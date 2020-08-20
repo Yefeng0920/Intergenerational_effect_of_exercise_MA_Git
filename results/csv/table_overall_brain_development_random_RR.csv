@@ -1,0 +1,12 @@
+"Traits","Effect size","Random effects"," "," ","Heterogeneity"," "," "," "," "
+,,"Factors","Sigma2","N-levels","I2 total","I2 trait cateforoy","I2 strain","I2 between-study","I2 within-study"
+"Brain development","lnRR","trait category","0","2","98.3","0.9","35.2","40.3","21.9"
+,,"strain","0.013","4",,,,,
+,,"between-study","0.015","29",,,,,
+,,"within-study","0.008","95",,,,,
+"Brain size",,"strain","0.05","3","99.5","0","64.9","33.8","0.8"
+,,"between-study","0.026","11",,,,,
+,,"within-study","0.001","24",,,,,
+"Neurogenesis",,"strain","0.006","3","95.7","0","22.1","26.1","47.6"
+,,"between-study","0.007","21",,,,,
+,,"within-study","0.012","71",,,,,

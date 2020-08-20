@@ -1,0 +1,10 @@
+"Traits","Model","Effect size","Estimate","Fixed effects"," "," "," "," "
+,,,,"Mean","CI.lb","CI.ub","k","n"
+"Brain development","Intercept-only","lnRR","Intercept","0.12","-0.019","0.259","95","1191"
+,,"lnCVR","Intercept","-0.054","-0.402","0.294","95","1191"
+,,,,,,,,
+"Brain size",,"lnRR","Intercept","0.138","-0.149","0.425","24","436"
+,,"lnCVR","Intercept","0.071","-0.292","0.435","24","436"
+,,,,,,,,
+"Neurogenesis",,"lnRR","Intercept","0.153","0.049","0.257","71","773"
+,,"lnCVR","Intercept","-0.217","-0.451","0.018","71","773"

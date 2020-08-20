@@ -1,0 +1,6 @@
+"Model (variable weight)","Exercise mode","Exercised sex","Exercise timing","F1 ontogenetic stage","F1 sex","delta_AICc","Weight"
+"Model1",NA,"+",NA,NA,NA,0,0.34126887667225
+"Model2",NA,NA,NA,NA,"+",0.128714671601756,0.319997545491113
+"Model3","+",NA,NA,NA,NA,1.17008835677518,0.190114492510901
+"Model4",NA,"+",NA,NA,"+",1.66256820592787,0.148619085325736
+"(Sum of weights)","0.356","0.479","0.092","0.077","0.47",NA,NA

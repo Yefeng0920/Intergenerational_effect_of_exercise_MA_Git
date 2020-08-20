@@ -1,0 +1,37 @@
+"Traits","Model","Moderator","Effect size","Estimate","Fixed effects"," "," "," "," "
+,,,,,"Mean","CI.lb","CI.ub","k","n"
+"Neurobehavior","Univariate","pre-conception","lnRR","Intercept","0.217","0.05","0.385","40","711"
+,,,"lnCVR","Intercept","-0.147","-0.327","0.032","40","711"
+,,,,,,,,,
+,,"pregnancy","lnRR","Intercept","0.229","0.106","0.352","87","998"
+,,,"lnCVR","Intercept","-0.094","-0.22","0.033","87","998"
+,,,,,,,,,
+,,"pre-conception to pregnancy","lnRR","Intercept","0.047","-0.138","0.233","37","987"
+,,,"lnCVR","Intercept","-0.11","-0.291","0.071","37","987"
+,,,,,,,,,
+,,"pre-conception to post-partum","lnRR","Intercept","0.413","-0.317","1.143","2","33"
+,,,"lnCVR","Intercept","0.209","-0.641","1.06","2","33"
+,,,,,,,,,
+"Brain development",,"pre-conception","lnRR","Intercept","0.178","0.02","0.336","15","110"
+,,,"lnCVR","Intercept","0.022","-0.397","0.441","15","110"
+,,,,,,,,,
+,,"pregnancy","lnRR","Intercept","0.119","-0.026","0.265","56","512"
+,,,"lnCVR","Intercept","-0.228","-0.493","0.038","56","512"
+,,,,,,,,,
+,,"pre-conception to pregnancy","lnRR","Intercept","0.024","-0.126","0.175","16","381"
+,,,"lnCVR","Intercept","-0.033","-0.402","0.336","16","381"
+,,,,,,,,,
+,,"pre-conception to post-partum","lnRR","Intercept","-0.009","-0.182","0.164","8","196"
+,,,"lnCVR","Intercept","0.132","-0.506","0.769","8","196"
+,,,,,,,,,
+"Brain growth factors",,"pre-conception","lnRR","Intercept","0.238","0.032","0.444","45","362"
+,,,"lnCVR","Intercept","0.371","-0.315","1.057","45","362"
+,,,,,,,,,
+,,"pregnancy","lnRR","Intercept","0.285","0.09","0.48","59","576"
+,,,"lnCVR","Intercept","0.21","-0.462","0.881","59","576"
+,,,,,,,,,
+,,"pre-conception to pregnancy","lnRR","Intercept","0.105","-0.171","0.381","19","160"
+,,,"lnCVR","Intercept","0.522","-0.256","1.299","19","160"
+,,,,,,,,,
+,,"pre-conception to post-partum","lnRR","Intercept","0.222","-0.284","0.728","8","54"
+,,,"lnCVR","Intercept","0.38","-0.693","1.452","8","54"

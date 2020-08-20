@@ -1,0 +1,24 @@
+"Traits","Effect size","Random effects"," "," ","Heterogeneity"," "," "," "," "
+,,"Factors","Sigma2","N-levels","I2 total","I2 trait cateforoy","I2 strain","I2 between-study","I2 within-study"
+"Brain Growth factors","lnCVR","trait category","0","6","74.8","0","29.2","0","45.6"
+,,"strain","0.237","3",,,,,
+,,"between-study","0","28",,,,,
+,,"within-study","0.372","131",,,,,
+"BDNF",,"strain","0.496","3","81.7","0","45.8","23.6","12.3"
+,,"between-study","0.256","23",,,,,
+,,"within-study","0.133","60",,,,,
+"TrkB",,"strain","0","3","62.8","0","0","0","62.8"
+,,"between-study","0","6",,,,,
+,,"within-study","0.313","14",,,,,
+"VEGF",,"strain","0.037","2","62.7","0","6.7","0","55.9"
+,,"between-study","0","8",,,,,
+,,"within-study","0.309","25",,,,,
+"reelin",,"strain","0","2","73.2","0","0","38.7","34.5"
+,,"between-study","0.438","5",,,,,
+,,"within-study","0.391","14",,,,,
+"GFAP",,"strain","0.075","2","26.1","0","26.1","0","0"
+,,"between-study","0","5",,,,,
+,,"within-study","0","10",,,,,
+"synapsin",,"strain","0.084","2","66.5","0","15.4","38.6","12.4"
+,,"between-study","0.21","5",,,,,
+,,"within-study","0.068","8",,,,,

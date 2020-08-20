@@ -1,0 +1,19 @@
+"Traits","Model","Effect size","Estimate","Fixed effects"," "," "," "," "
+,,,,"Mean","CI.lb","CI.ub","k","n"
+"Neurobehavior","Intercept-only","lnRR","Intercept","0.189","0.061","0.318","166","2703"
+,,"lnCVR","Intercept","-0.107","-0.196","-0.018","166","2703"
+,,,,,,,,
+"Learning-MWM",,"lnRR","Intercept","0.169","0.002","0.336","29","615"
+,,"lnCVR","Intercept","0.075","-0.143","0.293","29","615"
+,,,,,,,,
+"Memory-MWM",,"lnRR","Intercept","0.225","0.021","0.43","30","687"
+,,"lnCVR","Intercept","-0.233","-0.359","-0.106","30","687"
+,,,,,,,,
+"Memory-NOR",,"lnRR","Intercept","0.344","-0.238","0.926","17","267"
+,,"lnCVR","Intercept","-0.218","-0.693","0.256","17","267"
+,,,,,,,,
+"Anxiety-EPM",,"lnRR","Intercept","-0.028","-0.26","0.205","32","664"
+,,"lnCVR","Intercept","-0.118","-0.368","0.132","32","664"
+,,,,,,,,
+"Anxiety-OFT",,"lnRR","Intercept","0.259","0.055","0.463","58","1171"
+,,"lnCVR","Intercept","-0.116","-0.281","0.05","58","1171"

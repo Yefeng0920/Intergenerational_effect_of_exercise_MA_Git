@@ -1,0 +1,21 @@
+"Traits","Effect size","Random effects"," "," ","Heterogeneity"," "," "," "," "
+,,"Factors","Sigma2","N-levels","I2 total","I2 trait cateforoy","I2 strain","I2 between-study","I2 within-study"
+"Neurobehavior","lnCVR","trait category","0","5","97.9","0","0","0","97.9"
+,,"strain","0","4",,,,,
+,,"between-study","0","30",,,,,
+,,"within-study","0.26","166",,,,,
+"Learning-MWM",,"strain","0","4","49.9","0","0","30.4","19.5"
+,,"between-study","0.081","19",,,,,
+,,"within-study","0.052","29",,,,,
+"Memory-MWM",,"strain","0","4","0","0","0","0","0"
+,,"between-study","0","18",,,,,
+,,"within-study","0","30",,,,,
+"Memory-NOR",,"strain","0","3","61.4","0","0","60.6","0.8"
+,,"between-study","0.279","7",,,,,
+,,"within-study","0.003","17",,,,,
+"Anxiety-EPM",,"strain","0.006","3","65.8","0","1.8","0","64"
+,,"between-study","0","11",,,,,
+,,"within-study","0.202","32",,,,,
+"Anxiety-OFT",,"strain","0","3","63.5","0","0","0","63.5"
+,,"between-study","0","16",,,,,
+,,"within-study","0.18","58",,,,,
