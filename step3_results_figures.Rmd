@@ -1,0 +1,2062 @@
+---
+title: "Figures presented in: Intergenerational effects of physical exercise on cognition and brain: a multilevel meta-analysis of mean and variance"
+output: word_document
+---
+
+
+## Step 3 - Figures
+
+
+### 1. Setup
+
+```{r setup, include = FALSE, eval = TRUE}
+
+# Preparing workspace
+  knitr::opts_chunk$set(echo = FALSE, warning = FALSE, eval = FALSE)
+
+# Loading packages
+  pacman::p_load(metafor,
+                 dplyr,
+                 readxl,
+                 magrittr, # extending pipline
+                 PerformanceAnalytics, # correlation analysis
+                 ggplot2,
+                 ggpubr,
+                 cowplot,
+                 gridExtra,
+                 patchwork, 
+                 orchardRd # orchard plot - extended forest plot devtools::install_github("itchyshin/orchard_plot", subdir = "orchaRd", force = TRUE)
+               )
+
+  source('./functions/functions.R')
+```
+
+
+
+### 2. Loading models
+
+```{r required models}
+# Importing models
+  load('./models/model1.behavior_RR.Rdata')
+  load('./models/model1.learning_MWM_RR.Rdata')
+  load('./models/model1.memory_MWM_RR.Rdata')
+  load('./models/model1.memory_NOR_RR.Rdata')
+  load('./models/model1.anxiety_EPM_RR.Rdata')
+  load('./models/model1.anxiety_OFT_RR.Rdata')
+  load('./models/model2.behavior_RR.Rdata')
+
+  load('./models/model1.brain_development_RR.Rdata')
+  load('./models/model1.neuron_count_RR.Rdata')
+  load('./models/model1.brain_size_RR.Rdata')
+  load('./models/model2.brain_development_RR.Rdata')
+  load('./models/model3.brain_development_RR.Rdata')
+  load('./models/model4.brain_development_RR.Rdata')
+  load('./models/model5.brain_development_RR.Rdata')
+  load('./models/model6.brain_development_RR.Rdata')
+
+  load('./models/model1.brain_development_CVR.Rdata')
+  load('./models/model1.neuron_count_CVR.Rdata')
+  load('./models/model1.brain_size_CVR.Rdata')
+  load('./models/model2.brain_development_CVR.Rdata')
+  load('./models/model3.brain_development_CVR.Rdata')
+  load('./models/model4.brain_development_CVR.Rdata')
+  load('./models/model5.brain_development_CVR.Rdata')
+  load('./models/model6.brain_development_CVR.Rdata')
+
+  load('./models/model1.genes_RR.Rdata')
+  load('./models/model1.BDNF_RR.Rdata')
+  load('./models/model1.TrkB_RR.Rdata')
+  load('./models/model1.VEGF_RR.Rdata')
+  load('./models/model1.reelin_RR.Rdata')
+  load('./models/model1.GFAP_RR.Rdata')
+  load('./models/model1.syptophysin_RR.Rdata')
+  load('./models/model2.genes_RR.Rdata')
+  load('./models/model3.genes_RR.Rdata')
+  load('./models/model4.genes_RR.Rdata')
+  load('./models/model5.genes_RR.Rdata')
+  load('./models/model6.genes_RR.Rdata')
+
+# Loading required data
+  load('./database/overlap.max.Rdata')
+  load('./database/overlap.ave.Rdata')
+  load('./database/overlap.min.Rdata')
+```
+
+
+
+### 3. Custom themes
+
+```{r}
+text = 'black'
+background = 'white'
+th <- theme(panel.background = element_rect(fill = background),
+            plot.background = element_rect(fill = background),
+            panel.grid = element_blank(),
+            axis.ticks = element_blank(),
+            axis.text = element_blank(),
+            axis.title.y = element_blank(),
+            axis.line.y = element_blank(),
+            axis.line.x = element_line(colour = text, size = 0.5),
+            axis.title.x = element_text(size = 15, margin = margin(t = 5, r = 0, b = 0, l = 0)),
+            plot.title = element_text(size = 15, margin = margin(0, 0,10, 0), hjust = -0, face = 'bold'))
+
+
+
+tm <- theme(panel.background = element_rect(fill = background),
+            plot.background = element_rect(fill = background),
+            panel.grid = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.line.y = element_line(colour = text, size = 0.5),
+            axis.text.y = element_blank(),
+            axis.title.y = element_text(size = 15, margin = margin(t = 0, r = 5, b = 0, l = 0)),
+            axis.line.x = element_line(colour = text, size = 0.5),
+            axis.text.x = element_text(colour = text, size = 15, margin = margin(t = 5, r = 0, b = 0, l = 0)),
+            plot.title = element_text(size = 15, margin = margin(0, 0, 10, 0), hjust = -0, face = 'bold'),
+            plot.margin = margin(0.3, 0.3, -0.2, 0.3, 'cm'))
+
+
+
+
+background.colour <- 'white'
+
+hypothesis.theme <- theme(panel.background = element_rect(fill = background.colour),
+                        plot.background = element_rect(fill = background.colour),
+                        panel.grid = element_blank(),
+                        panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
+                        #axis.line = element_line(size = 0.9, colour = 'black'),
+                        axis.ticks = element_line(size = 0.9, color = 'black'),
+                        axis.ticks.length = unit(0.15, 'cm'),
+                        axis.text.y = element_text(face = 'bold',size = 20, margin = margin(t = 0, r = 5, b = 0, l = 0)),
+                        axis.text.x = element_text(face = 'bold' , size = 20, margin = margin(t = 10, r = 0, b = 0, l = 0)),
+                        axis.title = element_text(size = 22),
+                        #axis.title.y = element_text(margin = margin(t = 0, r = 15, b = 0, l = 0)),
+                        #axis.title.x = element_text(margin = margin(t = 15, r = 0, b = 0, l =0)),
+                        plot.title = element_text(size = 18,  face = 'bold', hjust = -0.03))
+                       #plot.margin = unit(c(0.3, 0.3, 0, 0.3), 'cm')
+                       #legend.background = element_blank(),
+                       #legend.key = element_blank(),
+                       #legend.title = element_text(size = 12)
+
+```
+
+
+### 4. Conceptual figure
+
+```{r Scenarios}
+set.seed(20200817)
+
+# Simulated dataset
+ # Conception 1: control
+   m1 <- 0
+   s1 <- 2
+   c1 <- rnorm(n = 10000, mean = m1, sd = s1)
+
+
+ # Conception 2: mean shift
+   m2 <- m1 + s1*2
+   s2 <- s1
+   c2 <- rnorm(n = 10000, mean = m2, sd = s2)
+
+
+ # Conception 3: variability shift
+   m3 <- m1
+   s3 <- s1/2
+   c3 <- rnorm.exercise(n = 10000, mean = m3, sd = s3)
+
+
+ # Conception 4: mean & variability
+   m4 <- m1 + s1*2
+   s4 <- s1/2
+   c4 <- rnorm.exercise(n = 10000, mean = m4, sd = s4)
+
+
+
+
+
+# Distribution plot
+ # Conception 2: mean shift
+  ggplot() + th + labs(x = 'Cognitive traits', title = '(A)') +
+    geom_density(aes(x = c1), adjust = 2, lty = 0, fill = '#D55E00', alpha = 0.3) +
+    stat_density(aes(x = c1), geom = 'line', adjust = 2, lty = 1, lwd = 0.6, colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1, y = 0, xend = m1, yend = 0.19), lty = 2, lwd = 1, colour = '#D55E00', alpha = 1) + 
+    geom_density(aes(x = c2),adjust = 2, lty = 0, fill = '#0072B2', alpha = 0.5) +
+    stat_density(aes(x = c2), geom = 'line', adjust = 2, lty = 1, lwd = 0.6, colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m2, y = 0, xend = m2, yend = 0.19), lty = 2, lwd = 1, colour = '#0072B2', alpha = 1) +
+    
+    geom_segment(aes(x = m1-s1, y = -0.02, xend = m1+s1, yend = -0.02), colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1-s1, y = -0.02-0.006, xend = m1-s1, yend = -0.02+0.006), colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1+s1, y = -0.02-0.006, xend = m1+s1, yend = -0.02+0.006), colour = '#D55E00', alpha = 1) +
+    geom_point(aes(x = m1, y = -0.02), size = 3, colour = '#D55E00', alpha = 1) +
+    annotate(geom = 'text', x = m1, y = -0.02, label = c('Ms, SDs'), colour = '#D55E00', alpha = 1, size = 3, hjust = -0.75, vjust = 0.25) +
+    
+    geom_segment(aes(x = m2-s2, y = -0.02-0.02, xend = m2+s2, yend = -0.02-0.02), colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m2-s2, y = -0.02-0.02-0.006, xend = m2-s2, yend = -0.02-0.02+0.006), colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m2+s2, y = -0.02-0.02-0.006, xend = m2+s2, yend = -0.02-0.02+0.006), colour = '#0072B2', alpha = 1) +
+    geom_point(aes(x = m2, y = -0.02-0.02), size = 3, colour = '#0072B2', alpha = 1) +
+    annotate(geom = 'text', x = m2, y = -0.02-0.02, label = c('Me, SDe'), colour = '#0072B2', alpha = 1, size = 3, hjust = -0.75, vjust = 0.25) +
+    
+    geom_segment(aes(x = -11, xend = -2 , y = 0.165, yend = 0.165), size = 0.2, arrow = arrow(length = unit(0.4,"cm"), ends = 'last', type = 'closed')) +
+    annotate(geom = 'text', x = -10.5, y = 0.165, label = c('Sedentary'), colour = '#D55E00', alpha = 1, size = 3, hjust = 0, vjust = -0.5) +
+    
+    geom_segment(aes(x = 6.0, xend = 15 , y = 0.165, yend = 0.165), size = 0.2, arrow = arrow(length = unit(0.4,"cm"), ends = 'first', type = 'closed')) +
+    annotate(geom = 'text', x = 8.3, y = 0.165, label = c('Exercise'), colour = '#0072B2', alpha = 1, size = 3, hjust = 0, vjust = -0.5) +
+    
+    theme(plot.margin = unit(c(0.3, 0.3, 0.15, 0.3), 'cm')) -> a
+
+
+
+
+ # Conception 3: variability shift
+  ggplot() + th + labs(x = 'Cognitive traits', title = '(B)') +
+    geom_density(aes(x = c1), adjust = 2, lty = 0, fill = '#D55E00', alpha = 0.3) +
+    stat_density(aes(x = c1), geom = 'line', adjust = 2, lty = 1, lwd = 0.6, colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1, y = 0, xend = m1, yend = 0.18), lty = 2, lwd = 1, colour = '#D55E00', alpha = 1) + 
+    geom_density(aes(x = c3),adjust = 2, lty = 0, fill = '#0072B2', alpha = 0.3) +
+    stat_density(aes(x = c3), geom = 'line', adjust = 2, lty = 1, lwd = 0.6, colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m3, y = 0.2, xend = m3, yend = 0.38), lty = 2, lwd = 1, colour = '#0072B2', alpha = 1)  +
+    
+     geom_segment(aes(x = m1-s1, y = -0.04, xend = m1+s1, yend = -0.04), colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1-s1, y = -0.04-0.012, xend = m1-s1, yend = -0.04+0.012), colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1+s1, y = -0.04-0.012, xend = m1+s1, yend = -0.04+0.012), colour = '#D55E00', alpha = 1) +
+    geom_point(aes(x = m1, y = -0.04), size = 3, colour = '#D55E00', alpha = 1) +
+    annotate(geom = 'text', x = m1, y = -0.04, label = c('Ms, SDs'), colour = '#D55E00', alpha = 1, size = 3, hjust = -0.85, vjust = 0.25) +
+    
+    geom_segment(aes(x = m3-s3, y = -0.04-0.04, xend = m3+s3, yend = -0.04-0.04), colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m3-s3, y = -0.04-0.04-0.012, xend = m3-s3, yend = -0.04-0.04+0.012), colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m3+s3, y = -0.04-0.04-0.012, xend = m3+s3, yend = -0.04-0.04+0.012), colour = '#0072B2', alpha = 1) +
+    geom_point(aes(x = m3, y = -0.04-0.04), size = 3, colour = '#0072B2', alpha = 1) +
+    annotate(geom = 'text', x = m3, y = -0.04-0.04, label = c('Me, SDe'), colour = '#0072B2', alpha = 1, size = 3, hjust = -0.50, vjust = 0.25) +
+    
+    theme(plot.margin = unit(c(0.3, 0.3, 0.15, 0.3), 'cm')) -> b
+
+
+
+ # Conception 4: mean & variabiity shift
+  ggplot() + th + labs(x = 'Cognitive traits', title = '(C)') +
+    geom_density(aes(x = c1), adjust = 2, lty = 0, fill = '#D55E00', alpha = 0.3) +
+    stat_density(aes(x = c1), geom = 'line', adjust = 2, lty = 1, lwd = 0.6, colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1, y = 0, xend = m1, yend = 0.19), lty = 2, lwd = 1, colour = '#D55E00', alpha = 1) + 
+    geom_density(aes(x = c4),adjust = 2, lty = 0, fill = '#0072B2', alpha = 0.3) +
+    stat_density(aes(x = c4), geom = 'line', adjust = 2, lty = 1, lwd = 0.6, colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m4, y = 0, xend = m4, yend = 0.38), lty = 2, lwd = 1, colour = '#0072B2', alpha = 1) +
+    
+    geom_segment(aes(x = m1-s1, y = -0.04, xend = m1+s1, yend = -0.04), colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1-s1, y = -0.04-0.012, xend = m1-s1, yend = -0.04+0.012), colour = '#D55E00', alpha = 1) +
+    geom_segment(aes(x = m1+s1, y = -0.04-0.012, xend = m1+s1, yend = -0.04+0.012), colour = '#D55E00', alpha = 1) +
+    geom_point(aes(x = m1, y = -0.04), size = 3, colour = '#D55E00', alpha = 1) +
+    annotate(geom = 'text', x = m1, y = -0.04, label = c('Ms, SDs'), colour = '#D55E00', alpha = 1, size = 3, hjust = -0.85, vjust = 0.25) +
+    
+      geom_segment(aes(x = m4-s4, y = -0.04-0.04, xend = m4+s4, yend = -0.04-0.04), colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m4-s4, y = -0.04-0.04-0.012, xend = m4-s4, yend = -0.04-0.04+0.012), colour = '#0072B2', alpha = 1) +
+    geom_segment(aes(x = m4+s4, y = -0.04-0.04-0.012, xend = m4+s4, yend = -0.04-0.04+0.012), colour = '#0072B2', alpha = 1) +
+    geom_point(aes(x = m4, y = -0.04-0.04), size = 3, colour = '#0072B2', alpha = 1) +
+    annotate(geom = 'text', x = m4, y = -0.04-0.04, label = c('Me, SDe'), colour = '#0072B2', alpha = 1, size = 3, hjust = 1.55, vjust = 0.4) +
+  
+    theme(plot.margin = unit(c(0.3, 0.3, 0.15, 0.3), 'cm')) -> c 
+  
+
+
+# Spread plot
+  ggplot() +
+    scale_x_continuous(limits = c(-0.2, 1.2), breaks = c(0,1), labels = c('Sedentary', 'Exercise')) +
+    scale_y_continuous(limits = c(-1.5, 3.5)) +
+    xlab(' ') -> p
+
+ # Conception 2: mean shift
+  p + tm +
+      labs(title = '(D)') +
+      geom_point(aes(x = c(0, 1), y = c(0, 2)), size = 6, colour = c('#D55E00', '#0072B2')) +
+      geom_errorbar(aes(x = c(0, 1), ymin = c(-1, 1), ymax = c(1, 3)), size = 1, width = 0.1, colour = c('#D55E00', '#0072B2')) +
+    ylab('Cognitive traits') +
+    
+    annotate (geom = 'text', x = 0.25, y = 3.2, parse = T, label = 'lnRR == ln(frac(Me,Ms))', size = 4) +
+    annotate (geom = 'text', x = 0.67, y = 3.2, label = '> 0', size = 4) +
+    annotate (geom = 'text', x = 0.25, y = 1.8, parse = T, label = 'lnCVR == ln(frac(Me/SDe,Ms/SDs))', size = 4) +
+    annotate (geom = 'text', x = 0.83, y = 1.8, label = '= 0', size = 4) -> d
+    
+  
+   
+   # Conception 3: variability shift
+  p + tm +
+      labs(title = '(E)') +
+      geom_point(aes(x = c(0, 1), y = c(0, 0)), size = 6, colour = c('#D55E00', '#0072B2')) +
+      geom_errorbar(aes(x = c(0, 1), ymin = c(-1, 0-0.5), ymax = c(1, 0+0.5)), size = 1, width = 0.1, colour = c('#D55E00', '#0072B2')) +
+    ylab(' ') +
+      
+    annotate (geom = 'text', x = 0.45, y = 3.2, parse = T, label = 'lnRR == ln(frac(Me,Ms))', size = 4) +
+    annotate (geom = 'text', x = 0.87, y = 3.2, label = '= 0', size = 4) +
+    annotate (geom = 'text', x = 0.45, y = 1.8, parse = T, label = 'lnCVR == ln(frac(Me/SDe,Ms/SDs))', size = 4) +
+    annotate (geom = 'text', x = 1.03, y = 1.8, label = '< 0', size = 4) -> e
+  
+
+
+ # Conception 4: mean & variability shif
+  p + tm +
+      labs(title = '(F)') +
+      geom_point(aes(x = c(0, 1), y = c(0, 2)), size = 6, colour = c('#D55E00', '#0072B2')) +
+      geom_errorbar(aes(x = c(0, 1), ymin = c(-1, 2-0.5), ymax = c(1, 2+0.5)), size = 1, width = 0.1, colour = c('#D55E00', '#0072B2')) +
+    ylab(' ') +
+    
+    annotate (geom = 'text', x = 0.25, y = 3.2, parse = T, label = 'lnRR == ln(frac(Me,Ms))', size = 4) +
+    annotate (geom = 'text', x = 0.67, y = 3.2, label = '> 0', size = 4) +
+    annotate (geom = 'text', x = 0.25, y = 1.8, parse = T, label = 'lnCVR == ln(frac(Me/SDe,Ms/SDs))', size = 4) +
+    annotate (geom = 'text', x = 0.83, y = 1.8, label = '< 0', size = 4) -> f
+
+
+
+# Save
+  fig.conception <- a + b + c + d + e + f + plot_layout(nrow = 2, ncol = 3)
+
+# ggsave(plot = fig.conception, filename = './results/Figures/fig.1.pdf', height = 7, width = 9, dpi = 300,  device = cairo_pdf)
+
+
+  print(fig.conception)
+  png(filename = './results/Figures/fig.1.png', height = 7, width = 9, units = "in", type = "windows", res = 400)
+  fig.conception
+  dev.off()
+```
+
+
+
+
+
+### 5. Neurobehavior
+
+```{r Neurobehavior improvement and variability}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Overall
+#--------------------------------------------------------------#
+
+# Tailored orchard plot (forest-like plot) for neurobehavior improvement - orchard.plot.behavior_RR()
+
+# Neurobehavior
+ # Retrieving estimates
+  table.behavior.RR <- mod_results(model1.behavior_RR, mod = 'Int')
+
+
+ # Plotting
+  orchard.plot.behavior_RR(table.behavior.RR, mod = "Int", xlab = "Improvement (lnRR)", transfm = "none", angle = 0) +
+  scale_colour_manual(values = c('grey40')) +
+  scale_x_continuous(limits = c(-2, 3),
+                     breaks = c(-2, -1, 0, 1, 2, 3), 
+                     labels = c('-2', '-1', '0', '1', '2','3') ) +
+  scale_y_discrete(labels = c('Neurobehavior')) +
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
+        axis.ticks = element_line(size = 0.9, color = 'black'),
+        axis.ticks.length = unit(0.15, 'cm'),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(colour = 'black', face = 'bold', size = 25), 
+        plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+    ggtitle('(A)  Overall trait mean') -> orchard.overall.behavior.RR
+
+
+  
+  
+# Specific trait
+ # Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Learning-MWM',
+                                                 'Memory-MWM',
+                                                 'Memory-NOR',
+                                                 'Anxiety-EPM',
+                                                 'Anxiety-OFT'),
+                                              levels = rev(c('Learning-MWM',
+                                                             'Memory-MWM',
+                                                             'Memory-NOR',
+                                                             'Anxiety-EPM',
+                                                             'Anxiety-OFT'))),
+                               coeffi = c(model1.learning_MWM_RR$b,
+                                          model1.memory_MWM_RR$b,
+                                          model1.memory_NOR_RR$b,
+                                          model1.anxiety_EPM_RR$b,
+                                          model1.anxiety_OFT_RR$b),
+                               lower = c(model1.learning_MWM_RR$ci.lb,
+                                         model1.memory_MWM_RR$ci.lb,
+                                         model1.memory_NOR_RR$ci.lb,
+                                         model1.anxiety_EPM_RR$ci.lb,
+                                         model1.anxiety_OFT_RR$ci.lb),
+                               upper = c(model1.learning_MWM_RR$ci.ub,
+                                         model1.memory_MWM_RR$ci.ub,
+                                         model1.memory_NOR_RR$ci.ub,
+                                         model1.anxiety_EPM_RR$ci.ub,
+                                         model1.anxiety_OFT_RR$ci.ub))
+
+ # Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 3),
+                       breaks = c(-2, -1, 0, 1, 2, 3), 
+                       labels = c('-2', '-1', '0', '1', '2','3') 
+                       ) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(B)  Specific traits') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(anxiety_OFT %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(anxiety_EPM %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 2.7, label= paste("italic(k)==", nrow(memory_NOR %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 2.7, label= paste("italic(k)==", nrow(memory_MWM %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 5, y = 2.7, label= paste("italic(k)==", nrow(learning_MWM %>% distinct(ES_ID))), parse=TRUE, size=7)-> fig.specific.behavior.RR
+
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercise mode
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Forced','Voluntary'), 
+                                             levels = rev(c('Forced','Voluntary'))),
+                               coeffi = c(model4.behavior_RR$b[1],
+                                          model4.behavior_RR$b[2]),
+                               lower = c(model4.behavior_RR$ci.lb[1],
+                                         model4.behavior_RR$ci.lb[2]),
+                               upper = c(model4.behavior_RR$ci.ub[1],
+                                         model4.behavior_RR$ci.ub[2]))
+
+  
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-2, 3),
+                       breaks = c(-2, -1, 0, 1, 2, 3), 
+                       labels = c('-2', '-1', '0', '1', '2','3')  
+                       ) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(C)  Exercise mode') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='voluntary') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='forced') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.mode.behavior.RR
+
+
+
+    
+#--------------------------------------------------------------#
+#                         Exercise timing
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Pre-conception',
+                                                 'Pregnancy',
+                                                 'Pre to Pregnancy',
+                                                 'Pre to Post'), 
+                                             levels = rev(c('Pre-conception',
+                                                            'Pregnancy',
+                                                            'Pre to Pregnancy',
+                                                            'Pre to Post'))),
+                               coeffi = c(model5.behavior_RR$b[1],
+                                          model5.behavior_RR$b[4],
+                                          model5.behavior_RR$b[3],
+                                          model5.behavior_RR$b[2]),
+                               lower = c(model5.behavior_RR$ci.lb[1],
+                                         model5.behavior_RR$ci.lb[4],
+                                         model5.behavior_RR$ci.lb[3],
+                                         model5.behavior_RR$ci.lb[2]),
+                               upper = c(model5.behavior_RR$ci.ub[1],
+                                         model5.behavior_RR$ci.ub[4],
+                                         model5.behavior_RR$ci.ub[3],
+                                         model5.behavior_RR$ci.ub[2]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 3),
+                       breaks = c(-2, -1, 0, 1, 2, 3), 
+                       labels = c('-2', '-1', '0', '1', '2','3')   
+                       ) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(D) Exercise timing') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) + 
+    annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pre-conception to post-partum') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pre-conception to pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pre-conception') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.timing.behavior.RR
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercised sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Paternal', 'Maternal'), 
+                                             levels = rev(c('Paternal', 'Maternal'))),
+                               coeffi = c(model2.behavior_RR$b[1],
+                                          model2.behavior_RR$b[2]),
+                               lower = c(model2.behavior_RR$ci.lb[1],
+                                         model2.behavior_RR$ci.lb[2]),
+                               upper = c(model2.behavior_RR$ci.ub[1],
+                                         model2.behavior_RR$ci.ub[2]))
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-2, 3),
+                       breaks = c(-2, -1, 0, 1, 2, 3), 
+                       labels = c('-2', '-1', '0', '1', '2','3')  
+                       ) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(E)  Exercised sex') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(F0_sex_exercise=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(F0_sex_exercise=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F0.sex.behavior.RR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Offspring sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Male', 'Female', 'Mixed-sex'), 
+                                             levels = rev(c('Male', 'Female', 'Mixed-sex'))),
+                               coeffi = c(model3.behavior_RR$b[1],
+                                          model3.behavior_RR$b[2],
+                                          model3.behavior_RR$b[3]),
+                               lower = c(model3.behavior_RR$ci.lb[1],
+                                         model3.behavior_RR$ci.lb[2],
+                                         model3.behavior_RR$ci.lb[3]),
+                               upper = c(model3.behavior_RR$ci.ub[1],
+                                         model3.behavior_RR$ci.ub[2],
+                                         model3.behavior_RR$ci.ub[3]))
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 3),
+                       breaks = c(-2, -1, 0, 1, 2, 3), 
+                       labels = c('-2', '-1', '0', '1', '2','3')  
+                       ) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(F)  Offspring sex') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(F1_sex_test=='mixed') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(F1_sex_test=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(F1_sex_test=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F1.sex.behavior.RR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                       Offspring ontogenetic stage 
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Prenatal', 
+                                                 'Early postnatal', 
+                                                 'Adolescence',
+                                                 'Adulthood'), 
+                                             levels = rev(c('Prenatal', 
+                                                            'Early postnatal', 
+                                                            'Adolescence',
+                                                            'Adulthood'))),
+                               coeffi = c(0,
+                                          model6.behavior_RR$b[3],
+                                          model6.behavior_RR$b[1],
+                                          model6.behavior_RR$b[2]),
+                               lower = c(0,
+                                          model6.behavior_RR$ci.lb[3],
+                                          model6.behavior_RR$ci.lb[1],
+                                          model6.behavior_RR$ci.lb[2]),
+                               upper = c(0,
+                                          model6.behavior_RR$ci.ub[3],
+                                          model6.behavior_RR$ci.ub[1],
+                                          model6.behavior_RR$ci.ub[2]))
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 3),
+                       breaks = c(-2, -1, 0, 1, 2, 3), 
+                       labels = c('-2', '-1', '0', '1', '2','3')  
+                       ) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_text(colour = 'black', size = 25),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab('Improvement (lnRR) ') +
+    ggtitle ('(G)  Offspring ontogenetic stage') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(response_age_life_phase=='adulthood') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(response_age_life_phase=='adolescence') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(response_age_life_phase=='early postnatal') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 2.7, label= paste("italic(k)==", 0), parse=TRUE, size=7)->  fig.F1.age.behavior.RR
+
+
+
+
+# fig.behavior.RR <- orchard.overall.behavior.RR + fig.specific.behavior.RR + fig.mode.behavior.RR + fig.timing.behavior.RR + fig.F0.sex.behavior.RR + fig.F1.sex.behavior.RR + fig.F1.age.behavior.RR + plot_layout(nrow = 7, ncol = 1) - using cowplot to manipulate plot layout
+
+
+
+# Saving
+fig.behavior.RR <- ggarrange(orchard.overall.behavior.RR, fig.specific.behavior.RR, fig.mode.behavior.RR,fig.timing.behavior.RR, fig.F0.sex.behavior.RR, fig.F1.sex.behavior.RR,fig.F1.age.behavior.RR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
+
+fig.behavior.RR
+png(filename = "./results/Figures/fig.behavior.RR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
+fig.behavior.RR
+dev.off()
+
+
+
+
+
+#***************************************************************#
+#------------- Inter-individual difference (lnCVR) -------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Overall
+#--------------------------------------------------------------#
+
+# Tailored orchard plot (forest-like plot) for neurobehavior variability - orchard.plot.behavior_CVR()
+
+# Neurobehavior
+ # Retrieving estimates
+  table.behavior.CVR <- mod_results(model1.behavior_CVR, mod = 'Int')
+
+
+ # Plotting
+  orchard.plot.behavior_CVR(table.behavior.CVR, mod = "Int", xlab = "Inter-individual difference (lnCVR)", transfm = "none", angle = 0) +
+  scale_colour_manual(values = c('grey40')) +
+  scale_x_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
+  scale_y_discrete(labels = c('Neurobehavior')) +
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
+        axis.ticks = element_line(size = 0.9, color = 'black'),
+        axis.ticks.length = unit(0.15, 'cm'),
+        axis.text.x = element_blank(),
+        #axis.text.x = element_text(colour = 'black', face = 'bold', size = 25),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(colour = 'black', face = 'bold', size = 25), 
+        plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+    ggtitle('(A)  Overall trait variation') -> orchard.overall.behavior.CVR
+
+
+
+
+# Specific trait
+ # Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Learning-MWM',
+                                               'Memory-MWM',
+                                               'Memory-NOR',
+                                               'Anxiety-EPM',
+                                               'Anxiety-OFT'),
+                                            levels = rev(c('Learning-MWM',
+                                                           'Memory-MWM',
+                                                           'Memory-NOR',
+                                                           'Anxiety-EPM',
+                                                           'Anxiety-OFT'))),
+                             coeffi = c(model1.learning_MWM_CVR$b,
+                                        model1.memory_MWM_CVR$b,
+                                        model1.memory_NOR_CVR$b,
+                                        model1.anxiety_EPM_CVR$b,
+                                        model1.anxiety_OFT_CVR$b),
+                             lower = c(model1.learning_MWM_CVR$ci.lb,
+                                       model1.memory_MWM_CVR$ci.lb,
+                                       model1.memory_NOR_CVR$ci.lb,
+                                       model1.anxiety_EPM_CVR$ci.lb,
+                                       model1.anxiety_OFT_CVR$ci.lb),
+                             upper = c(model1.learning_MWM_CVR$ci.ub,
+                                       model1.memory_MWM_CVR$ci.ub,
+                                       model1.memory_NOR_CVR$ci.ub,
+                                       model1.anxiety_EPM_CVR$ci.ub,
+                                       model1.anxiety_OFT_CVR$ci.ub))
+
+## Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(B)  Specific traits') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(anxiety_OFT %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(anxiety_EPM %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(memory_NOR %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(memory_MWM %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 5, y = 1.7, label= paste("italic(k)==", nrow(learning_MWM %>% distinct(ES_ID))), parse=TRUE, size=7)-> fig.specific.behavior.CVR
+
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercise mode
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Forced','Voluntary'), 
+                                             levels = rev(c('Forced','Voluntary'))),
+                               coeffi = c(model4.behavior_CVR$b[1],
+                                          model4.behavior_CVR$b[2]),
+                               lower = c(model4.behavior_CVR$ci.lb[1],
+                                         model4.behavior_CVR$ci.lb[2]),
+                               upper = c(model4.behavior_CVR$ci.ub[1],
+                                         model4.behavior_CVR$ci.ub[2]))
+
+  
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(C)  Exercise mode') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='voluntary') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='forced') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.mode.behavior.CVR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercise timing
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Pre-conception',
+                                                 'Pregnancy',
+                                                 'Pre to Pregnancy',
+                                                 'Pre to Post'), 
+                                             levels = rev(c('Pre-conception',
+                                                            'Pregnancy',
+                                                            'Pre to Pregnancy',
+                                                            'Pre to Post'))),
+                               coeffi = c(model5.behavior_CVR$b[1],
+                                          model5.behavior_CVR$b[4],
+                                          model5.behavior_CVR$b[3],
+                                          model5.behavior_CVR$b[2]),
+                               lower = c(model5.behavior_CVR$ci.lb[1],
+                                         model5.behavior_CVR$ci.lb[4],
+                                         model5.behavior_CVR$ci.lb[3],
+                                         model5.behavior_CVR$ci.lb[2]),
+                               upper = c(model5.behavior_CVR$ci.ub[1],
+                                         model5.behavior_CVR$ci.ub[4],
+                                         model5.behavior_CVR$ci.ub[3],
+                                         model5.behavior_CVR$ci.ub[2]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(D) Exercise timing') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) + 
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pre-conception to post-partum') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pre-conception to pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_window=='pre-conception') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.timing.behavior.CVR
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercised sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Paternal', 'Maternal'), 
+                                             levels = rev(c('Paternal', 'Maternal'))),
+                               coeffi = c(model2.behavior_CVR$b[1],
+                                          model2.behavior_CVR$b[2]),
+                               lower = c(model2.behavior_CVR$ci.lb[1],
+                                         model2.behavior_CVR$ci.lb[2]),
+                               upper = c(model2.behavior_CVR$ci.ub[1],
+                                         model2.behavior_CVR$ci.ub[2]))
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(E)  Exercised sex') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(F0_sex_exercise=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(F0_sex_exercise=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F0.sex.behavior.CVR
+
+
+
+
+#--------------------------------------------------------------#
+#                         Offspring sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Male', 'Female', 'Mixed-sex'), 
+                                             levels = rev(c('Male', 'Female', 'Mixed-sex'))),
+                               coeffi = c(model3.behavior_CVR$b[1],
+                                          model3.behavior_CVR$b[2],
+                                          model3.behavior_CVR$b[3]),
+                               lower = c(model3.behavior_CVR$ci.lb[1],
+                                         model3.behavior_CVR$ci.lb[2],
+                                         model3.behavior_CVR$ci.lb[3]),
+                               upper = c(model3.behavior_CVR$ci.ub[1],
+                                         model3.behavior_CVR$ci.ub[2],
+                                         model3.behavior_CVR$ci.ub[3]))
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(F)  Offspring sex') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(F1_sex_test=='mixed') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(F1_sex_test=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(F1_sex_test=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F1.sex.behavior.CVR
+
+
+
+
+#--------------------------------------------------------------#
+#                       Offspring ontogenetic stage 
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Prenatal', 
+                                                 'Early postnatal', 
+                                                 'Adolescence',
+                                                 'Adulthood'), 
+                                             levels = rev(c('Prenatal', 
+                                                            'Early postnatal', 
+                                                            'Adolescence',
+                                                            'Adulthood'))),
+                               coeffi = c(0,
+                                          model6.behavior_CVR$b[3],
+                                          model6.behavior_CVR$b[1],
+                                          model6.behavior_CVR$b[2]),
+                               lower = c(0,
+                                          model6.behavior_CVR$ci.lb[3],
+                                          model6.behavior_CVR$ci.lb[1],
+                                          model6.behavior_CVR$ci.lb[2]),
+                               upper = c(0,
+                                          model6.behavior_CVR$ci.ub[3],
+                                          model6.behavior_CVR$ci.ub[1],
+                                          model6.behavior_CVR$ci.ub[2]))
+
+# Plotting  
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_text(colour = 'black', size = 25),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab('Inter-individual difference (lnCVR) ') +
+    ggtitle ('(G)  Offspring ontogenetic stage') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(response_age_life_phase=='adulthood') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(response_age_life_phase=='adolescence') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(behavior %>% filter(response_age_life_phase=='early postnatal') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", 0), parse=TRUE, size=7)->  fig.F1.age.behavior.CVR
+
+
+
+
+
+# Saving
+fig.behavior.CVR <- ggarrange(orchard.overall.behavior.CVR, fig.specific.behavior.CVR, fig.mode.behavior.CVR,fig.timing.behavior.CVR, fig.F0.sex.behavior.CVR, fig.F1.sex.behavior.CVR,fig.F1.age.behavior.CVR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
+
+
+
+fig.behavior.CVR
+png(filename = "./results/Figures/fig.behavior.CVR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
+fig.behavior.CVR
+dev.off()
+```
+
+
+
+
+
+
+### 6. Brain development
+
+```{r Brain development improvement and variability}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Overall
+#--------------------------------------------------------------#
+
+# Tailored orchard plot (forest-like plot) for brain development improvement - orchard.plot.brain_RR()
+
+# Brain development
+ # Retrieving estimates
+  table.brain_development.RR <- mod_results(model1.brain_development_RR, mod = 'Int')
+
+
+ # Plotting
+  orchard.plot.brain_RR(table.brain_development.RR, mod = "Int", xlab = "Improvement (lnRR)", transfm = "none", angle = 0) +
+  scale_colour_manual(values = c('grey40')) +
+  scale_x_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  scale_y_discrete(labels = c('Brain development')) +
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
+        axis.ticks = element_line(size = 0.9, color = 'black'),
+        axis.ticks.length = unit(0.15, 'cm'),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(colour = 'black', face = 'bold', size = 25), 
+        plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+    ggtitle('(A)  Overall trait mean') -> orchard.overall.brain_development.RR
+
+
+
+
+
+# Specific trait
+ # Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Neurogenesis','Brain size'),
+                                              levels = rev(c('Neurogenesis','Brain size'))),
+                               coeffi = c(model1.neuron_count_RR$b,
+                                          model1.brain_size_RR$b),
+                               lower = c(model1.neuron_count_RR$ci.lb,
+                                         model1.brain_size_RR$ci.lb),
+                               upper = c(model1.neuron_count_RR$ci.ub,
+                                         model1.brain_size_RR$ci.ub))
+
+ # Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(B)  Specific traits') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_size %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(neuron_count %>% distinct(ES_ID))), parse=TRUE, size=7) -> fig.specific.brain_development.RR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercise mode
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Forced','Voluntary'), 
+                                             levels = rev(c('Forced','Voluntary'))),
+                               coeffi = c(model4.brain_development_RR$b[1],
+                                          model4.brain_development_RR$b[2]),
+                               lower = c(model4.brain_development_RR$ci.lb[1],
+                                         model4.brain_development_RR$ci.lb[2]),
+                               upper = c(model4.brain_development_RR$ci.ub[1],
+                                         model4.brain_development_RR$ci.ub[2]))
+
+  
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(C)  Exercise mode') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_mode=='voluntary') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_mode=='forced') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.mode.brain_development.RR
+
+
+
+      
+
+#--------------------------------------------------------------#
+#                         Exercise timing
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Pre-conception',
+                                                 'Pregnancy',
+                                                 'Pre to Pregnancy',
+                                                 'Pre to Post'), 
+                                             levels = rev(c('Pre-conception',
+                                                            'Pregnancy',
+                                                            'Pre to Pregnancy',
+                                                            'Pre to Post'))),
+                               coeffi = c(model5.brain_development_RR$b[1],
+                                          model5.brain_development_RR$b[4],
+                                          model5.brain_development_RR$b[3],
+                                          model5.brain_development_RR$b[2]),
+                               lower = c(model5.brain_development_RR$ci.lb[1],
+                                         model5.brain_development_RR$ci.lb[4],
+                                         model5.brain_development_RR$ci.lb[3],
+                                         model5.brain_development_RR$ci.lb[2]),
+                               upper = c(model5.brain_development_RR$ci.ub[1],
+                                         model5.brain_development_RR$ci.ub[4],
+                                         model5.brain_development_RR$ci.ub[3],
+                                         model5.brain_development_RR$ci.ub[2]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(D) Exercise timing') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) + 
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pre-conception to post-partum') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pre-conception to pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pre-conception') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.timing.brain_development.RR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercised sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Paternal', 'Maternal'), 
+                                             levels = rev(c('Paternal', 'Maternal'))),
+                               coeffi = c(model2.brain_development_RR$b[1],
+                                          model2.brain_development_RR$b[2]),
+                               lower = c(model2.brain_development_RR$ci.lb[1],
+                                         model2.brain_development_RR$ci.lb[2]),
+                               upper = c(model2.brain_development_RR$ci.ub[1],
+                                         model2.brain_development_RR$ci.ub[2]))
+  
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(E)  Exercised sex') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F0_sex_exercise=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F0_sex_exercise=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F0.sex.brain_development.RR
+
+
+
+
+#--------------------------------------------------------------#
+#                         Offspring sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Male', 'Female', 'Mixed-sex'), 
+                                             levels = rev(c('Male', 'Female', 'Mixed-sex'))),
+                               coeffi = c(model3.brain_development_RR$b[1],
+                                          model3.brain_development_RR$b[2],
+                                          model3.brain_development_RR$b[3]),
+                               lower = c(model3.brain_development_RR$ci.lb[1],
+                                         model3.brain_development_RR$ci.lb[2],
+                                         model3.brain_development_RR$ci.lb[3]),
+                               upper = c(model3.brain_development_RR$ci.ub[1],
+                                         model3.brain_development_RR$ci.ub[2],
+                                         model3.brain_development_RR$ci.ub[3]))
+  
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(F)  Offspring sex') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F1_sex_test=='mixed') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F1_sex_test=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F1_sex_test=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F1.sex.brain_development.RR
+
+
+
+
+#--------------------------------------------------------------#
+#                       Offspring ontogenetic stage 
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Prenatal', 
+                                                 'Early postnatal', 
+                                                 'Adolescence',
+                                                 'Adulthood'), 
+                                             levels = rev(c('Prenatal', 
+                                                            'Early postnatal', 
+                                                            'Adolescence',
+                                                            'Adulthood'))),
+                               coeffi = c(model6.brain_development_RR$b[4],
+                                          model6.brain_development_RR$b[3],
+                                          model6.brain_development_RR$b[1],
+                                          model6.brain_development_RR$b[2]),
+                               lower = c(model6.brain_development_RR$ci.lb[4],
+                                          model6.brain_development_RR$ci.lb[3],
+                                          model6.brain_development_RR$ci.lb[1],
+                                          model6.brain_development_RR$ci.lb[2]),
+                               upper = c(model6.brain_development_RR$ci.ub[4],
+                                          model6.brain_development_RR$ci.ub[3],
+                                          model6.brain_development_RR$ci.ub[1],
+                                          model6.brain_development_RR$ci.ub[2]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_text(colour = 'black', size = 25),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab('Improvement (lnRR) ') +
+    ggtitle ('(G)  Offspring ontogenetic stage') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='adulthood') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='adolescence') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='early postnatal') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='prenantal') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.F1.age.brain_development.RR
+
+
+
+
+
+# Saving
+fig.brain_development.RR <- ggarrange(orchard.overall.brain_development.RR, fig.specific.brain_development.RR, fig.mode.brain_development.RR,fig.timing.brain_development.RR, fig.F0.sex.brain_development.RR, fig.F1.sex.brain_development.RR,fig.F1.age.brain_development.RR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
+
+
+fig.brain_development.RR
+png(filename = "./results/Figures/fig.brain.RR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
+fig.brain_development.RR
+dev.off()
+
+
+
+
+
+
+#***************************************************************#
+#------------- Inter-individual difference (lnCVR) -------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Overall
+#--------------------------------------------------------------#
+
+# Tailored orchard plot (forest-like plot) for brain development variability - orchard.plot.brain_CVR()
+
+# Brain development
+ # Retrieving estimates
+  table.brain_development.CVR <- mod_results(model1.brain_development_CVR, mod = 'Int')
+  
+  
+# Plotting
+  orchard.plot.brain_CVR(table.brain_development.CVR, mod = "Int", xlab = "Inter-individual difference (lnCVR)", transfm = "none", angle = 0) +
+  scale_colour_manual(values = c('grey40')) +
+  scale_x_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
+  scale_y_discrete(labels = c('Brain development')) +
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
+        axis.ticks = element_line(size = 0.9, color = 'black'),
+        axis.ticks.length = unit(0.15, 'cm'),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(colour = 'black', face = 'bold', size = 25), 
+        plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+    ggtitle('(A)  Overall trait variation') -> orchard.overall.brain_development.CVR
+
+
+
+
+
+# Specific trait
+ # Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Neurogenesis','Brain size'),
+                                              levels = rev(c('Neurogenesis','Brain size'))),
+                               coeffi = c(model1.neuron_count_CVR$b,
+                                          model1.brain_size_CVR$b),
+                               lower = c(model1.neuron_count_CVR$ci.lb,
+                                         model1.brain_size_CVR$ci.lb),
+                               upper = c(model1.neuron_count_CVR$ci.ub,
+                                         model1.brain_size_CVR$ci.ub))
+  
+  ## plot
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(B)  Specific traits') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_size %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(neuron_count %>% distinct(ES_ID))), parse=TRUE, size=7) -> fig.specific.brain_development.CVR
+
+
+  
+
+#--------------------------------------------------------------#
+#                         Exercise mode
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Forced','Voluntary'), 
+                                             levels = rev(c('Forced','Voluntary'))),
+                               coeffi = c(model4.brain_development_CVR$b[1],
+                                          model4.brain_development_CVR$b[2]),
+                               lower = c(model4.brain_development_CVR$ci.lb[1],
+                                         model4.brain_development_CVR$ci.lb[2]),
+                               upper = c(model4.brain_development_CVR$ci.ub[1],
+                                         model4.brain_development_CVR$ci.ub[2]))
+
+  
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(C)  Exercise mode') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_mode=='voluntary') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_mode=='forced') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.mode.brain_development.CVR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercise timing
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Pre-conception',
+                                                 'Pregnancy',
+                                                 'Pre to Pregnancy',
+                                                 'Pre to Post'), 
+                                             levels = rev(c('Pre-conception',
+                                                            'Pregnancy',
+                                                            'Pre to Pregnancy',
+                                                            'Pre to Post'))),
+                               coeffi = c(model5.brain_development_CVR$b[1],
+                                          model5.brain_development_CVR$b[4],
+                                          model5.brain_development_CVR$b[3],
+                                          model5.brain_development_CVR$b[2]),
+                               lower = c(model5.brain_development_CVR$ci.lb[1],
+                                         model5.brain_development_CVR$ci.lb[4],
+                                         model5.brain_development_CVR$ci.lb[3],
+                                         model5.brain_development_CVR$ci.lb[2]),
+                               upper = c(model5.brain_development_CVR$ci.ub[1],
+                                         model5.brain_development_CVR$ci.ub[4],
+                                         model5.brain_development_CVR$ci.ub[3],
+                                         model5.brain_development_CVR$ci.ub[2]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(D) Exercise timing') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) + 
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pre-conception to post-partum') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pre-conception to pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(manipulation_window=='pre-conception') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.timing.brain_development.CVR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercised sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Paternal', 'Maternal'), 
+                                             levels = rev(c('Paternal', 'Maternal'))),
+                               coeffi = c(model2.brain_development_CVR$b[1],
+                                          model2.brain_development_CVR$b[2]),
+                               lower = c(model2.brain_development_CVR$ci.lb[1],
+                                         model2.brain_development_CVR$ci.lb[2]),
+                               upper = c(model2.brain_development_CVR$ci.ub[1],
+                                         model2.brain_development_CVR$ci.ub[2]))
+  
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(E)  Exercised sex') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F0_sex_exercise=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F0_sex_exercise=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F0.sex.brain_development.CVR
+
+
+
+
+#--------------------------------------------------------------#
+#                         Offspring sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Male', 'Female', 'Mixed-sex'), 
+                                             levels = rev(c('Male', 'Female', 'Mixed-sex'))),
+                               coeffi = c(model3.brain_development_CVR$b[1],
+                                          model3.brain_development_CVR$b[2],
+                                          model3.brain_development_CVR$b[3]),
+                               lower = c(model3.brain_development_CVR$ci.lb[1],
+                                         model3.brain_development_CVR$ci.lb[2],
+                                         model3.brain_development_CVR$ci.lb[3]),
+                               upper = c(model3.brain_development_CVR$ci.ub[1],
+                                         model3.brain_development_CVR$ci.ub[2],
+                                         model3.brain_development_CVR$ci.ub[3]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(F)  Offspring sex') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F1_sex_test=='mixed') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F1_sex_test=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(F1_sex_test=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F1.sex.brain_development.CVR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                       Offspring ontogenetic stage 
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.CVR <- data.frame(traits = factor(c('Prenatal', 
+                                                 'Early postnatal', 
+                                                 'Adolescence',
+                                                 'Adulthood'), 
+                                             levels = rev(c('Prenatal', 
+                                                            'Early postnatal', 
+                                                            'Adolescence',
+                                                            'Adulthood'))),
+                               coeffi = c(model6.brain_development_CVR$b[4],
+                                          model6.brain_development_CVR$b[3],
+                                          model6.brain_development_CVR$b[1],
+                                          model6.brain_development_CVR$b[2]),
+                               lower = c(model6.brain_development_CVR$ci.lb[4],
+                                          model6.brain_development_CVR$ci.lb[3],
+                                          model6.brain_development_CVR$ci.lb[1],
+                                          model6.brain_development_CVR$ci.lb[2]),
+                               upper = c(model6.brain_development_CVR$ci.ub[4],
+                                          model6.brain_development_CVR$ci.ub[3],
+                                          model6.brain_development_CVR$ci.ub[1],
+                                          model6.brain_development_CVR$ci.ub[2]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.CVR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_text(colour = 'black', size = 25),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab('Inter-individual difference (lnCVR) ') +
+    ggtitle ('(G)  Offspring ontogenetic stage') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='adulthood') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='adolescence') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='early postnatal') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(brain_development %>% filter(response_age_life_phase=='prenantal') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.F1.age.brain_development.CVR
+
+
+
+
+
+# Saving
+fig.brain_development.CVR <- ggarrange(orchard.overall.brain_development.CVR, fig.specific.brain_development.CVR, fig.mode.brain_development.CVR,fig.timing.brain_development.CVR, fig.F0.sex.brain_development.CVR, fig.F1.sex.brain_development.CVR,fig.F1.age.brain_development.CVR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
+
+
+fig.brain_development.CVR
+png(filename = "./results/Figures/fig.brain.CVR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
+fig.brain_development.CVR
+dev.off()
+```
+
+
+
+
+
+### 7. Brain growth factors
+
+```{r Upregulation of gene expression}
+#***************************************************************#
+#-------------------- Upregulation (lnRR) ----------------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Overall
+#--------------------------------------------------------------#
+
+# Tailored orchard plot (forest-like plot) for brain growth factors upregulation - orchard.plot.brain_CVR()
+
+# Brain growth factors
+ # Retrieving estimates
+  table.genes.RR <- mod_results(model1.genes_RR, mod = 'Int')
+
+
+ # Plotting
+  orchard.plot.genes_RR(table.genes.RR, mod = "Int", xlab = "Upregulation (lnRR)", transfm = "none", angle = 0) +
+  scale_colour_manual(values = c('grey40')) +
+  scale_x_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  scale_y_discrete(labels = c('Brain growth factors')) +
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
+        axis.ticks = element_line(size = 0.9, color = 'black'),
+        axis.ticks.length = unit(0.15, 'cm'),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(colour = 'black', face = 'bold', size = 25), 
+        plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
+        legend.text = element_text(size = 20),
+        legend.title = element_text(size = 20),
+        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+    ggtitle('(A)  Overall trait mean') -> orchard.overall.genes.RR
+
+
+
+
+# Specific trait
+ # Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('BDNF',
+                                                 'TrkB',
+                                                 'VEGF',
+                                                 'reelin',
+                                                 'GFAP',
+                                                 'synapsin'),
+                                              levels = rev(c('BDNF',
+                                                             'TrkB',
+                                                             'VEGF',
+                                                             'reelin',
+                                                             'GFAP',
+                                                             'synapsin'))),
+                               coeffi = c(model1.BDNF_RR$b,
+                                          model1.TrkB_RR$b,
+                                          model1.VEGF_RR$b,
+                                          model1.reelin_RR$b,
+                                          model1.GFAP_RR$b,
+                                          model1.syptophysin_RR$b),
+                               lower = c(model1.BDNF_RR$ci.lb,
+                                         model1.TrkB_RR$ci.lb,
+                                         model1.VEGF_RR$ci.lb,
+                                         model1.reelin_RR$ci.lb,
+                                         model1.GFAP_RR$ci.lb,
+                                         model1.syptophysin_RR$ci.lb),
+                               upper = c(model1.BDNF_RR$ci.ub,
+                                         model1.TrkB_RR$ci.ub,
+                                         model1.VEGF_RR$ci.ub,
+                                         model1.reelin_RR$ci.ub,
+                                         model1.GFAP_RR$ci.ub,
+                                         model1.syptophysin_RR$ci.ub))
+
+ # Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6, 0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black", "black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(B)  Specific traits') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(syptophysin %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(GFAP %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(reelin %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(VEGF %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 5, y = 1.7, label= paste("italic(k)==", nrow(TrkB %>% distinct(ES_ID))), parse=TRUE, size=7) + 
+    annotate('text', x = 6, y = 1.7, label= paste("italic(k)==", nrow(BDNF %>% distinct(ES_ID))), parse=TRUE, size=7)-> fig.specific.genes.RR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercise mode
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Forced','Voluntary'), 
+                                             levels = rev(c('Forced','Voluntary'))),
+                               coeffi = c(model4.genes_RR$b[1],
+                                          model4.genes_RR$b[2]),
+                               lower = c(model4.genes_RR$ci.lb[1],
+                                         model4.genes_RR$ci.lb[2]),
+                               upper = c(model4.genes_RR$ci.ub[1],
+                                         model4.genes_RR$ci.ub[2]))
+
+  
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_color_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+    coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(C)  Exercise mode') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(manipulation_mode=='voluntary') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(manipulation_mode=='forced') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.mode.genes.RR
+
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercise timing
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Pre-conception',
+                                                 'Pregnancy',
+                                                 'Pre to Pregnancy',
+                                                 'Pre to Post'), 
+                                             levels = rev(c('Pre-conception',
+                                                            'Pregnancy',
+                                                            'Pre to Pregnancy',
+                                                            'Pre to Post'))),
+                               coeffi = c(model5.genes_RR$b[1],
+                                          model5.genes_RR$b[4],
+                                          model5.genes_RR$b[3],
+                                          model5.genes_RR$b[2]),
+                               lower = c(model5.genes_RR$ci.lb[1],
+                                         model5.genes_RR$ci.lb[4],
+                                         model5.genes_RR$ci.lb[3],
+                                         model5.genes_RR$ci.lb[2]),
+                               upper = c(model5.genes_RR$ci.ub[1],
+                                         model5.genes_RR$ci.ub[4],
+                                         model5.genes_RR$ci.ub[3],
+                                         model5.genes_RR$ci.ub[2]))
+
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(D) Exercise timing') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) + 
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(manipulation_window=='pre-conception to post-partum') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(manipulation_window=='pre-conception to pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(manipulation_window=='pregnancy') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(manipulation_window=='pre-conception') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.timing.genes.RR
+
+
+
+
+#--------------------------------------------------------------#
+#                         Exercised sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Paternal', 'Maternal'), 
+                                             levels = rev(c('Paternal', 'Maternal'))),
+                               coeffi = c(model2.genes_RR$b[1],
+                                          model2.genes_RR$b[2]),
+                               lower = c(model2.genes_RR$ci.lb[1],
+                                         model2.genes_RR$ci.lb[2]),
+                               upper = c(model2.genes_RR$ci.ub[1],
+                                         model2.genes_RR$ci.ub[2]))
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(E)  Exercised sex') +
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(F0_sex_exercise=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(F0_sex_exercise=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F0.sex.genes.RR
+
+
+
+
+#--------------------------------------------------------------#
+#                         Offspring sex
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Male', 'Female', 'Mixed-sex'), 
+                                             levels = rev(c('Male', 'Female', 'Mixed-sex'))),
+                               coeffi = c(model3.genes_RR$b[1],
+                                          model3.genes_RR$b[2],
+                                          model3.genes_RR$b[3]),
+                               lower = c(model3.genes_RR$ci.lb[1],
+                                         model3.genes_RR$ci.lb[2],
+                                         model3.genes_RR$ci.lb[3]),
+                               upper = c(model3.genes_RR$ci.ub[1],
+                                         model3.genes_RR$ci.ub[2],
+                                         model3.genes_RR$ci.ub[3]))
+# Plotting
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab(' ') +
+    ggtitle ('(F)  Offspring sex') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(F1_sex_test=='mixed') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(F1_sex_test=='female') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(F1_sex_test=='male') %>% distinct(ES_ID))), parse=TRUE, size=7) ->  fig.F1.sex.genes.RR
+
+
+
+
+#--------------------------------------------------------------#
+#                       Offspring ontogenetic stage 
+#--------------------------------------------------------------#
+
+# Retriving estimates
+  model.table.RR <- data.frame(traits = factor(c('Prenatal', 
+                                                 'Early postnatal', 
+                                                 'Adolescence',
+                                                 'Adulthood'), 
+                                             levels = rev(c('Prenatal', 
+                                                            'Early postnatal', 
+                                                            'Adolescence',
+                                                            'Adulthood'))),
+                               coeffi = c(model6.genes_RR$b[4],
+                                          model6.genes_RR$b[3],
+                                          model6.genes_RR$b[1],
+                                          model6.genes_RR$b[2]),
+                               lower = c(model6.genes_RR$ci.lb[4],
+                                          model6.genes_RR$ci.lb[3],
+                                          model6.genes_RR$ci.lb[1],
+                                          model6.genes_RR$ci.lb[2]),
+                               upper = c(model6.genes_RR$ci.ub[4],
+                                          model6.genes_RR$ci.ub[3],
+                                          model6.genes_RR$ci.ub[1],
+                                          model6.genes_RR$ci.ub[2]))
+# Plotting  
+  ggplot() +
+    geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
+    geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
+    scale_shape_manual(values = c(16, 16, 16, 16)) +
+    scale_size_manual(values = c(0.6, 0.6, 0.6, 0.6)) +
+    scale_colour_manual(values = c("black", "black", "black", "black")) +
+    scale_y_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
+  coord_flip() +
+    hypothesis.theme +
+    theme(axis.title.y = element_blank(),
+          axis.text.y = element_text(colour = 'black', face = 'bold', size = 25),
+          axis.title.x = element_text(face = 'bold', colour = 'black', size = 25),
+          axis.text.x = element_text(colour = 'black', size = 25),
+          plot.title = element_text(colour = 'black', size = 25, face = 'bold')) +
+    ylab('Upregulation (lnRR) ') +
+    ggtitle ('(G)  Offspring ontogenetic stage') + 
+    theme(plot.margin = unit(c(0, 0, 0, 0), 'pt')) +
+    annotate('text', x = 1, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(response_age_life_phase=='adulthood') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 2, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(response_age_life_phase=='adolescence') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 3, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(response_age_life_phase=='early postnatal') %>% distinct(ES_ID))), parse=TRUE, size=7) +
+    annotate('text', x = 4, y = 1.7, label= paste("italic(k)==", nrow(genes %>% filter(response_age_life_phase=='prenantal') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.F1.age.genes.RR
+
+
+
+
+# Saving
+fig.genes.RR <- ggarrange(orchard.overall.genes.RR, fig.specific.genes.RR, fig.mode.genes.RR,fig.timing.genes.RR, fig.F0.sex.genes.RR, fig.F1.sex.genes.RR,fig.F1.age.genes.RR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
+
+
+
+fig.genes.RR
+png(filename = "./results/Figures/fig.genes.RR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
+fig.genes.RR
+dev.off()
+```
+
+
+
+
+### 8. Study-levle correlations of traits 
+
+```{r correlations}
+
+# Subsetting data
+ # RR
+  overlap.max %>% subset(select = c(2:4)) -> overlap.RR.max
+  overlap.ave %>% subset(select = c(2:4)) -> overlap.RR.ave
+  overlap.min %>% subset(select = c(2:4)) -> overlap.RR.min
+  colnames(overlap.RR.max) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.RR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.RR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+
+ # CVR
+  overlap.max %>% subset(select = c(6:8)) -> overlap.CVR.max
+  overlap.ave %>% subset(select = c(6:8)) -> overlap.CVR.ave
+  overlap.min %>% subset(select = c(6:8)) -> overlap.CVR.min
+  colnames(overlap.CVR.max) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.CVR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.CVR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+
+# Visualization
+ # RR
+  #pdf(file = './results/Figures/correlation.max.RR.pdf', height = 4, width = 4)
+  #correlation.max <- chart.Correlation(overlap.RR.max, histogram = FALSE, method = 'pearson', pch = 1)  
+  #dev.off()
+
+  png(file = './results/Figures/correlation.max.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  correlation.max <- chart.Correlation(overlap.RR.max, histogram = FALSE, method = 'pearson', pch = 1)  
+  dev.off()
+
+  
+  png(file = './results/Figures/correlation.ave.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  correlation.ave <- chart.Correlation(overlap.RR.ave, histogram = FALSE, method = 'pearson', pch = 1)  
+  dev.off()
+
+  
+  png(file = './results/Figures/correlation.min.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  correlation.min <- chart.Correlation(overlap.RR.min, histogram=FALSE, pch = 1)  
+  dev.off()
+   
+ # CVR
+  png(file = './results/Figures/correlation.max.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  correlation.max <- chart.Correlation(overlap.CVR.max, histogram = FALSE, method = 'pearson', pch = 1)  
+  dev.off()
+  
+  png(file = './results/Figures/correlation.ave.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  correlation.ave <- chart.Correlation(overlap.CVR.ave, histogram = FALSE, method = 'pearson',pch = 1)  
+  dev.off()
+  
+  png(file = './results/Figures/correlation.min.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  correlation.min <- chart.Correlation(overlap.CVR.min, histogram = FALSE, method = 'pearson',pch = 1)  
+  dev.off()
+```
+
+

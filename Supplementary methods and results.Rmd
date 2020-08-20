@@ -1,0 +1,2801 @@
+---
+title: "Model diagnostic: Intergenerational effects of physical exercise on cognition and brain: a multilevel meta-analysis of mean and variance"
+author: "Yefeng"
+output: 
+  html_document:
+    code_download: true
+    code_folding: hide
+    depth: 4
+    number_sections: no
+    theme:  cosmo # “default”, “cerulean”, “journal”, “flatly”, “darkly”, “readable”, “spacelab”, “united”, “cosmo”, “lumen”, “paper”, “sandstone”, “simplex”, “yeti”
+    toc: yes
+    toc_float: yes
+    toc_depth: 4
+  pdf_document:
+    toc: yes
+subtitle: Electronic Supplementary Material - Model diagnostic, Model selection, Publication bias, Data extraction validation
+#bibliography: references.bib
+#biblio-style: "apalike"
+#csl: nature.csl
+link-citations: yes
+---
+
+
+
+## Supplementary Methods and Results - model diagnostic, model selection, publication bias, data extraction validation
+
+
+### 1. Setup
+
+```{r Setup, eval = TRUE}
+# Preparing workspace
+  knitr::opts_chunk$set(
+  #cache = TRUE,# Cacheing to save time when kniting
+  message = FALSE,
+  warning = FALSE, # no warnings
+  tidy = TRUE, 
+  echo = TRUE,
+  fig.height = 8, fig.width = 12
+  )
+
+# Loading packages
+  pacman::p_load(metafor, # meta-analysis 
+                 readxl,
+                 ggplot2,
+                 tibble,
+                 dplyr,
+                 tidyverse,
+                 patchwork,
+                 magrittr, # extending piping
+                 knitr, # present table
+                 MuMIn, # model inference
+                 lme4,
+                 rptR)
+  
+  
+  source('./functions/functions.R')
+```
+
+
+
+### 2. Model diagnostic
+
+#### 2.1 Methods   
+
+
+We have 4 possible options for random effects included in our multilevel/hierarchical meta-regression
+
+1.response_type: heterogeneity caused by individual measurements
+
+2.study_ID: between study heterogeneity 
+
+3.strain: heterogeneity caused by different strain of laboratory rodents
+
+4.ES_ID: quantifying residual heterogeneity
+
+**Diagnoise Method:** All the above random effects are possible to induce heterogeneity of the model. To get a best model for the hierarchical meta-regression, we should diagnoise the models with different structure of random effects. To achieve this, we firstly incorporate all the four potential options into a meta-analytic model (full model). Then we reduce the four random factors one by one (reduced models), and compare the full model with each reduced model using AIC and significant test. Lower AIC denotes a better model. 
+
+**Note:** When diagonising the model using AIC, we should use maximum-likelihood (ML) estimator rather then restricted maximum-likelihood estimator(REML). This is very different from the meta-analysis and meta-regression, of which REML performs more stably than ML.
+
+```{r loading data, echo = TRUE}
+# datasets
+  behavior <- read.csv(file = './database/behavior.csv')
+  brain_development <- read.csv(file = './database/brain_development.csv')
+  genes <- read.csv(file = './database/genes.csv')
+  load(file = './database/cov_VRR_behavior.Rdata')
+  load(file = './database/cov_VRR_brain_development.Rdata')
+  load(file = './database/cov_VRR_genes.Rdata')
+  load(file = './database/cov_VCVR_behavior.Rdata')
+  load(file = './database/cov_VCVR_brain_development.Rdata')
+  load(file = './database/cov_VCVR_genes.Rdata')
+```
+
+
+
+
+```{r model diagnostic, echo = TRUE}
+
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+# full model
+  model_behavior_RR.full <- rma.mv(yi = RR,
+                                   V = cov_VRR_behavior,
+                                   random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   method = 'ML', data = behavior)
+# response_type -1
+  model_behavior_RR.response_type <- rma.mv(yi = RR,
+                                            V = cov_VRR_behavior,
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            method = 'ML', data = behavior)
+
+  behavior_full_reduced.response_type <- anova(model_behavior_RR.full,  model_behavior_RR.response_type)
+
+
+# study_ID -1
+  model_behavior_RR.study_ID <- rma.mv(yi = RR,
+                                       V = cov_VRR_behavior,
+                                       random = list(~1|response_type, ~1|strain, ~1|ES_ID),
+                                       method = 'ML', data = behavior)
+  
+  behavior_full_reduced.study_ID <- anova(model_behavior_RR.full, model_behavior_RR.study_ID)
+
+
+# strain -1
+  model_behavior_RR.strain <- rma.mv(yi = RR,
+                                     V = cov_VRR_behavior,
+                                     random = list(~1|response_type, ~1|study_ID, ~1|ES_ID),
+                                     method = 'ML', data = behavior)
+  
+  behavior_full_reduced.strain <- anova(model_behavior_RR.full, model_behavior_RR.strain)
+
+
+# ES_ID -1
+  model_behavior_RR.ES_ID <- rma.mv(yi = RR,
+                                    V = cov_VRR_behavior,
+                                    random = list(~1|response_type, ~1|strain, ~1|study_ID),
+                                    method = 'ML', data = behavior)
+  
+  behavior_full_reduced.ES_ID <- anova(model_behavior_RR.full, model_behavior_RR.ES_ID)
+
+
+# response_type and study_ID -1
+  model_behavior_RR.response_type.study_ID <- rma.mv(yi = RR,
+                                                     V = cov_VRR_behavior,
+                                                     random = list(~1|strain, ~1|ES_ID),
+                                                     method = 'ML', data = behavior)
+  
+  behavior_full_reduced.response_type.study_ID <- anova(model_behavior_RR.full,  model_behavior_RR.response_type.study_ID)
+
+
+# response_type and strain -1
+  model_behavior_RR.response_type.strain <- rma.mv(yi = RR,
+                                                   V = cov_VRR_behavior,
+                                                   random = list(~1|study_ID, ~1|ES_ID),
+                                                   method = 'ML', data = behavior)
+  
+  behavior_full_reduced.response_type.strain <- anova(model_behavior_RR.full, model_behavior_RR.response_type.strain)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+# full model
+  model_brain_development_RR.full <- rma.mv(yi = RR,
+                                            V = cov_VRR_brain_development,
+                                            random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            method = 'ML', data = brain_development)
+
+# response_type -1
+  model_brain_development_RR.response_type <- rma.mv(yi = RR,
+                                                     V = cov_VRR_brain_development,
+                                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                     method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.response_type <- anova(model_brain_development_RR.full,  model_brain_development_RR.response_type)
+
+
+# study_ID -1
+  model_brain_development_RR.study_ID <- rma.mv(yi = RR,
+                                                V = cov_VRR_brain_development,
+                                                random = list(~1|response_type, ~1|strain, ~1|ES_ID),
+                                                method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.study_ID <- anova(model_brain_development_RR.full, model_brain_development_RR.study_ID)
+
+
+# strain -1
+  model_brain_development_RR.strain <- rma.mv(yi = RR,
+                                              V = cov_VRR_brain_development,
+                                              random = list(~1|response_type, ~1|study_ID, ~1|ES_ID),
+                                              method = 'ML', data = brain_development)
+
+  brain_development_full_reduced.strain <- anova(model_brain_development_RR.full, model_brain_development_RR.strain)
+
+
+# ES_ID -1
+  model_brain_development_RR.ES_ID <- rma.mv(yi = RR,
+                                             V = cov_VRR_brain_development,
+                                             random = list(~1|response_type, ~1|strain, ~1|study_ID),
+                                             method = 'ML', data = brain_development)
+
+  brain_development_full_reduced.ES_ID <- anova(model_brain_development_RR.full,model_brain_development_RR.ES_ID)
+
+
+# response_type and study_ID -1
+  model_brain_development_RR.response_type.study_ID <- rma.mv(yi = RR,
+                                                              V = cov_VRR_brain_development,
+                                                              random = list(~1|strain, ~1|ES_ID),
+                                                              method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.response_type.study_ID <- anova(model_brain_development_RR.full, model_brain_development_RR.response_type.study_ID)
+
+
+# response_type and strain -1
+  model_brain_development_RR.response_type.strain <- rma.mv(yi = RR,
+                                                            V = cov_VRR_brain_development,
+                                                            random = list(~1|study_ID, ~1|ES_ID),
+                                                            method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.response_type.strain <- anova(model_brain_development_RR.full, model_brain_development_RR.response_type.strain)
+
+
+
+  
+  
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+# full model
+  model_genes_RR.full <- rma.mv(yi = RR,
+                                V = cov_VRR_genes,
+                                random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                method = 'ML', data = genes)
+# response_type -1
+  model_genes_RR.response_type <- rma.mv(yi = RR,
+                                         V = cov_VRR_genes,
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         method = 'ML', data = genes)
+
+  genes_full_reduced.response_type <- anova(model_genes_RR.full, model_genes_RR.response_type)
+
+
+# study_ID -1
+  model_genes_RR.study_ID <- rma.mv(yi = RR,
+                                    V = cov_VRR_genes,
+                                    random = list(~1|response_type, ~1|strain, ~1|ES_ID),
+                                    method = 'ML', data = genes)
+  
+  genes_full_reduced.study_ID <- anova(model_genes_RR.full, model_genes_RR.study_ID)
+
+
+# strain -1
+  model_genes_RR.strain <- rma.mv(yi = RR,
+                                  V = cov_VRR_genes,
+                                  random = list(~1|response_type, ~1|study_ID, ~1|ES_ID),
+                                  method = 'ML', data = genes)
+  
+  genes_full_reduced.strain <- anova(model_genes_RR.full, model_genes_RR.strain)
+
+
+# ES_ID -1
+  model_genes_RR.ES_ID <- rma.mv(yi = RR,
+                                 V = cov_VRR_genes,
+                                 random = list(~1|response_type, ~1|strain, ~1|study_ID),
+                                 method = 'ML', data = genes)
+  
+  genes_full_reduced.ES_ID <- anova(model_genes_RR.full, model_genes_RR.ES_ID)
+
+
+  # response_type and study_ID -1
+  model_genes_RR.response_type.study_ID <- rma.mv(yi = RR,
+                                                  V = cov_VRR_genes,
+                                                  random = list(~1|strain, ~1|ES_ID),
+                                                  method = 'ML', data = genes)
+  
+  genes_full_reduced.response_type.study_ID <- anova(model_genes_RR.full, model_genes_RR.response_type.study_ID)
+
+
+# response_type and strain -1
+  model_genes_RR.response_type.strain <- rma.mv(yi = RR,
+                                                V = cov_VRR_genes,
+                                                random = list(~1|study_ID, ~1|ES_ID),
+                                                method = 'ML', data = genes)
+  
+  genes_full_reduced.response_type.strain <- anova(model_genes_RR.full, model_genes_RR.response_type.strain)
+
+
+
+
+#***************************************************************#
+#------------ Inter-individual difference (lnCVR) --------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+# full model
+  model_behavior_CVR.full <- rma.mv(yi = CVR,
+                                    V = VCVR,
+                                    random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    method = 'ML', data = behavior)
+  
+# response_type -1
+  model_behavior_CVR.response_type <- rma.mv(yi = CVR,
+                                             V = VCVR,
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             method = 'ML', data = behavior)
+  
+  behavior_full_reduced.response_type <- anova(model_behavior_CVR.full, model_behavior_CVR.response_type)
+
+
+# study_ID -1
+  model_behavior_CVR.study_ID <- rma.mv(yi = CVR,
+                                        V = VCVR,
+                                        random = list(~1|response_type, ~1|strain, ~1|ES_ID),
+                                        method = 'ML', data = behavior)
+  
+  behavior_full_reduced.study_ID <- anova(model_behavior_CVR.full,model_behavior_CVR.study_ID)
+
+
+# strain -1
+  model_behavior_CVR.strain <- rma.mv(yi = CVR,
+                                      V = VCVR,
+                                      random = list(~1|response_type, ~1|study_ID, ~1|ES_ID),
+                                      method = 'ML', data = behavior)
+  
+  behavior_full_reduced.strain <- anova(model_behavior_CVR.full, model_behavior_CVR.strain)
+
+
+# ES_ID -1
+  model_behavior_CVR.ES_ID <- rma.mv(yi = CVR,
+                                     V = VCVR,
+                                     random = list(~1|response_type, ~1|strain, ~1|study_ID),
+                                     method = 'ML', data = behavior)
+  
+  behavior_full_reduced.ES_ID <- anova(model_behavior_CVR.full, model_behavior_CVR.ES_ID)
+
+
+### response_type and study_ID -1
+model_behavior_CVR.response_type.study_ID <- rma.mv(yi = CVR,
+                                                    V = VCVR,
+                                                    random = list(~1|strain, ~1|ES_ID),
+                                                    method = 'ML', data = behavior)
+
+behavior_full_reduced.response_type.study_ID <- anova(model_behavior_CVR.full, model_behavior_CVR.response_type.study_ID)
+
+
+# response_type and strain -1
+  model_behavior_CVR.response_type.strain <- rma.mv(yi = CVR,
+                                                    V = VCVR,
+                                                    random = list(~1|study_ID, ~1|ES_ID),
+                                                    method = 'ML', data = behavior)
+  
+  behavior_full_reduced.response_type.strain <- anova(model_behavior_CVR.full, model_behavior_CVR.response_type.strain)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+# full model
+  model_brain_development_CVR.full <- rma.mv(yi = CVR,
+                                             V = cov_VCVR_brain_development,
+                                             random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             method = 'ML', data = brain_development)
+  
+# response_type -1
+  model_brain_development_CVR.response_type <- rma.mv(yi = CVR,
+                                                      V = cov_VCVR_brain_development,
+                                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                      method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.response_type <- anova(model_brain_development_CVR.full,  model_brain_development_CVR.response_type)
+
+
+# study_ID -1
+  model_brain_development_CVR.study_ID <- rma.mv(yi = CVR,
+                                                 V = cov_VCVR_brain_development,
+                                                 random = list(~1|response_type, ~1|strain, ~1|ES_ID),
+                                                 method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.study_ID <- anova(model_brain_development_CVR.full, model_brain_development_CVR.study_ID)
+
+
+ # strain -1
+  model_brain_development_CVR.strain <- rma.mv(yi = CVR,
+                                               V = cov_VCVR_brain_development,
+                                               random = list(~1|response_type, ~1|study_ID, ~1|ES_ID),
+                                               method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.strain <- anova(model_brain_development_CVR.full, model_brain_development_CVR.strain)
+
+
+# ES_ID -1
+  model_brain_development_CVR.ES_ID <- rma.mv(yi = CVR,
+                                              V = cov_VCVR_brain_development,
+                                              random = list(~1|response_type, ~1|strain, ~1|study_ID),
+                                              method = 'ML', data = brain_development)
+
+brain_development_full_reduced.ES_ID <- anova(model_brain_development_CVR.full, model_brain_development_CVR.ES_ID)
+
+
+# response_type and study_ID -1
+  model_brain_development_CVR.response_type.study_ID <- rma.mv(yi = CVR,
+                                                               V = cov_VCVR_brain_development,
+                                                               random = list(~1|strain, ~1|ES_ID),
+                                                               method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.response_type.study_ID <- anova(model_brain_development_CVR.full, model_brain_development_CVR.response_type.study_ID)
+
+
+# response_type and strain -1
+  model_brain_development_CVR.response_type.strain <- rma.mv(yi = CVR,
+                                                             V = cov_VCVR_brain_development,
+                                                             random = list(~1|study_ID, ~1|ES_ID),
+                                                             method = 'ML', data = brain_development)
+  
+  brain_development_full_reduced.response_type.strain <- anova(model_brain_development_CVR.full,              model_brain_development_CVR.response_type.strain)
+
+
+  
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+# full model
+  model_genes_CVR.full <- rma.mv(yi = CVR,
+                                 V = cov_VCVR_genes,
+                                 random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 method = 'ML', data = genes)
+  
+# response_type -1
+  model_genes_CVR.response_type <- rma.mv(yi = CVR,
+                                          V = cov_VCVR_genes,
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          method = 'ML', data = genes)
+  
+  genes_full_reduced.response_type <- anova(model_genes_CVR.full, model_genes_CVR.response_type)
+
+
+# study_ID -1
+  model_genes_CVR.study_ID <- rma.mv(yi = CVR,
+                                     V = cov_VCVR_genes,
+                                     random = list(~1|response_type, ~1|strain, ~1|ES_ID),
+                                     method = 'ML', data = genes)
+  
+  genes_full_reduced.study_ID <- anova(model_genes_CVR.full, model_genes_CVR.study_ID)
+
+
+# strain -1
+  model_genes_CVR.strain <- rma.mv(yi = CVR,
+                                   V = cov_VCVR_genes,
+                                   random = list(~1|response_type, ~1|study_ID, ~1|ES_ID),
+                                   method = 'ML', data = genes)
+  
+  genes_full_reduced.strain <- anova(model_genes_CVR.full, model_genes_CVR.strain)
+
+
+# ES_ID -1
+model_genes_CVR.ES_ID <- rma.mv(yi = CVR,
+                               V = cov_VCVR_genes,
+                               random = list(~1|response_type, ~1|strain, ~1|study_ID),
+                               method = 'ML', data = genes)
+
+genes_full_reduced.ES_ID <- anova(model_genes_CVR.full, model_genes_CVR.ES_ID)
+
+
+# response_type and study_ID -1
+  model_genes_CVR.response_type.study_ID <- rma.mv(yi = CVR,
+                                                   V = cov_VCVR_genes,
+                                                   random = list(~1|strain, ~1|ES_ID),
+                                                   method = 'ML', data = genes)
+  
+  genes_full_reduced.response_type.study_ID <- anova(model_genes_CVR.full, model_genes_CVR.response_type.study_ID)
+
+
+# response_type and strain -1
+  model_genes_CVR.response_type.strain <- rma.mv(yi = CVR,
+                                                 V = cov_VCVR_genes,
+                                                 random = list(~1|study_ID, ~1|ES_ID),
+                                                 method = 'ML', data = genes)
+  
+  genes_full_reduced.response_type.strain <- anova(model_genes_CVR.full, model_genes_CVR.response_type.strain)
+```
+
+
+
+#### 2.2 Running models
+
+```{r diagnostic parameters, echo = TRUE}
+
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+  diagnostic.behavior_RR <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'ANOVA', col_names = TRUE)
+
+  diagnostic.behavior_RR %>% kable
+
+# Position
+  position.behavior_RR <- c(1, 6, 10, 14, 18, 22, 25)
+  position.behavior_RR.levels <- c(1,2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23, 25,26)
+
+# AIC
+  diagnostic.behavior_RR$AIC[position.behavior_RR] <- round(c(behavior_full_reduced.response_type$fit.stats.f[3],
+        behavior_full_reduced.response_type$fit.stats.r[3],
+        behavior_full_reduced.strain$fit.stats.r[3],
+        behavior_full_reduced.study_ID$fit.stats.r[3],
+        behavior_full_reduced.ES_ID$fit.stats.r[3],
+        behavior_full_reduced.response_type.study_ID$fit.stats.r[3],
+        behavior_full_reduced.response_type.strain$fit.stats.r[3]),1)
+
+# pval
+  diagnostic.behavior_RR$`p-value`[position.behavior_RR] <- round(c(0,
+          behavior_full_reduced.response_type$pval,
+          behavior_full_reduced.strain$pval,
+          behavior_full_reduced.study_ID$pval,
+          behavior_full_reduced.ES_ID$pval,
+          behavior_full_reduced.response_type.study_ID$pval,
+          behavior_full_reduced.response_type.strain$pval),4)
+
+ # N-levels
+  diagnostic.behavior_RR$`N-levels`[position.behavior_RR.levels] <- round(c(model_behavior_RR.full$s.nlevels[1],model_behavior_RR.full$s.nlevels[2],model_behavior_RR.full$s.nlevels[3],model_behavior_RR.full$s.nlevels[4], model_behavior_RR.response_type$s.nlevels[1],model_behavior_RR.response_type$s.nlevels[2],model_behavior_RR.response_type$s.nlevels[3], model_behavior_RR.study_ID$s.nlevels[1],model_behavior_RR.study_ID$s.nlevels[2],model_behavior_RR.study_ID$s.nlevels[3], model_behavior_RR.strain$s.nlevels[1],model_behavior_RR.strain$s.nlevels[2],model_behavior_RR.strain$s.nlevels[3],  model_behavior_RR.ES_ID$s.nlevels[1],model_behavior_RR.ES_ID$s.nlevels[2],model_behavior_RR.ES_ID$s.nlevels[3], model_behavior_RR.response_type.study_ID$s.nlevels[1],model_behavior_RR.response_type.study_ID$s.nlevels[2], model_behavior_RR.response_type.strain$s.nlevels[1],model_behavior_RR.response_type.strain$s.nlevels[2]),1)
+
+
+ # variance
+  diagnostic.behavior_RR$Variance[position.behavior_RR.levels] <- round(c(model_behavior_RR.full$sigma2[1],model_behavior_RR.full$sigma2[2],model_behavior_RR.full$sigma2[3],model_behavior_RR.full$sigma2[4], model_behavior_RR.response_type$sigma2[1],model_behavior_RR.response_type$sigma2[2],model_behavior_RR.response_type$sigma2[3], model_behavior_RR.study_ID$sigma2[1],model_behavior_RR.study_ID$sigma2[2],model_behavior_RR.study_ID$sigma2[3], model_behavior_RR.strain$sigma2[1],model_behavior_RR.strain$sigma2[2],model_behavior_RR.strain$sigma2[3],  model_behavior_RR.ES_ID$sigma2[1],model_behavior_RR.ES_ID$sigma2[2],model_behavior_RR.ES_ID$sigma2[3], model_behavior_RR.response_type.study_ID$sigma2[1],model_behavior_RR.response_type.study_ID$sigma2[2], model_behavior_RR.response_type.strain$sigma2[1],model_behavior_RR.response_type.strain$sigma2[2]),4)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+  diagnostic.brain_development_RR <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'ANOVA', col_names = TRUE)
+
+# Position
+  position.brain_development_RR <- c(1, 6, 10, 14, 18, 22, 25)
+  position.brain_development_RR.levels <- c(1,2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23, 25,26)
+
+
+# AIC
+  diagnostic.brain_development_RR$AIC[position.brain_development_RR] <- round(c(brain_development_full_reduced.response_type$fit.stats.f[3],
+        brain_development_full_reduced.response_type$fit.stats.r[3],
+        brain_development_full_reduced.strain$fit.stats.r[3],
+        brain_development_full_reduced.study_ID$fit.stats.r[3],
+        brain_development_full_reduced.ES_ID$fit.stats.r[3],
+        brain_development_full_reduced.response_type.study_ID$fit.stats.r[3],
+          brain_development_full_reduced.response_type.strain$fit.stats.r[3]),1)
+
+# pval
+  diagnostic.brain_development_RR$`p-value`[position.brain_development_RR] <- round(c(0,
+          brain_development_full_reduced.response_type$pval,
+          brain_development_full_reduced.strain$pval,
+          brain_development_full_reduced.study_ID$pval,
+          brain_development_full_reduced.ES_ID$pval,
+          brain_development_full_reduced.response_type.study_ID$pval,
+          brain_development_full_reduced.response_type.strain$pval),4)
+
+  # N-levels
+  diagnostic.brain_development_RR$`N-levels`[position.brain_development_RR.levels] <- round(c(model_brain_development_RR.full$s.nlevels[1],model_brain_development_RR.full$s.nlevels[2],model_brain_development_RR.full$s.nlevels[3],model_brain_development_RR.full$s.nlevels[4], model_brain_development_RR.response_type$s.nlevels[1],model_brain_development_RR.response_type$s.nlevels[2],model_brain_development_RR.response_type$s.nlevels[3], model_brain_development_RR.study_ID$s.nlevels[1],model_brain_development_RR.study_ID$s.nlevels[2],model_brain_development_RR.study_ID$s.nlevels[3], model_brain_development_RR.strain$s.nlevels[1],model_brain_development_RR.strain$s.nlevels[2],model_brain_development_RR.strain$s.nlevels[3],  model_brain_development_RR.ES_ID$s.nlevels[1],model_brain_development_RR.ES_ID$s.nlevels[2],model_brain_development_RR.ES_ID$s.nlevels[3], model_brain_development_RR.response_type.study_ID$s.nlevels[1],model_brain_development_RR.response_type.study_ID$s.nlevels[2], model_brain_development_RR.response_type.strain$s.nlevels[1],model_brain_development_RR.response_type.strain$s.nlevels[2]),1)
+
+
+## variance
+diagnostic.brain_development_RR$Variance[position.brain_development_RR.levels] <- round(c(model_brain_development_RR.full$sigma2[1],model_brain_development_RR.full$sigma2[2],model_brain_development_RR.full$sigma2[3],model_brain_development_RR.full$sigma2[4], model_brain_development_RR.response_type$sigma2[1],model_brain_development_RR.response_type$sigma2[2],model_brain_development_RR.response_type$sigma2[3], model_brain_development_RR.study_ID$sigma2[1],model_brain_development_RR.study_ID$sigma2[2],model_brain_development_RR.study_ID$sigma2[3], model_brain_development_RR.strain$sigma2[1],model_brain_development_RR.strain$sigma2[2],model_brain_development_RR.strain$sigma2[3],  model_brain_development_RR.ES_ID$sigma2[1],model_brain_development_RR.ES_ID$sigma2[2],model_brain_development_RR.ES_ID$sigma2[3], model_brain_development_RR.response_type.study_ID$sigma2[1],model_brain_development_RR.response_type.study_ID$sigma2[2], model_brain_development_RR.response_type.strain$sigma2[1],model_brain_development_RR.response_type.strain$sigma2[2]),4)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+  diagnostic.genes_RR <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'ANOVA', col_names = TRUE)
+
+
+# Position
+  position.genes_RR <- c(1, 6, 10, 14, 18, 22, 25)
+  position.genes_RR.levels <- c(1,2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23, 25,26)
+
+# AIC
+  diagnostic.genes_RR$AIC[position.genes_RR] <- round(c(genes_full_reduced.response_type$fit.stats.f[3],
+        genes_full_reduced.response_type$fit.stats.r[3],
+        genes_full_reduced.strain$fit.stats.r[3],
+        genes_full_reduced.study_ID$fit.stats.r[3],
+        genes_full_reduced.ES_ID$fit.stats.r[3],
+        genes_full_reduced.response_type.study_ID$fit.stats.r[3],
+        genes_full_reduced.response_type.strain$fit.stats.r[3]),1)
+
+# pval
+  diagnostic.genes_RR$`p-value`[position.genes_RR] <- round(c(0,
+          genes_full_reduced.response_type$pval,
+          genes_full_reduced.strain$pval,
+          genes_full_reduced.study_ID$pval,
+          genes_full_reduced.ES_ID$pval,
+          genes_full_reduced.response_type.study_ID$pval,
+          genes_full_reduced.response_type.strain$pval),4)
+
+# N-levels
+  diagnostic.genes_RR$`N-levels`[position.genes_RR.levels] <- round(c(model_genes_RR.full$s.nlevels[1],model_genes_RR.full$s.nlevels[2],model_genes_RR.full$s.nlevels[3],model_genes_RR.full$s.nlevels[4], model_genes_RR.response_type$s.nlevels[1],model_genes_RR.response_type$s.nlevels[2],model_genes_RR.response_type$s.nlevels[3], model_genes_RR.study_ID$s.nlevels[1],model_genes_RR.study_ID$s.nlevels[2],model_genes_RR.study_ID$s.nlevels[3], model_genes_RR.strain$s.nlevels[1],model_genes_RR.strain$s.nlevels[2],model_genes_RR.strain$s.nlevels[3],  model_genes_RR.ES_ID$s.nlevels[1],model_genes_RR.ES_ID$s.nlevels[2],model_genes_RR.ES_ID$s.nlevels[3], model_genes_RR.response_type.study_ID$s.nlevels[1],model_genes_RR.response_type.study_ID$s.nlevels[2], model_genes_RR.response_type.strain$s.nlevels[1],model_genes_RR.response_type.strain$s.nlevels[2]),1)
+
+
+# variance
+  diagnostic.genes_RR$Variance[position.genes_RR.levels] <- round(c(model_genes_RR.full$sigma2[1],model_genes_RR.full$sigma2[2],model_genes_RR.full$sigma2[3],model_genes_RR.full$sigma2[4], model_genes_RR.response_type$sigma2[1],model_genes_RR.response_type$sigma2[2],model_genes_RR.response_type$sigma2[3], model_genes_RR.study_ID$sigma2[1],model_genes_RR.study_ID$sigma2[2],model_genes_RR.study_ID$sigma2[3], model_genes_RR.strain$sigma2[1],model_genes_RR.strain$sigma2[2],model_genes_RR.strain$sigma2[3],  model_genes_RR.ES_ID$sigma2[1],model_genes_RR.ES_ID$sigma2[2],model_genes_RR.ES_ID$sigma2[3], model_genes_RR.response_type.study_ID$sigma2[1],model_genes_RR.response_type.study_ID$sigma2[2], model_genes_RR.response_type.strain$sigma2[1],model_genes_RR.response_type.strain$sigma2[2]),4)
+
+
+
+
+
+#***************************************************************#
+#------------ Inter-individual difference (lnCVR) --------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+  diagnostic.behavior_CVR <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'ANOVA', col_names = TRUE)
+
+
+# Position
+  position.behavior_CVR <- c(1, 6, 10, 14, 18, 22, 25)
+  position.behavior_CVR.levels <- c(1,2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23, 25,26)
+
+# AIC
+  diagnostic.behavior_CVR$AIC[position.behavior_CVR] <- round(c(behavior_full_reduced.response_type$fit.stats.f[3],
+        behavior_full_reduced.response_type$fit.stats.r[3],
+        behavior_full_reduced.strain$fit.stats.r[3],
+        behavior_full_reduced.study_ID$fit.stats.r[3],
+        behavior_full_reduced.ES_ID$fit.stats.r[3],
+        behavior_full_reduced.response_type.study_ID$fit.stats.r[3],
+        behavior_full_reduced.response_type.strain$fit.stats.r[3]),1)
+
+# pval
+  diagnostic.behavior_CVR$`p-value`[position.behavior_CVR] <- round(c(0,
+          behavior_full_reduced.response_type$pval,
+          behavior_full_reduced.strain$pval,
+          behavior_full_reduced.study_ID$pval,
+          behavior_full_reduced.ES_ID$pval,
+          behavior_full_reduced.response_type.study_ID$pval,
+          behavior_full_reduced.response_type.strain$pval),4)
+
+# N-levels
+  diagnostic.behavior_CVR$`N-levels`[position.behavior_CVR.levels] <- round(c(model_behavior_CVR.full$s.nlevels[1],model_behavior_CVR.full$s.nlevels[2],model_behavior_CVR.full$s.nlevels[3],model_behavior_CVR.full$s.nlevels[4], model_behavior_CVR.response_type$s.nlevels[1],model_behavior_CVR.response_type$s.nlevels[2],model_behavior_CVR.response_type$s.nlevels[3], model_behavior_CVR.study_ID$s.nlevels[1],model_behavior_CVR.study_ID$s.nlevels[2],model_behavior_CVR.study_ID$s.nlevels[3], model_behavior_CVR.strain$s.nlevels[1],model_behavior_CVR.strain$s.nlevels[2],model_behavior_CVR.strain$s.nlevels[3],  model_behavior_CVR.ES_ID$s.nlevels[1],model_behavior_CVR.ES_ID$s.nlevels[2],model_behavior_CVR.ES_ID$s.nlevels[3], model_behavior_CVR.response_type.study_ID$s.nlevels[1],model_behavior_CVR.response_type.study_ID$s.nlevels[2], model_behavior_CVR.response_type.strain$s.nlevels[1],model_behavior_CVR.response_type.strain$s.nlevels[2]),1)
+
+
+# variance
+  diagnostic.behavior_CVR$Variance[position.behavior_CVR.levels] <- round(c(model_behavior_CVR.full$sigma2[1],model_behavior_CVR.full$sigma2[2],model_behavior_CVR.full$sigma2[3],model_behavior_CVR.full$sigma2[4], model_behavior_CVR.response_type$sigma2[1],model_behavior_CVR.response_type$sigma2[2],model_behavior_CVR.response_type$sigma2[3], model_behavior_CVR.study_ID$sigma2[1],model_behavior_CVR.study_ID$sigma2[2],model_behavior_CVR.study_ID$sigma2[3], model_behavior_CVR.strain$sigma2[1],model_behavior_CVR.strain$sigma2[2],model_behavior_CVR.strain$sigma2[3],  model_behavior_CVR.ES_ID$sigma2[1],model_behavior_CVR.ES_ID$sigma2[2],model_behavior_CVR.ES_ID$sigma2[3], model_behavior_CVR.response_type.study_ID$sigma2[1],model_behavior_CVR.response_type.study_ID$sigma2[2], model_behavior_CVR.response_type.strain$sigma2[1],model_behavior_CVR.response_type.strain$sigma2[2]),4)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+  diagnostic.brain_development_CVR <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'ANOVA', col_names = TRUE)
+
+
+# Position
+  position.brain_development_CVR <- c(1, 6, 10, 14, 18, 22, 25)
+  position.brain_development_CVR.levels <- c(1,2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23, 25,26)
+
+# AIC
+  diagnostic.brain_development_CVR$AIC[position.brain_development_CVR] <- round(c(brain_development_full_reduced.response_type$fit.stats.f[3],brain_development_full_reduced.response_type$fit.stats.r[3],brain_development_full_reduced.strain$fit.stats.r[3], brain_development_full_reduced.study_ID$fit.stats.r[3],brain_development_full_reduced.ES_ID$fit.stats.r[3],brain_development_full_reduced.response_type.study_ID$fit.stats.r[3],brain_development_full_reduced.response_type.strain$fit.stats.r[3]),1)
+
+# pval
+  diagnostic.brain_development_CVR$`p-value`[position.brain_development_CVR] <- round(c(0,
+          brain_development_full_reduced.response_type$pval,
+          brain_development_full_reduced.strain$pval,
+          brain_development_full_reduced.study_ID$pval,
+          brain_development_full_reduced.ES_ID$pval,
+          brain_development_full_reduced.response_type.study_ID$pval,
+          brain_development_full_reduced.response_type.strain$pval),4)
+
+# N-levels
+  diagnostic.brain_development_CVR$`N-levels`[position.brain_development_CVR.levels] <- round(c(model_brain_development_CVR.full$s.nlevels[1],model_brain_development_CVR.full$s.nlevels[2],model_brain_development_CVR.full$s.nlevels[3],model_brain_development_CVR.full$s.nlevels[4], model_brain_development_CVR.response_type$s.nlevels[1],model_brain_development_CVR.response_type$s.nlevels[2],model_brain_development_CVR.response_type$s.nlevels[3], model_brain_development_CVR.study_ID$s.nlevels[1],model_brain_development_CVR.study_ID$s.nlevels[2],model_brain_development_CVR.study_ID$s.nlevels[3], model_brain_development_CVR.strain$s.nlevels[1],model_brain_development_CVR.strain$s.nlevels[2],model_brain_development_CVR.strain$s.nlevels[3],  model_brain_development_CVR.ES_ID$s.nlevels[1],model_brain_development_CVR.ES_ID$s.nlevels[2],model_brain_development_CVR.ES_ID$s.nlevels[3], model_brain_development_CVR.response_type.study_ID$s.nlevels[1],model_brain_development_CVR.response_type.study_ID$s.nlevels[2], model_brain_development_CVR.response_type.strain$s.nlevels[1],model_brain_development_CVR.response_type.strain$s.nlevels[2]),1)
+
+
+# variance
+  diagnostic.brain_development_CVR$Variance[position.brain_development_CVR.levels] <- round(c(model_brain_development_CVR.full$sigma2[1],model_brain_development_CVR.full$sigma2[2],model_brain_development_CVR.full$sigma2[3],model_brain_development_CVR.full$sigma2[4], model_brain_development_CVR.response_type$sigma2[1],model_brain_development_CVR.response_type$sigma2[2],model_brain_development_CVR.response_type$sigma2[3], model_brain_development_CVR.study_ID$sigma2[1],model_brain_development_CVR.study_ID$sigma2[2],model_brain_development_CVR.study_ID$sigma2[3], model_brain_development_CVR.strain$sigma2[1],model_brain_development_CVR.strain$sigma2[2],model_brain_development_CVR.strain$sigma2[3],  model_brain_development_CVR.ES_ID$sigma2[1],model_brain_development_CVR.ES_ID$sigma2[2],model_brain_development_CVR.ES_ID$sigma2[3], model_brain_development_CVR.response_type.study_ID$sigma2[1],model_brain_development_CVR.response_type.study_ID$sigma2[2], model_brain_development_CVR.response_type.strain$sigma2[1],model_brain_development_CVR.response_type.strain$sigma2[2]),4)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+  diagnostic.genes_CVR <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'ANOVA', col_names = TRUE)
+
+
+# Position
+  position.genes_CVR <- c(1, 6, 10, 14, 18, 22, 25)
+  position.genes_CVR.levels <- c(1,2,3,4, 6,7,8, 10,11,12, 14,15,16, 18,19,20, 22,23, 25,26)
+
+
+# AIC
+  diagnostic.genes_CVR$AIC[position.genes_CVR] <- round(c(genes_full_reduced.response_type$fit.stats.f[3],
+        genes_full_reduced.response_type$fit.stats.r[3],
+        genes_full_reduced.strain$fit.stats.r[3],
+        genes_full_reduced.study_ID$fit.stats.r[3],
+        genes_full_reduced.ES_ID$fit.stats.r[3],
+        genes_full_reduced.response_type.study_ID$fit.stats.r[3],
+        genes_full_reduced.response_type.strain$fit.stats.r[3]),1)
+
+# pval
+  diagnostic.genes_CVR$`p-value`[position.genes_CVR] <- round(c(0,
+          genes_full_reduced.response_type$pval,
+          genes_full_reduced.strain$pval,
+          genes_full_reduced.study_ID$pval,
+          genes_full_reduced.ES_ID$pval,
+          genes_full_reduced.response_type.study_ID$pval,
+          genes_full_reduced.response_type.strain$pval),4)
+
+# N-levels
+  diagnostic.genes_CVR$`N-levels`[position.genes_CVR.levels] <- round(c(model_genes_CVR.full$s.nlevels[1],model_genes_CVR.full$s.nlevels[2],model_genes_CVR.full$s.nlevels[3],model_genes_CVR.full$s.nlevels[4], model_genes_CVR.response_type$s.nlevels[1],model_genes_CVR.response_type$s.nlevels[2],model_genes_CVR.response_type$s.nlevels[3], model_genes_CVR.study_ID$s.nlevels[1],model_genes_CVR.study_ID$s.nlevels[2],model_genes_CVR.study_ID$s.nlevels[3], model_genes_CVR.strain$s.nlevels[1],model_genes_CVR.strain$s.nlevels[2],model_genes_CVR.strain$s.nlevels[3],  model_genes_CVR.ES_ID$s.nlevels[1],model_genes_CVR.ES_ID$s.nlevels[2],model_genes_CVR.ES_ID$s.nlevels[3], model_genes_CVR.response_type.study_ID$s.nlevels[1],model_genes_CVR.response_type.study_ID$s.nlevels[2], model_genes_CVR.response_type.strain$s.nlevels[1],model_genes_CVR.response_type.strain$s.nlevels[2]),1)
+
+
+# variance
+  diagnostic.genes_CVR$Variance[position.genes_CVR.levels] <- round(c(model_genes_CVR.full$sigma2[1],model_genes_CVR.full$sigma2[2],model_genes_CVR.full$sigma2[3],model_genes_CVR.full$sigma2[4], model_genes_CVR.response_type$sigma2[1],model_genes_CVR.response_type$sigma2[2],model_genes_CVR.response_type$sigma2[3], model_genes_CVR.study_ID$sigma2[1],model_genes_CVR.study_ID$sigma2[2],model_genes_CVR.study_ID$sigma2[3], model_genes_CVR.strain$sigma2[1],model_genes_CVR.strain$sigma2[2],model_genes_CVR.strain$sigma2[3],  model_genes_CVR.ES_ID$sigma2[1],model_genes_CVR.ES_ID$sigma2[2],model_genes_CVR.ES_ID$sigma2[3], model_genes_CVR.response_type.study_ID$sigma2[1],model_genes_CVR.response_type.study_ID$sigma2[2], model_genes_CVR.response_type.strain$sigma2[1],model_genes_CVR.response_type.strain$sigma2[2]),4)
+
+
+
+# Cleaning 'NA' inside the table
+
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+diagnostic.behavior_RR$Traits[1] <- 'Neurobehavior'
+diagnostic.behavior_RR[is.na(diagnostic.behavior_RR)] <- c(' ')
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+diagnostic.brain_development_RR$Traits[1] <- 'Brain development'
+diagnostic.brain_development_RR[is.na(diagnostic.brain_development_RR)] <- c(' ')
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+diagnostic.genes_RR$Traits[1] <- 'Growth factors'
+diagnostic.genes_RR[is.na(diagnostic.genes_RR)] <- c(' ')
+
+
+
+
+#***************************************************************#
+#------------ Inter-individual difference (lnCVR) --------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+diagnostic.behavior_CVR$Traits[1] <- 'Neurobehavior'
+diagnostic.behavior_CVR[is.na(diagnostic.behavior_CVR)] <- c(' ')
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+diagnostic.brain_development_CVR$Traits[1] <- 'Brain development'
+diagnostic.brain_development_CVR[is.na(diagnostic.brain_development_CVR)] <- c(' ')
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+diagnostic.genes_CVR$Traits[1] <- 'Brain growth factors'
+diagnostic.genes_CVR[is.na(diagnostic.genes_CVR)] <- c(' ')
+
+
+
+# Saving
+  write.csv(diagnostic.behavior_RR, file = './results/csv/diagonistic-behavior-RR.csv', row.names = FALSE, col.names = TRUE, na = '')
+  write.csv(diagnostic.brain_development_RR, file = './results/csv/diagonistic-brain_development-RR.csv', row.names = FALSE, col.names = TRUE, na = '')
+  write.csv(diagnostic.genes_RR, file = './results/csv/diagonistic-genes-RR.csv', row.names = FALSE, col.names = TRUE, na = '')
+
+  write.csv(diagnostic.behavior_CVR, file = './results/csv/diagonistic-behavior-CVR.csv', row.names = FALSE, col.names = TRUE, na = '')
+  write.csv(diagnostic.brain_development_CVR, file = './results/csv/diagonistic-brain_development-CVR.csv', row.names = FALSE, col.names = TRUE, na = '')
+  write.csv(diagnostic.genes_CVR, file = './results/csv/diagonistic-genes-CVR.csv', row.names = FALSE, col.names = TRUE, na = '')
+```
+
+
+
+#### 2.3 Results for model diagnostics
+
+##### (i) Neurobehavior
+**Model diagnostic for neurobehavior (lnRR):**
+```{r}
+kable(diagnostic.behavior_RR)
+```
+
+**Model diagnostic for neurobehavior (lnCVR):**
+```{r}
+kable(diagnostic.behavior_CVR)
+```
+
+##### (ii) Brain development
+**Model diagnostic for brain development (lnRR):**
+```{r}
+kable(diagnostic.brain_development_RR)
+```
+
+**Model diagnostic for brain development (lnCVR):**
+```{r}
+kable(diagnostic.brain_development_CVR)
+```
+
+##### (ii) Brain growth factors
+**Model diagnostic for brain growth factors (lnRR):**
+```{r}
+kable(diagnostic.genes_RR)
+```
+
+**Model diagnostic for brain growth factors (lnCVR):**
+```{r}
+kable(diagnostic.genes_CVR)
+```
+
+
+
+#### 2.4 Conclusions for model diagnostic
+
+For all the models, ES_ID (residual) causes moderate heterogenetiy, whereas response_type cause small heterogeneity. In some cases, strain and study_ID can raise moderate heterogenetiy. Therefore, for the AIC based informantion-theoretic approach and the balance of data size of each model, we will incorporate strain, study_ID and ES_ID as the random effects structure in the final modeling.
+
+
+
+
+
+### 3. Model selection
+
+#### 3.1 Methods   
+
+
+Here we build the best model via custom function, which is an information-theoretic approach implemented in the R package MuMin. For the full model, we had 6 variables: F0_sex_exercise, F1_sex_test, manipulation_mode, manipulation_window, & response_age_life_phase. 
+
+```{r Model selection}
+# Using the custom function to run in MuMIn
+modified.rma.mv <- updateable(rma.mv)
+
+
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+# Using modified rma.mv function to select model
+  model.selection.behavior_RR_int <- modified.rma.mv(yi = RR,
+                                                   V = cov_VRR_behavior,
+                                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                   mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase,
+                                                   test = 't',
+                                                   method = 'ML',
+                                                   data = behavior)
+  
+  model.selection.behavior_RR <- modified.rma.mv(yi = RR,
+                                                 V = cov_VRR_behavior,
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase -1,
+                                                 test = 't',
+                                                 method = 'ML',
+                                                 data = behavior)
+
+
+
+# Testing dredge
+  candidates_behavior_RR_int <- dredge(model.selection.behavior_RR_int, trace = 2)
+  candidates_behavior_RR <- dredge(model.selection.behavior_RR, trace = 2) # the argrument of MuMIn has changed from evaluate to trace
+   # reminder: there is a difference to test dredge when -1(remove intercept) and non -1 in running model
+
+    
+# Retrieving AICc delta<2
+  aic2_behavior_RR_int <- subset(candidates_behavior_RR_int, delta <= 2)
+  aic2_behavior_RR <- subset(candidates_behavior_RR, delta <= 2) # weight of multi-models
+
+# Model average with delta AICc < 2
+  averaged_aic2_behavior_RR_int <- summary(model.avg(candidates_behavior_RR_int, subset = delta < 2))
+  averaged_aic2_behavior_RR <- summary(model.avg(candidates_behavior_RR, subset = delta < 2))
+
+# Ranking
+  ranking_behavior_RR <- importance(candidates_behavior_RR) # weight of multi-moderator
+
+# Top 3 models
+  model.top1.behavior_RR <- rma.mv(yi = RR,
+                                   V = cov_VRR_behavior,
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mods = ~manipulation_mode,
+                                   test = 't',
+                                   method = 'REML',
+                                   data = behavior)
+  
+  model.top2.behavior_RR <- rma.mv(yi = RR,
+                                   V = cov_VRR_behavior,
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mods = ~F0_sex_exercise,
+                                   test = 't',
+                                   method = 'REML',
+                                   data = behavior)
+
+
+  model.top3.behavior_RR <- rma.mv(yi = RR,
+                                   V = cov_VRR_behavior,
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mods = ~F0_sex_exercise +  manipulation_mode,
+                                   test = 't',
+                                   method = 'REML',
+                                   data = behavior)
+
+# Creating a table
+  tibble(`Model (variable weight)` = c("Model1", "Model2", "Model3","(Sum of weights)"), 
+`Exercise mode` = c(if_else(aic2_behavior_RR$manipulation_mode == "+", "+", "NA"), round(ranking_behavior_RR[1], 3)), `Exercised sex` = c(if_else(aic2_behavior_RR$F0_sex_exercise == "+", "+", "NA"), round(ranking_behavior_RR[2], 3)), `Exercise timing` = c(if_else(aic2_behavior_RR$manipulation_window == "+", "+", "NA"), round(ranking_behavior_RR[3], 3)), 
+`F1 ontogenetic stage` = c(if_else(aic2_behavior_RR$response_age_life_phase == "+", "+", "NA"), round(ranking_behavior_RR[4], 3)), 
+`F1 sex` = c(if_else(aic2_behavior_RR$F1_sex_test == "+", "+", "NA"), round(ranking_behavior_RR[5], 3)), delta_AICc = c(aic2_behavior_RR$delta, NA), Weight = c(aic2_behavior_RR$weight, NA)) -> table.top3.models_behavior_RR
+
+
+# Saving
+  write.csv(table.top3.models_behavior_RR, file = './results/csv/table.top3.models_behavior_RR.csv', row.names = FALSE, col.names = TRUE)
+
+ 
+  average_sigma2 <- "Variance"
+  average_sigma2 <- data.frame(average_sigma2)
+  average_sigma2$strain <- weighted.mean(x = c(model.top1.behavior_RR$sigma2[1], model.top2.behavior_RR$sigma2[1], model.top3.behavior_RR$sigma2[1]), w = aic2_behavior_RR$weight) 
+  average_sigma2$study <- weighted.mean(x = c(model.top1.behavior_RR$sigma2[2], model.top2.behavior_RR$sigma2[2], model.top3.behavior_RR$sigma2[2]), w = aic2_behavior_RR$weight)
+  average_sigma2$unite <- weighted.mean(x = c(model.top1.behavior_RR$sigma2[3], model.top2.behavior_RR$sigma2[3], model.top3.behavior_RR$sigma2[3]), w = aic2_behavior_RR$weight)
+    
+  average_R2 <- weighted.mean(x = c(R2(model.top1.behavior_RR)[1], R2(model.top2.behavior_RR)[1], R2(model.top3.behavior_RR)[1]), w = aic2_behavior_RR$weight)*100
+  
+
+  
+# Creating a table
+tibble(`Fixed effect` = c("Intercept (both-exercise mode-paternal sex )" ,"Forced exercise", "Voluntary exercise", "Maternal exercise", "Paternal exercise"), 
+        Estimate = c(averaged_aic2_behavior_RR_int$coefmat.full[, 1][1], averaged_aic2_behavior_RR$coefmat.full[, 1]), `95% Lower CI` = c(averaged_aic2_behavior_RR_int$coefmat.full[, 1][1], averaged_aic2_behavior_RR$coefmat.full[, 1]) - c(averaged_aic2_behavior_RR_int$coefmat.full[, 2][1], averaged_aic2_behavior_RR$coefmat.full[, 2]) * qnorm(0.975), `95% Upper CI` = c(averaged_aic2_behavior_RR_int$coefmat.full[, 1][1], averaged_aic2_behavior_RR$coefmat.full[, 1]) + c(averaged_aic2_behavior_RR_int$coefmat.full[, 2][1], averaged_aic2_behavior_RR$coefmat.full[, 2]) * qnorm(0.975), `V[strain]` = c(average_sigma2$strain, rep(NA, 4)), `V[betwee-study]` = c(average_sigma2$study, rep(NA, 4)), `V[within-study]` = c(average_sigma2$unite, rep(NA, 4)), R2 = c(average_R2, rep(NA, 4))) -> table.model.averaging.behavior_RR
+  
+
+# Saving
+  write.csv(table.model.averaging.behavior_RR, file = './results/csv/table.model.averaging.behavior_RR.csv', row.names = FALSE, col.names = TRUE)
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+model.selection.brain_development_RR_int <- modified.rma.mv(yi = RR,
+                                                        V = cov_VRR_brain_development,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase,
+                                                        test = 't',
+                                                        method = 'ML',
+                                                        data = brain_development)  
+
+
+
+model.selection.brain_development_RR <- modified.rma.mv(yi = RR,
+                                                        V = cov_VRR_brain_development,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase -1,
+                                                        test = 't',
+                                                        method = 'ML',
+                                                        data = brain_development)
+
+## permutation of moderators
+## permutation_moderators <- dredge(model.selection.brain_development_RR, evaluate = F)
+
+# Testing dredge
+   candidates_brain_development_RR_int <- dredge(model.selection.brain_development_RR_int, trace = 2) 
+  candidates_brain_development_RR <- dredge(model.selection.brain_development_RR, trace = 2) 
+
+# Retrieving AICc delta<2
+  aic2_brain_development_RR_int <- candidates_brain_development_RR_int %>% subset(delta < 2)
+  aic2_brain_development_RR <- candidates_brain_development_RR %>% subset(delta < 2)
+
+# Model average with delta AICc < 2
+  averaged_aic2_brain_development_RR_int <- candidates_brain_development_RR_int %>% model.avg(delta < 2) %>% summary()
+  averaged_aic2_brain_development_RR <- candidates_brain_development_RR %>% model.avg(delta < 2) %>% summary()
+  
+ # Ranking
+  ranking_brain_development_RR <- candidates_brain_development_RR %>% importance()
+
+
+
+
+  
+# Top 2 models
+  model.top1.brain_development_RR <- rma.mv(yi = RR,
+                                            V = cov_VRR_brain_development,
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mods = ~manipulation_mode,
+                                            test = 't',
+                                            method = 'REML',
+                                            data = brain_development)
+  
+  model.top2.brain_development_RR <- rma.mv(yi = RR,
+                                            V = cov_VRR_brain_development,
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mods = ~manipulation_window,
+                                            test = 't',
+                                            method = 'REML',
+                                            data = brain_development)
+
+# Creating a table
+  tibble(`Model (variable weight)` = c("Model1", "Model2","(Sum of weights)"), 
+`Exercise mode` = c(if_else(aic2_brain_development_RR$manipulation_mode == "+", "+", "NA"), round(ranking_brain_development_RR[1], 3)), `Exercised sex` = c(if_else(aic2_brain_development_RR$F0_sex_exercise == "+", "+", "NA"), round(ranking_brain_development_RR[2], 3)), `Exercise timing` = c(if_else(aic2_brain_development_RR$manipulation_window == "+", "+", "NA"), round(ranking_brain_development_RR[3], 3)), 
+`F1 ontogenetic stage` = c(if_else(aic2_brain_development_RR$response_age_life_phase == "+", "+", "NA"), round(ranking_brain_development_RR[4], 3)), 
+`F1 sex` = c(if_else(aic2_brain_development_RR$F1_sex_test == "+", "+", "NA"), round(ranking_brain_development_RR[5], 3)), delta_AICc = c(aic2_brain_development_RR$delta, NA), Weight = c(aic2_brain_development_RR$weight, NA)) -> table.top3.models_brain_development_RR
+
+
+# Saving
+  write.csv(table.top3.models_brain_development_RR, file = './results/csv/table.top3.models_brain_development_RR.csv', row.names = FALSE, col.names = TRUE)
+
+ 
+  average_sigma2 <- "Variance"
+  average_sigma2 <- data.frame(average_sigma2)
+  average_sigma2$strain <- weighted.mean(x = c(model.top1.brain_development_RR$sigma2[1], model.top2.brain_development_RR$sigma2[1]), w = aic2_brain_development_RR$weight) 
+  average_sigma2$study <- weighted.mean(x = c(model.top1.brain_development_RR$sigma2[2], model.top2.brain_development_RR$sigma2[2]), w = aic2_brain_development_RR$weight)
+  average_sigma2$unite <- weighted.mean(x = c(model.top1.brain_development_RR$sigma2[3], model.top2.brain_development_RR$sigma2[3]), w = aic2_brain_development_RR$weight)
+    
+  average_R2 <- weighted.mean(x = c(R2(model.top1.brain_development_RR)[1], R2(model.top2.brain_development_RR)[1]), w = aic2_brain_development_RR$weight)*100
+  
+
+  
+# Creating a table
+tibble(`Fixed effect` = c("Intercept (both-exercise mode-exercise timing)", "Forced exercise", "Voluntary exercise", "Pre-conception", "Pre to Post", "Pre to Pregnancy", "Pregnancy"), 
+        Estimate = c(averaged_aic2_brain_development_RR_int$coefmat.full[, 1][1], averaged_aic2_brain_development_RR$coefmat.full[, 1]), `95% Lower CI` = c(averaged_aic2_brain_development_RR_int$coefmat.full[, 1][1], averaged_aic2_brain_development_RR$coefmat.full[, 1]) - c(averaged_aic2_brain_development_RR_int$coefmat.full[, 2][1], averaged_aic2_brain_development_RR$coefmat.full[, 2]) * qnorm(0.975), `95% Upper CI` = c(averaged_aic2_brain_development_RR_int$coefmat.full[, 1][1], averaged_aic2_brain_development_RR$coefmat.full[, 1]) + c(averaged_aic2_brain_development_RR_int$coefmat.full[, 2][1], averaged_aic2_brain_development_RR$coefmat.full[, 2]) * qnorm(0.975), `V[strain]` = c(average_sigma2$strain, rep(NA, 6)), `V[betwee-study]` = c(average_sigma2$study, rep(NA, 6)), `V[within-study]` = c(average_sigma2$unite, rep(NA, 6)), R2 = c(average_R2, rep(NA, 6))) -> table.model.averaging.brain_development_RR
+  
+
+# Saving
+  write.csv(table.model.averaging.brain_development_RR, file = './results/csv/table.model.averaging.brain_development_RR.csv', row.names = FALSE, col.names = TRUE)
+
+    
+  
+    
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+  
+model.selection.genes_RR_int <- modified.rma.mv(yi = RR,
+                                                V = cov_VRR_genes,
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase,
+                                                test = 't',
+                                                method = 'ML',
+                                                data = genes)  
+  
+  
+model.selection.genes_RR <- modified.rma.mv(yi = RR,
+                                            V = cov_VRR_genes,
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase -1,
+                                            test = 't',
+                                            method = 'ML',
+                                            data = genes)
+# Testing dredge
+  candidates_genes_RR_int <- dredge(model.selection.genes_RR_int, trace = 2) # the argrument of MuMIn has changed from evaluate to trace
+  candidates_genes_RR <- dredge(model.selection.genes_RR, trace = 2) # the argrument of MuMIn has changed from evaluate to trace
+
+# Retrieving AICc delta<2
+  aic2_genes_RR_int <- subset(candidates_genes_RR_int, delta < 2)
+  aic2_genes_RR <- subset(candidates_genes_RR, delta < 2)
+
+# Model average with delta AICc < 2
+  averaged_aic2_genes_RR_int <- summary(model.avg(candidates_genes_RR_int, subset = delta < 2))
+  # only one model (parental sex as uni-variate moderator), no need to average
+  # averaged_aic2_genes_RR <- summary(model.avg(candidates_genes_RR, subset = delta < 2))
+  
+
+# Ranking
+  ranking_genes_RR <- importance(candidates_genes_RR)
+
+
+
+  
+# Top 1 models
+  model.top1.genes_RR <- rma.mv(yi = RR,
+                                V = cov_VRR_genes,
+                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                mods = ~F0_sex_exercise,
+                                test = 't',
+                                method = 'REML',
+                                data = genes)
+  
+
+
+# Creating a table
+  tibble(`Model (variable weight)` = c("Model1","(Sum of weights)"), 
+`Exercise mode` = c(if_else(aic2_genes_RR$manipulation_mode == "+", "+", "NA"), round(ranking_genes_RR[2], 3)), `Exercised sex` = c(if_else(aic2_genes_RR$F0_sex_exercise == "+", "+", "NA"), round(ranking_genes_RR[1], 3)), `Exercise timing` = c(if_else(aic2_genes_RR$manipulation_window == "+", "+", "NA"), round(ranking_genes_RR[3], 3)), 
+`F1 ontogenetic stage` = c(if_else(aic2_genes_RR$response_age_life_phase == "+", "+", "NA"), round(ranking_genes_RR[5], 3)), 
+`F1 sex` = c(if_else(aic2_genes_RR$F1_sex_test == "+", "+", "NA"), round(ranking_genes_RR[4], 3)), delta_AICc = c(aic2_genes_RR$delta, NA), Weight = c(aic2_genes_RR$weight, NA)) -> table.top3.models_genes_RR
+
+
+# Saving
+  write.csv(table.top3.models_genes_RR, file = './results/csv/table.top3.models_genes_RR.csv', row.names = FALSE, col.names = TRUE)
+
+ 
+  average_sigma2 <- "Variance"
+  average_sigma2 <- data.frame(average_sigma2)
+  average_sigma2$strain <- weighted.mean(x = c(model.top1.genes_RR$sigma2[1]), w = aic2_genes_RR$weight) 
+  average_sigma2$study <- weighted.mean(x = c(model.top1.genes_RR$sigma2[2]), w = aic2_genes_RR$weight)
+  average_sigma2$unite <- weighted.mean(x = c(model.top1.genes_RR$sigma2[3]), w = aic2_genes_RR$weight)
+    
+  average_R2 <- weighted.mean(x = c(R2(model.top1.genes_RR)[1]), w = aic2_genes_RR$weight)*100
+  
+
+  
+# Creating a table
+tibble(`Fixed effect` = c("Intercept (Female parent)", "Male parent"), 
+        Estimate = averaged_aic2_genes_RR_int$coefmat.full[, 1], `95% Lower CI` = averaged_aic2_genes_RR_int$coefmat.full[, 1] - averaged_aic2_genes_RR_int$coefmat.full[, 2] * qnorm(0.975), `95% Upper CI` = averaged_aic2_genes_RR_int$coefmat.full[, 1] + averaged_aic2_genes_RR_int$coefmat.full[, 2] * qnorm(0.975), `V[strain]` = c(average_sigma2$strain, rep(NA, 1)), `V[betwee-study]` = c(average_sigma2$study, rep(NA, 1)), `V[within-study]` = c(average_sigma2$unite, rep(NA, 1)), R2 = c(average_R2, rep(NA, 1))) -> table.model.averaging.genes_RR
+  
+
+# Saving
+  write.csv(table.model.averaging.genes_RR, file = './results/csv/table.model.averaging.genes_RR.csv', row.names = FALSE, col.names = TRUE)  
+  
+
+  
+  
+ 
+#***************************************************************#
+#------------------ Inter-difference (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+model.selection.behavior_CVR_int <- modified.rma.mv(yi = CVR,
+                                                    V = cov_VCVR_behavior,
+                                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                    mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase,
+                                                    test = 't',
+                                                    method = 'ML',
+                                                    data = behavior)
+  
+
+model.selection.behavior_CVR <- modified.rma.mv(yi = CVR,
+                                                V = cov_VCVR_behavior,
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase -1,
+                                                test = 't',
+                                                method = 'ML',
+                                                data = behavior)
+# Testing dredge
+  candidates_behavior_CVR_int <- dredge(model.selection.behavior_CVR_int, trace = 2)
+  candidates_behavior_CVR <- dredge(model.selection.behavior_CVR, trace = 2) # the argrument of MuMIn has changed from evaluate to trace
+
+# Retrieving AICc delta<2
+  aic2_behavior_CVR_int <- subset(candidates_behavior_CVR_int, delta < 2)
+  aic2_behavior_CVR <- subset(candidates_behavior_CVR, delta < 2)
+
+# Model average  with delta AICc < 2
+  averaged_aic2_behavior_CVR_int <- summary(model.avg(candidates_behavior_CVR_int, subset = delta < 2))
+  averaged_aic2_behavior_CVR <- summary(model.avg(candidates_behavior_CVR, subset = delta < 2))
+
+# Ranking of predictors
+  ranking_behavior_CVR <- importance(candidates_behavior_CVR)
+
+
+# Top 4 models
+  model.top1.behavior_CVR <- rma.mv(yi = RR,
+                                    V = cov_VRR_behavior,
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mods = ~F1_sex_test,
+                                    test = 't',
+                                    method = 'REML',
+                                    data = behavior)
+  
+  model.top2.behavior_CVR <- rma.mv(yi = RR,
+                                    V = cov_VRR_behavior,
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mods = ~manipulation_mode,
+                                    test = 't',
+                                    method = 'REML',
+                                    data = behavior)
+
+
+  model.top3.behavior_CVR <- rma.mv(yi = RR,
+                                     V = cov_VRR_behavior,
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mods = ~F1_sex_test +  manipulation_mode,
+                                     test = 't',
+                                     method = 'REML',
+                                     data = behavior)
+
+  
+  model.top4.behavior_CVR <- rma.mv(yi = RR,
+                                    V = cov_VRR_behavior,
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mods = ~F0_sex_exercise + F1_sex_test, 
+                                    test = 't',
+                                    method = 'REML',
+                                    data = behavior)  
+
+    
+# Creating a table
+  tibble(`Model (variable weight)` = c("Model1", "Model2", "Model3", "Model4", "(Sum of weights)"), 
+`Exercise mode` = c(if_else(aic2_behavior_CVR$manipulation_mode == "+", "+", "NA"), round(ranking_behavior_CVR[2], 3)), `Exercised sex` = c(if_else(aic2_behavior_CVR$F0_sex_exercise == "+", "+", "NA"), round(ranking_behavior_CVR[3], 3)), `Exercise timing` = c(if_else(aic2_behavior_CVR$manipulation_window == "+", "+", "NA"), round(ranking_behavior_CVR[5], 3)), 
+`F1 ontogenetic stage` = c(if_else(aic2_behavior_CVR$response_age_life_phase == "+", "+", "NA"), round(ranking_behavior_CVR[4], 3)), 
+`F1 sex` = c(if_else(aic2_behavior_CVR$F1_sex_test == "+", "+", "NA"), round(ranking_behavior_CVR[1], 3)), delta_AICc = c(aic2_behavior_CVR$delta, NA), Weight = c(aic2_behavior_CVR$weight, NA)) -> table.top4.models_behavior_CVR
+
+
+# Saving
+  write.csv(table.top4.models_behavior_CVR, file = './results/csv/table.top4.models_behavior_CVR.csv', row.names = FALSE, col.names = TRUE)
+
+ 
+  average_sigma2 <- "Variance"
+  average_sigma2 <- data.frame(average_sigma2)
+  average_sigma2$strain <- weighted.mean(x = c(model.top1.behavior_CVR$sigma2[1], model.top2.behavior_CVR$sigma2[1], model.top3.behavior_CVR$sigma2[1], model.top4.behavior_CVR$sigma2[1]), w = aic2_behavior_CVR$weight) 
+  average_sigma2$study <- weighted.mean(x = c(model.top1.behavior_CVR$sigma2[2], model.top2.behavior_CVR$sigma2[2], model.top3.behavior_CVR$sigma2[2], model.top4.behavior_CVR$sigma2[2]), w = aic2_behavior_CVR$weight) 
+  average_sigma2$unite <- weighted.mean(x = c(model.top1.behavior_CVR$sigma2[3], model.top2.behavior_CVR$sigma2[3], model.top3.behavior_CVR$sigma2[3], model.top4.behavior_CVR$sigma2[3]), w = aic2_behavior_CVR$weight) 
+    
+  average_R2 <- weighted.mean(x = c(R2(model.top1.behavior_CVR)[1], R2(model.top2.behavior_CVR)[1], R2(model.top3.behavior_CVR)[1], R2(model.top4.behavior_CVR)[1]), w = aic2_behavior_CVR$weight)*100
+  
+
+  
+# Creating a table
+tibble(`Fixed effect` = c("Intercept (both-offspring sex-exercise mode-parental sex)", "Female offspring", "Male offspring", "Mixed-sex offspring", "Forced exercise", "Voluntary exercise", "Maternal exercise", "Paternal exercise"), 
+        Estimate = c(averaged_aic2_behavior_CVR_int$coefmat.full[, 1][1], averaged_aic2_behavior_CVR$coefmat.full[, 1]), `95% Lower CI` = c(averaged_aic2_behavior_CVR_int$coefmat.full[, 1][1], averaged_aic2_behavior_CVR$coefmat.full[, 1]) - c(averaged_aic2_behavior_CVR_int$coefmat.full[, 2][1], averaged_aic2_behavior_CVR$coefmat.full[, 2]) * qnorm(0.975), `95% Upper CI` = c(averaged_aic2_behavior_CVR_int$coefmat.full[, 1][1], averaged_aic2_behavior_CVR$coefmat.full[, 1]) + c(averaged_aic2_behavior_CVR_int$coefmat.full[, 2][1], averaged_aic2_behavior_CVR$coefmat.full[, 2]) * qnorm(0.975), `V[strain]` = c(average_sigma2$strain, rep(NA, 7)), `V[betwee-study]` = c(average_sigma2$study, rep(NA, 7)), `V[within-study]` = c(average_sigma2$unite, rep(NA, 7)), R2 = c(average_R2, rep(NA, 7))) -> table.model.averaging.behavior_CVR
+  
+
+# Saving
+  write.csv(table.model.averaging.behavior_CVR, file = './results/csv/table.model.averaging.behavior_CVR.csv', row.names = FALSE, col.names = TRUE)  
+  
+  
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+model.selection.brain_development_CVR_int <- modified.rma.mv(yi = CVR,
+                                                             V = cov_VCVR_brain_development,
+                                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                             mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase,
+                                                             test = 't',
+                                                             method = 'ML',
+                                                             data = brain_development)
+  
+ 
+ 
+model.selection.brain_development_CVR <- modified.rma.mv(yi = CVR,
+                                                         V = cov_VCVR_brain_development,
+                                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                         mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase -1,
+                                                         test = 't',
+                                                         method = 'ML',
+                                                         data = brain_development)
+
+# Testing dredge
+  candidates_brain_development_CVR_int <- dredge(model.selection.brain_development_CVR_int, trace = 2) 
+  candidates_brain_development_CVR <- dredge(model.selection.brain_development_CVR, trace = 2) 
+
+# Retrieving AICc delta<2
+  aic2_brain_development_CVR_int <- subset(candidates_brain_development_CVR_int, delta < 2)
+  aic2_brain_development_CVR <- subset(candidates_brain_development_CVR, delta < 2)
+
+# Model average with delta AICc < 2
+  averaged_aic2_brain_development_CVR_int <- summary(model.avg(candidates_brain_development_CVR_int, subset = delta < 2))
+  averaged_aic2_brain_development_CVR <- summary(model.avg(candidates_brain_development_CVR, subset = delta < 2))
+
+# ranking
+  ranking_brain_development_CVR <- importance(candidates_brain_development_CVR)
+
+
+
+
+# Top 2 models
+  model.top1.brain_development_CVR <- rma.mv(yi = CVR,
+                                             V = cov_VCVR_brain_development,
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mods = ~manipulation_mode,
+                                             test = 't',
+                                             method = 'REML',
+                                             data = brain_development)
+  
+
+  model.top2.brain_development_CVR <- rma.mv(yi = CVR,
+                                             V = cov_VCVR_brain_development,
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mods = ~manipulation_mode + F1_sex_test,
+                                             test = 't',
+                                             method = 'REML',
+                                             data = brain_development)
+
+# Creating a table
+  tibble(`Model (variable weight)` = c("Model1", "Model2","(Sum of weights)"), 
+`Exercise mode` = c(if_else(aic2_brain_development_CVR$manipulation_mode == "+", "+", "NA"), round(ranking_brain_development_CVR[1], 3)), `Exercised sex` = c(if_else(aic2_brain_development_CVR$F0_sex_exercise == "+", "+", "NA"), round(ranking_brain_development_CVR[2], 3)), `Exercise timing` = c(if_else(aic2_brain_development_CVR$manipulation_window == "+", "+", "NA"), round(ranking_brain_development_CVR[3], 3)), 
+`F1 ontogenetic stage` = c(if_else(aic2_brain_development_CVR$response_age_life_phase == "+", "+", "NA"), round(ranking_brain_development_CVR[4], 3)), 
+`F1 sex` = c(if_else(aic2_brain_development_CVR$F1_sex_test == "+", "+", "NA"), round(ranking_brain_development_CVR[5], 3)), delta_AICc = c(aic2_brain_development_CVR$delta, NA), Weight = c(aic2_brain_development_CVR$weight, NA)) -> table.top3.models_brain_development_CVR
+
+
+# Saving
+  write.csv(table.top3.models_brain_development_CVR, file = './results/csv/table.top3.models_brain_development_CVR.csv', row.names = FALSE, col.names = TRUE)
+
+ 
+  average_sigma2 <- "Variance"
+  average_sigma2 <- data.frame(average_sigma2)
+  average_sigma2$strain <- weighted.mean(x = c(model.top1.brain_development_CVR$sigma2[1], model.top2.brain_development_CVR$sigma2[1]), w = aic2_brain_development_CVR$weight) 
+  average_sigma2$study <- weighted.mean(x = c(model.top1.brain_development_CVR$sigma2[2], model.top2.brain_development_CVR$sigma2[2]), w = aic2_brain_development_CVR$weight)
+  average_sigma2$unite <- weighted.mean(x = c(model.top1.brain_development_CVR$sigma2[3], model.top2.brain_development_CVR$sigma2[3]), w = aic2_brain_development_CVR$weight)
+    
+  average_R2 <- weighted.mean(x = c(R2(model.top1.brain_development_CVR)[1], R2(model.top2.brain_development_CVR)[1]), w = aic2_brain_development_CVR$weight)*100
+  
+
+  
+# creating a table
+tibble(`Fixed effect` = c("Intercept (both-exercise mode-offspring sex)", "Forced exercise", "Voluntary exercise", "Female offspring", "Male offspring", "Mixed-sex offspring"), 
+        Estimate = c(averaged_aic2_brain_development_CVR_int$coefmat.full[, 1][1], averaged_aic2_brain_development_CVR$coefmat.full[, 1]), `95% Lower CI` = c(averaged_aic2_brain_development_CVR_int$coefmat.full[, 1][1], averaged_aic2_brain_development_CVR$coefmat.full[, 1]) - c(averaged_aic2_brain_development_CVR_int$coefmat.full[, 2][1], averaged_aic2_brain_development_CVR$coefmat.full[, 2]) * qnorm(0.975), `95% Upper CI` = c(averaged_aic2_brain_development_CVR_int$coefmat.full[, 1][1], averaged_aic2_brain_development_CVR$coefmat.full[, 1]) + c(averaged_aic2_brain_development_CVR_int$coefmat.full[, 2][1], averaged_aic2_brain_development_CVR$coefmat.full[, 2]) * qnorm(0.975), `V[strain]` = c(average_sigma2$strain, rep(NA, 5)), `V[betwee-study]` = c(average_sigma2$study, rep(NA, 5)), `V[within-study]` = c(average_sigma2$unite, rep(NA, 5)), R2 = c(average_R2, rep(NA, 5))) -> table.model.averaging.brain_development_CVR
+  
+
+# Saving
+  write.csv(table.model.averaging.brain_development_CVR, file = './results/csv/table.model.averaging.brain_development_CVR.csv', row.names = FALSE, col.names = TRUE)
+  
+  
+  
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+model.selection.genes_CVR_int <- modified.rma.mv(yi = CVR,
+                                                 V = cov_VCVR_genes,
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase,
+                                                 test = 't',
+                                                 method = 'ML',
+                                                 data = genes)
+      
+  
+  
+  
+model.selection.genes_CVR <- modified.rma.mv(yi = CVR,
+                                             V = cov_VCVR_genes,
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mods = ~F0_sex_exercise + F1_sex_test + manipulation_mode + manipulation_window + response_age_life_phase -1,
+                                             test = 't',
+                                             method = 'ML',
+                                             data = genes)
+# Testing dredge
+  candidates_genes_CVR_int <- dredge(model.selection.genes_CVR_int, trace = 2)
+  candidates_genes_CVR <- dredge(model.selection.genes_CVR, trace = 2) 
+
+# Retrieving AICc delta<2
+  aic2_genes_CVR_int <- subset(candidates_genes_CVR_int, delta < 2)
+  aic2_genes_CVR <- subset(candidates_genes_CVR, delta < 2)
+
+# Model average with delta AICc < 2
+  averaged_aic2_genes_CVR_int <- summary(model.avg(candidates_genes_CVR_int, subset = delta < 2))
+  averaged_aic2_genes_CVR <- summary(model.avg(candidates_genes_CVR, subset = delta < 2))
+
+# Ranking
+  ranking_genes_CVR <- importance(candidates_genes_CVR)
+  
+  
+  
+  
+  
+# Top 4 models
+  model.top1.genes_CVR <- rma.mv(yi = CVR,
+                                 V = cov_VCVR_genes,
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mods = ~F0_sex_exercise,
+                                 test = 't',
+                                 method = 'REML',
+                                 data = genes)
+  
+
+  model.top2.genes_CVR <- rma.mv(yi = CVR,
+                                 V = cov_VCVR_genes,
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mods = ~F1_sex_test,
+                                 test = 't',
+                                 method = 'REML',
+                                 data = genes)
+
+  
+  model.top3.genes_CVR <- rma.mv(yi = CVR,
+                                 V = cov_VCVR_genes,
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mods = ~manipulation_mode,
+                                 test = 't',
+                                 method = 'REML',
+                                 data = genes)
+
+    
+  model.top4.genes_CVR <- rma.mv(yi = CVR,
+                                 V = cov_VCVR_genes,
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mods = ~F0_sex_exercise + F1_sex_test,
+                                 test = 't',
+                                 method = 'REML',
+                                 data = genes)
+    
+      
+# Creating a table
+  tibble(`Model (variable weight)` = c("Model1", "Model2", "Model3", "Model4", "(Sum of weights)"), 
+`Exercise mode` = c(if_else(aic2_genes_CVR$manipulation_mode == "+", "+", "NA"), round(ranking_genes_CVR[3], 3)), `Exercised sex` = c(if_else(aic2_genes_CVR$F0_sex_exercise == "+", "+", "NA"), round(ranking_genes_CVR[1], 3)), `Exercise timing` = c(if_else(aic2_genes_CVR$manipulation_window == "+", "+", "NA"), round(ranking_genes_CVR[4], 3)), 
+`F1 ontogenetic stage` = c(if_else(aic2_genes_CVR$response_age_life_phase == "+", "+", "NA"), round(ranking_genes_CVR[5], 3)), 
+`F1 sex` = c(if_else(aic2_genes_CVR$F1_sex_test == "+", "+", "NA"), round(ranking_genes_CVR[2], 3)), delta_AICc = c(aic2_genes_CVR$delta, NA), Weight = c(aic2_genes_CVR$weight, NA)) -> table.top4.models_genes_CVR
+
+
+# Saving
+  write.csv(table.top4.models_genes_CVR, file = './results/csv/table.top4.models_genes_CVR.csv', row.names = FALSE, col.names = TRUE)
+
+ 
+  average_sigma2 <- "Variance"
+  average_sigma2 <- data.frame(average_sigma2)
+  average_sigma2$strain <- weighted.mean(x = c(model.top1.genes_CVR$sigma2[1], model.top2.genes_CVR$sigma2[1], model.top3.genes_CVR$sigma2[1], model.top4.genes_CVR$sigma2[1]), w = aic2_genes_CVR$weight) 
+  average_sigma2$study <- weighted.mean(x = c(model.top1.genes_CVR$sigma2[2], model.top2.genes_CVR$sigma2[2], model.top3.genes_CVR$sigma2[2], model.top4.genes_CVR$sigma2[2]), w = aic2_genes_CVR$weight)
+  average_sigma2$unite <- weighted.mean(x = c(model.top1.genes_CVR$sigma2[3], model.top2.genes_CVR$sigma2[3], model.top3.genes_CVR$sigma2[3], model.top4.genes_CVR$sigma2[3]), w = aic2_genes_CVR$weight)
+    
+  average_R2 <- weighted.mean(x = c(R2(model.top1.genes_CVR)[1], R2(model.top2.genes_CVR)[1], R2(model.top2.genes_CVR)[1], R2(model.top4.genes_CVR)[1]), w = aic2_genes_CVR$weight)*100
+  
+
+  
+# Creating a table
+tibble(`Fixed effect` = c("Intercept (both-paternal sex-offspring sex-exercise mode)", "Maternal exercise", "Paternal exercise", "Female offspring", "Male offspring", "Mixed-sex offspring", "Forced exercise", "Voluntary exercise"), 
+        Estimate = c(averaged_aic2_genes_CVR_int$coefmat.full[, 1][1], averaged_aic2_genes_CVR$coefmat.full[, 1]), `95% Lower CI` = c(averaged_aic2_genes_CVR_int$coefmat.full[, 1][1], averaged_aic2_genes_CVR$coefmat.full[, 1]) - c(averaged_aic2_genes_CVR_int$coefmat.full_int[, 2][1], averaged_aic2_genes_CVR$coefmat.full[, 2]) * qnorm(0.975), `95% Upper CI` = c(averaged_aic2_genes_CVR_int$coefmat.full[, 1][1], averaged_aic2_genes_CVR$coefmat.full[, 1]) + c(averaged_aic2_genes_CVR_int$coefmat.full[, 2][1], averaged_aic2_genes_CVR$coefmat.full[, 2]) * qnorm(0.975), `V[strain]` = c(average_sigma2$strain, rep(NA, 7)), `V[betwee-study]` = c(average_sigma2$study, rep(NA, 7)), `V[within-study]` = c(average_sigma2$unite, rep(NA, 7)), R2 = c(average_R2, rep(NA, 7))) -> table.model.averaging.genes_CVR  
+  
+
+# Saving
+  write.csv(table.model.averaging.genes_CVR, file = './results/csv/table.model.averaging.genes_CVR.csv', row.names = FALSE, col.names = TRUE)
+  
+```
+
+
+
+#### 3.2 Results for model selection
+
+##### (i) Best modes
+
+**Neurobehavior (lnRR):**
+```{r}
+table.top3.models_behavior_RR %>% kable(digits = 3)
+```
+
+**Neurobehavior (lnCVR):**
+```{r}
+table.top4.models_behavior_CVR %>% kable(digits = 3)
+```
+
+**Brain development (lnRR):**
+```{r}
+table.top3.models_brain_development_RR %>% kable(digits = 3)
+```
+
+**Brain development (lnCVR):**
+```{r}
+table.top3.models_brain_development_CVR %>% kable(digits = 3)
+```
+
+**Brain growth factors (lnRR):**
+```{r}
+table.top3.models_genes_RR %>% kable(digits = 3)
+```
+
+**Brain growth factors (lnCVR):**
+```{r}
+table.top4.models_genes_CVR %>% kable(digits = 3)
+```
+
+
+##### (ii) Model averaging
+
+**Neurobehavior (lnRR):**
+```{r}
+table.model.averaging.behavior_RR %>% kable(digits = 3)
+```
+
+**Neurobehavior (lnCVR):**
+```{r}
+table.model.averaging.behavior_CVR %>% kable(digits = 3)
+```
+
+**Brain development (lnRR):**
+```{r}
+table.model.averaging.brain_development_RR %>% kable(digits = 3)
+```
+
+**Brain development (lnCVR):**
+```{r}
+table.model.averaging.brain_development_CVR %>% kable(digits = 3)
+```
+
+**Brain growth factors (lnRR):**
+```{r}
+table.model.averaging.genes_RR %>% kable(digits = 3)
+```
+
+**Brain growth factors (lnCVR):**
+```{r}
+table.model.averaging.genes_CVR %>% kable(digits = 3)
+```
+
+
+
+
+4. ### Publication bias 
+
+```{r publication bias}
+
+# contour-enhanced funnel plots
+
+#***************************************************************#
+#--------------------- improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+# behavior
+
+## residual funnel plot 1
+
+funnel.behavior_RR.1 <- rma.mv(yi = RR,
+                                                        V = cov_VRR_behavior,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F0_sex_exercise + manipulation_mode,
+                                                        method = 'REML',
+                                                        data = behavior)
+
+pdf(file = './results/Figures/funnel.behavior.RR.1.pdf', height = 6, width = 8)
+funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)  
+dev.off()
+
+
+par(mfrow=c(2,1))
+funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T) 
+funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T) 
+
+## Residual funnel plot 2
+### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
+funnel.behavior_RR.2 <- rma.mv(yi = RR,
+                                                        V = cov_VRR_behavior,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F0_sex_exercise + manipulation_mode + sqrt(VRR),
+                                                        method = 'REML',
+                                                        data = behavior)
+
+
+pdf(file = './results/Figures/funnel.behavior.RR.2.pdf', height = 6, width = 8)
+funnel(funnel.behavior_RR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'), pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+
+# brain_development
+
+## residual funnel plot 1
+
+funnel.brain_development_RR.1 <- rma.mv(yi = RR,
+                                        V = cov_VRR_brain_development,
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mods = ~manipulation_mode + manipulation_window,
+                                        method = 'REML',
+                                        data = brain_development)
+
+pdf(file = './results/Figures/funnel.brain_development.RR.1.pdf', height = 6, width = 8)
+funnel(funnel.brain_development_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+## Residual funnel plot 2
+### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
+funnel.brain_development_RR.2 <- rma.mv(yi = RR,
+                                        V = cov_VRR_brain_development,
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mods = ~manipulation_mode + manipulation_window + sqrt(VRR),
+                                        method = 'REML',
+                                        data = brain_development)
+
+
+pdf(file = './results/Figures/funnel.brain_development.RR.2.pdf', height = 6, width = 8)
+funnel(funnel.brain_development_RR.2, yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21,  refline = 0, legend = T)
+dev.off()
+
+
+## without moderators
+pdf(file = './results/Figures/funnel.brain_development.RR.without.pdf', height = 6, width = 8)
+funnel(model1.brain_development_RR, yaxis = 'seinv', xlab = 'brain development', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch= 21, refline = 0, legend = T)
+dev.off()
+
+
+
+
+
+# genes
+
+## residual funnel plot 1
+
+funnel.genes_RR.1 <- rma.mv(yi = RR,
+                                                        V = cov_VRR_genes,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F0_sex_exercise,
+                                                        method = 'REML',
+                                                        data = genes)
+
+pdf(file = './results/Figures/funnel.genes.RR.1.pdf', height = 6, width = 8)
+funnel(funnel.genes_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+## Residual funnel plot 2
+### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
+funnel.genes_RR.2 <- rma.mv(yi = RR,
+                            V = cov_VRR_genes,
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mods = ~F0_sex_exercise + sqrt(VRR),
+                            method = 'REML',
+                            data = genes)
+
+
+pdf(file = './results/Figures/funnel.genes.RR.2.pdf', height = 6, width = 8)
+funnel(funnel.genes_RR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+
+
+
+#***************************************************************#
+#------------------ inter-difference (lnCVR) -------------------#
+#***************************************************************#
+
+
+
+
+# behavior
+
+## residual funnel plot 1
+
+funnel.behavior_CVR.1 <- rma.mv(yi = CVR,
+                                                        V = cov_VCVR_behavior,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F1_sex_test + manipulation_mode + F0_sex_exercise,
+                                                        method = 'REML',
+                                                        data = behavior)
+
+pdf(file = './results/Figures/funnel.behavior.CVR.1.pdf', height = 6, width = 8)
+funnel.brain_size.CVR1 <- funnel(funnel.behavior_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+## Residual funnel plot 2
+### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
+funnel.behavior_CVR.2 <- rma.mv(yi = CVR,
+                                                        V = cov_VCVR_behavior,
+                                                        random = list(~~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F1_sex_test + manipulation_mode + F0_sex_exercise + sqrt(VCVR),
+                                                        method = 'REML',
+                                                        data = behavior)
+
+
+pdf(file = './results/Figures/funnel.behavior.CVR.2.pdf', height = 6, width = 8)
+funnel.brain_size.CVR2 <- funnel(funnel.behavior_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+
+# brain_development
+
+## residual funnel plot 1
+
+funnel.brain_development_CVR.1 <- rma.mv(yi = CVR,
+                                                        V = cov_VCVR_brain_development,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F1_sex_test + manipulation_mode,
+                                                        method = 'REML',
+                                                        data = brain_development)
+
+pdf(file = './results/Figures/funnel.brain_development.CVR.1.pdf', height = 6, width = 8)
+funnel.brain_size.CVR2 <- funnel(funnel.brain_development_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'), pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+## Residual funnel plot 2
+### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
+funnel.brain_development_CVR.2 <- rma.mv(yi = CVR,
+                                                        V = cov_VCVR_brain_development,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F1_sex_test + manipulation_mode + sqrt(VCVR),
+                                                        method = 'REML',
+                                                        data = brain_development)
+
+
+pdf(file = './results/Figures/funnel.brain_development.CVR.2.pdf', height = 6, width = 8)
+funnel.brain_size.CVR2 <- funnel(funnel.brain_development_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+# genes
+
+## residual funnel plot 1
+
+funnel.genes_CVR.1 <- rma.mv(yi = CVR,
+                                                        V = cov_VCVR_genes,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F0_sex_exercise,
+                                                        method = 'REML',
+                                                        data = genes)
+
+pdf(file = './results/Figures/funnel.genes.CVR.1.pdf', height = 6, width = 8)
+funnel.brain_size.CVR1 <- funnel(funnel.genes_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+## Residual funnel plot 2
+### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
+funnel.genes_CVR.2 <- rma.mv(yi = CVR,
+                                                        V = cov_VCVR_genes,
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mods = ~F0_sex_exercise + sqrt(VCVR),
+                                                        method = 'REML',
+                                                        data = genes)
+
+
+pdf(file = './results/Figures/funnel.genes.CVR.2.pdf', height = 6, width = 8)
+funnel.brain_size.CVR2 <- funnel(funnel.genes_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+dev.off()
+
+
+
+
+```
+
+
+
+### 4. Egger regression
+
+#### 4.1 Methods
+
+```{r Publication bias}
+
+# Egger regression
+
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+Egger_behavior_RR <- rma.mv(yi = RR,
+                            V = cov_VRR_behavior,
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mods = ~sqrt(VRR),
+                            method = 'REML',
+                            data = behavior)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+Egger_brain_development_RR <- rma.mv(yi = RR,
+                                     V = cov_VRR_brain_development,
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mods = ~sqrt(VRR),
+                                     method = 'REML',
+                                     data = brain_development)
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+Egger_genes_RR <- rma.mv(yi = RR,
+                         V = cov_VRR_genes,
+                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                         mods = ~sqrt(VRR),
+                         method = 'REML',
+                         data = genes)
+
+
+
+#***************************************************************#
+#------------------ Inter-difference (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+Egger_behavior_CVR <- rma.mv(yi = CVR,
+                             V = cov_VCVR_behavior,
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mods = ~sqrt(VCVR),
+                             method = 'REML',
+                             data = behavior)
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+Egger_brain_development_CVR <- rma.mv(yi = CVR,
+                                      V = cov_VCVR_brain_development,
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mods = ~sqrt(VCVR),
+                                      method = 'REML',
+                                      data = brain_development)
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+Egger_genes_CVR <- rma.mv(yi = CVR,
+                          V = cov_VCVR_genes,
+                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                          mods = ~sqrt(VCVR),
+                          method = 'REML',
+                          data = genes)
+
+
+
+
+
+```
+
+
+
+#### 4.2 Results
+
+```{r visualization}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+pred.Egger_behavior_RR <- predict.rma(Egger_behavior_RR)
+
+
+behavior %>% mutate(ymin = pred.Egger_behavior_RR$ci.lb, 
+                    ymax = pred.Egger_behavior_RR$ci.ub, 
+                    ymin2 = pred.Egger_behavior_RR$cr.lb, 
+                    ymax2 = pred.Egger_behavior_RR$cr.ub, 
+                    pred = pred.Egger_behavior_RR$pred) %>% ggplot(aes(x = sqrt(VRR), y = RR, size = 1/sqrt(VRR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  labs(x = "sqrt(Sampling variance)", y = 'Neurobehavior (lnRR)',  size = expression(paste('Precision (1/SE)'))) +    
+  guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Egger_behavior_RR.p
+
+
+#ggsave(plot = Egger_behavior_RR.p, filename = './results/Figures/Egger_behavior_RR.pdf', height = 4, width = 6,       device = cairo_pdf)
+
+
+print(Egger_behavior_RR.p)
+png(filename = './results/Figures/Egger_neurobehavior_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Egger_behavior_RR.p
+dev.off()
+
+  
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+pred.Egger_brain_development_RR <- predict.rma(Egger_brain_development_RR)
+
+
+brain_development %>% mutate(ymin = pred.Egger_brain_development_RR$ci.lb, 
+                             ymax = pred.Egger_brain_development_RR$ci.ub, 
+                             ymin2 = pred.Egger_brain_development_RR$cr.lb, 
+                             ymax2 = pred.Egger_brain_development_RR$cr.ub, 
+                             pred = pred.Egger_brain_development_RR$pred) %>% ggplot(aes(x = sqrt(VRR), y = RR, size = 1/sqrt(VRR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  labs(x = "sqrt(Sampling variance)", y = 'Brain development (lnRR)',  size = expression(paste('Precision (1/SE)'))) + 
+  guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(#axis.title = element_text(size = 15, colour = "black"),
+        axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Egger_brain_development_RR.p
+
+
+
+print(Egger_brain_development_RR.p)
+png(filename = './results/Figures/Egger_brain_development_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Egger_brain_development_RR.p
+dev.off()
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+pred.Egger_genes_RR <- predict.rma(Egger_genes_RR)
+
+
+genes %>% mutate(ymin = pred.Egger_genes_RR$ci.lb, 
+                 ymax = pred.Egger_genes_RR$ci.ub, 
+                 ymin2 = pred.Egger_genes_RR$cr.lb, 
+                 ymax2 = pred.Egger_genes_RR$cr.ub, 
+                 pred = pred.Egger_genes_RR$pred) %>% ggplot(aes(x = sqrt(VRR), y = RR, size = 1/sqrt(VRR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  labs(x = "sqrt(Sampling variance)", y = 'Brain growth factors (lnRR)',  size = expression(paste('Precision (1/SE)'))) +    guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Egger_genes_RR.p
+
+
+
+print(Egger_genes_RR.p)
+png(filename = './results/Figures/Egger_growth_factor_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Egger_genes_RR.p
+dev.off()
+
+
+
+
+#***************************************************************#
+#------------------ Inter-difference (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+pred.Egger_behavior_CVR <- predict.rma(Egger_behavior_CVR)
+
+
+behavior %>% mutate(ymin = pred.Egger_behavior_CVR$ci.lb, 
+                    ymax = pred.Egger_behavior_CVR$ci.ub, 
+                    ymin2 = pred.Egger_behavior_CVR$cr.lb, 
+                    ymax2 = pred.Egger_behavior_CVR$cr.ub, 
+                    pred = pred.Egger_behavior_CVR$pred) %>% ggplot(aes(x = sqrt(VCVR), y = CVR, size = 1/sqrt(VCVR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") +
+  labs(x = "sqrt(Sampling variance)", y = 'Neurobehavior (lnCVR)',  size = expression(paste('Precision (1/SE)'))) +    
+  guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Egger_behavior_CVR.p
+
+
+
+print(Egger_behavior_CVR.p)
+png(filename = './results/Figures/Egger_neurobehavior_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Egger_behavior_CVR.p
+dev.off()
+
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+pred.Egger_brain_development_CVR <- predict.rma(Egger_brain_development_CVR)
+
+
+brain_development %>% mutate(ymin = pred.Egger_brain_development_CVR$ci.lb, 
+                             ymax = pred.Egger_brain_development_CVR$ci.ub, 
+                             ymin2 = pred.Egger_brain_development_CVR$cr.lb, 
+                             ymax2 = pred.Egger_brain_development_CVR$cr.ub, 
+                             pred = pred.Egger_brain_development_CVR$pred) %>% ggplot(aes(x = sqrt(VCVR), y = CVR, size = 1/sqrt(VCVR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  labs(x = "sqrt(Sampling variance)", y = 'Brain development (lnCVR)',  size = expression(paste('Precision (1/SE)'))) + 
+  guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(#axis.title = element_text(size = 15, colour = "black"),
+        axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Egger_brain_development_CVR.p
+
+
+
+
+print(Egger_brain_development_CVR.p)
+png(filename = './results/Figures/Egger_brain_development_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Egger_brain_development_CVR.p
+dev.off()
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+pred.Egger_genes_CVR <- predict.rma(Egger_genes_CVR)
+
+
+genes %>% mutate(ymin = pred.Egger_genes_CVR$ci.lb, 
+                             ymax = pred.Egger_genes_CVR$ci.ub, 
+                             ymin2 = pred.Egger_genes_CVR$cr.lb, 
+                             ymax2 = pred.Egger_genes_CVR$cr.ub, 
+                             pred = pred.Egger_genes_CVR$pred) %>% ggplot(aes(x = sqrt(VCVR), y = CVR, size = 1/sqrt(VCVR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") +
+  labs(x = "sqrt(Sampling variance)", y = 'Brain growth factors (lnCVR)',  size = expression(paste('Precision (1/SE)'))) +    
+  guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Egger_genes_CVR.p
+
+
+
+print(Egger_genes_CVR.p)
+png(filename = './results/Figures/Egger_growth_factors_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Egger_genes_CVR.p
+dev.off()
+```
+
+
+
+
+### 5. Time-lag bias
+
+#### 5.1 Methods
+
+```{r Publications bias}
+
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+Time.lag_behavior_RR <- rma.mv(yi = RR,
+                               V = cov_VRR_behavior,
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mods = ~year,
+                               method = 'REML',
+                               data = behavior)
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+Time.lag_brain_development_RR <- rma.mv(yi = RR,
+                                        V = cov_VRR_brain_development,
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mods = ~year,
+                                        method = 'REML',
+                                        data = brain_development)
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+Time.lag_genes_RR <- rma.mv(yi = RR,
+                            V = cov_VRR_genes,
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mods = ~year,
+                            method = 'REML',
+                            data = genes)
+
+
+
+
+
+
+#***************************************************************#
+#------------------ Inter-difference (lnCVR) -------------------#
+#***************************************************************#
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+Time.lag_behavior_CVR <- rma.mv(yi = CVR,
+                                V = cov_VCVR_behavior,
+                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                mods = ~year,
+                                method = 'REML',
+                                data = behavior)
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+Time.lag_brain_development_CVR <- rma.mv(yi = CVR,
+                                         V = cov_VCVR_brain_development,
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mods = ~year,
+                                         method = 'REML',
+                                         data = brain_development)
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+Time.lag_genes_CVR <- rma.mv(yi = CVR,
+                             V = cov_VCVR_genes,
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mods = ~year,
+                             method = 'REML',
+                             data = genes)
+```
+
+
+
+#### 5.2 Results
+
+```{r Visualization}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+fit.Time.lag_behavior_RR <- predict.rma(Time.lag_behavior_RR)
+
+
+behavior %>% mutate(ymin = fit.Time.lag_behavior_RR$ci.lb, 
+                    ymax = fit.Time.lag_behavior_RR$ci.ub, 
+                    ymin2 = fit.Time.lag_behavior_RR$cr.lb, 
+                    ymax2 = fit.Time.lag_behavior_RR$cr.ub, 
+                    pred = fit.Time.lag_behavior_RR$pred) %>% ggplot(aes(x = year, y = RR, size = 1/sqrt(VRR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  scale_x_continuous(limits = c(2008, 2020), breaks = seq(2008, 2020, 4)) + 
+  ylim(-2, 4) +
+  labs(x = "Year", y = 'Neurobehavior (lnRR)',  size = expression(paste('Precision (1/SE)'))) + guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Time.lag_behavior_RR.p
+
+
+
+print(Time.lag_behavior_RR.p)
+png(filename = './results/Figures/Time.lag_behavior_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Time.lag_behavior_RR.p
+dev.off()
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+fit.Time.lag_brain_development_RR <- predict.rma(Time.lag_brain_development_RR)
+
+
+brain_development %>% mutate(ymin = fit.Time.lag_brain_development_RR$ci.lb, 
+                             ymax = fit.Time.lag_brain_development_RR$ci.ub, 
+                             ymin2 = fit.Time.lag_brain_development_RR$cr.lb, 
+                             ymax2 = fit.Time.lag_brain_development_RR$cr.ub, 
+                             pred = fit.Time.lag_brain_development_RR$pred) %>% ggplot(aes(x = year, y = RR, size = 1/sqrt(VRR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  scale_x_continuous(limits = c(1990, 2020)) + ylim(-0.5, 1) +
+  labs(x = "Year", y = 'Brain development (lnRR)',  size = expression(paste('Precision (1/SE)'))) + 
+  guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Time.lag_brain_development_RR.p
+
+
+
+print(Time.lag_brain_development_RR.p)
+png(filename = './results/Figures/Time.lag_brain_development_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Time.lag_brain_development_RR.p
+dev.off()
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+fit.Time.lag_genes_RR <- predict.rma(Time.lag_genes_RR)
+
+
+genes %>% mutate(ymin = fit.Time.lag_genes_RR$ci.lb, 
+                 ymax = fit.Time.lag_genes_RR$ci.ub, 
+                 ymin2 = fit.Time.lag_genes_RR$cr.lb, 
+                 ymax2 = fit.Time.lag_genes_RR$cr.ub, 
+                 pred = fit.Time.lag_genes_RR$pred) %>% ggplot(aes(x = year, y = RR, size = 1/sqrt(VRR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  scale_x_continuous(limits = c(2002, 2020), breaks = seq(2002, 2020, 6)) + 
+  ylim(-0.5,2) +
+  labs(x = "Year", y = 'Brain growth factors (lnRR)',  size = expression(paste('Precision (1/SE)'))) + guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Time.lag_genes_RR.p
+
+
+
+print(Time.lag_genes_RR.p)
+png(filename = './results/Figures/Time.lag_growth_factors_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Time.lag_genes_RR.p
+dev.off()
+
+
+
+#***************************************************************#
+#------------------ Inter-difference (lnCVR) -------------------#
+#***************************************************************#
+
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+fit.Time.lag_behavior_CVR <- predict.rma(Time.lag_behavior_CVR)
+
+
+behavior %>% mutate(ymin = fit.Time.lag_behavior_CVR$ci.lb, 
+                    ymax = fit.Time.lag_behavior_CVR$ci.ub, 
+                    ymin2 = fit.Time.lag_behavior_CVR$cr.lb, 
+                    ymax2 = fit.Time.lag_behavior_CVR$cr.ub, 
+                    pred = fit.Time.lag_behavior_CVR$pred) %>% ggplot(aes(x = year, y = CVR, size = 1/sqrt(VCVR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  scale_x_continuous(limits = c(2007, 2019), breaks = seq(2007, 2019, 3)) + 
+  ylim(-2, 2) +
+  labs(x = "Year", y = 'Neurobehavior (lnCVR)',  size = expression(paste('Precision (1/SE)'))) + guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Time.lag_behavior_CVR.p
+
+
+
+print(Time.lag_behavior_CVR.p)
+png(filename = './results/Figures/Time.lag_behavior_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Time.lag_behavior_CVR.p
+dev.off()
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+fit.Time.lag_brain_development_CVR <- predict.rma(Time.lag_brain_development_CVR)
+
+
+brain_development %>% mutate(ymin = fit.Time.lag_brain_development_CVR$ci.lb, 
+                             ymax = fit.Time.lag_brain_development_CVR$ci.ub, 
+                             ymin2 = fit.Time.lag_brain_development_CVR$cr.lb, 
+                             ymax2 = fit.Time.lag_brain_development_CVR$cr.ub, 
+                             pred = fit.Time.lag_brain_development_CVR$pred) %>% ggplot(aes(x = year, y = CVR, size = 1/sqrt(VCVR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  scale_x_continuous(limits = c(1980, 2020), breaks = seq(1980, 2020, 10)) + 
+  ylim(-2, 2) +
+  labs(x = "Year", y = 'Brain development (lnCVR)',  size = expression(paste('Precision (1/SE)'))) + 
+  guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Time.lag_brain_development_CVR.p
+
+
+
+print(Time.lag_brain_development_CVR.p)
+png(filename = './results/Figures/Time.lag_brain_development_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Time.lag_brain_development_CVR.p
+dev.off()
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+fit.Time.lag_genes_CVR <- predict.rma(Time.lag_genes_CVR)
+
+
+genes %>% mutate(ymin = fit.Time.lag_genes_CVR$ci.lb, 
+                 ymax = fit.Time.lag_genes_CVR$ci.ub, 
+                 ymin2 = fit.Time.lag_genes_CVR$cr.lb, 
+                 ymax2 = fit.Time.lag_genes_CVR$cr.ub, 
+                 pred = fit.Time.lag_genes_CVR$pred) %>% ggplot(aes(x = year, y = CVR, size = 1/sqrt(VCVR))) + 
+  geom_point(shape = 21, fill = 'grey95') + 
+  geom_smooth(aes(y = ymin2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + 
+  geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
+  geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
+  scale_x_continuous(limits = c(2000, 2020), breaks = seq(2000, 2020, 5)) + 
+  ylim(-3, 4) +
+  labs(x = "Year", y = 'Brain growth factors (lnCVR)',  size = expression(paste('Precision (1/SE)'))) + guides(fill = "none", colour = "none") + 
+  theme_bw() + 
+  theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
+  theme(legend.direction = "horizontal") + 
+  theme(legend.background = element_blank()) + 
+  theme(axis.text.x =  element_text(size = 12, colour = "black"),
+        axis.text.y =  element_text(size = 12, colour = "black"),
+        panel.grid = element_blank()) -> Time.lag_genes_CVR.p
+
+
+
+print(Time.lag_genes_CVR.p)
+png(filename = './results/Figures/Time.lag_growth_factors_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+Time.lag_genes_CVR.p
+dev.off()
+```
+
+
+
+
+### 6. Extractions validation
+
+#### 6.1 Methods   
+
+Data were extracted from figures, tables and main text. We used metaDigitise package to extract descriptive statistics (mean, se) from figures. All data were extracted by one author (YY). But we verify these extractions by checking 10 papers by other two authors (ML and YF) independently. 
+
+To verify the extracted data, we evaluated the inter-class correlations (Pearson coefficient), intra-class correlations (ICC) and repeatability (R) of data extractions from YFY-ML and YYF-YF pairwise comparisions. We used packages in R to achieve our aims as following: 
+
+1. cor.test() function in R to calculate the Pearson coefficient
+
+2. lme4 package and rptR package in R to estimate the ICC and R
+
+```{r Loading, echo = TRUE}
+# Loading extracted data from Yefeng, Losia and Yong
+ # Yefeng's extraction and counterparts from Losia
+  Yefeng_Losia <- read_excel('./database/Extraction_Yefeng.xlsx', sheet = 1)
+  Losia <- read_excel('./database/Extraction_Losial.xlsx')
+
+ # Yefeng's extraction and counterpart from Yong
+  Yefeng_Yong <- read_excel('./database/Extraction_Yefeng.xlsx', sheet = 2)
+  Yong <- read_excel('./database/Extraction_Yong.xlsx')
+
+
+# Data preprocessing for visualising and bias estimating
+ # Stack the data for inter-class correlation coefficient and intra-class correlation coefficient, respectively
+
+ # Inter-class coefficient - extractions of experimental group and control group in same column
+
+ # Stack data of Yefeng_Losia
+  # Split data into experiment group and control group
+    Yefeng_Losia_exp <- subset(Yefeng_Losia, select = -c(con_mean, con_se, con_n))
+    Yefeng_Losia_exp$group <- c('exp')
+    Yefeng_Losia_con <- subset(Yefeng_Losia, select = -c(exp_mean, exp_se, exp_n))
+    Yefeng_Losia_con$group <- c('con')
+  # Renames the column names
+    names(Yefeng_Losia_exp)[str_detect(names(Yefeng_Losia_exp), c('exp_mean|exp_se|exp_n'))] <- c('mean_Yefeng', 'se_Yefeng', 'n_Yefeng')
+    names(Yefeng_Losia_con)[str_detect(names(Yefeng_Losia_con), c('con_mean|con_se|con_n'))] <- c('mean_Yefeng', 'se_Yefeng', 'n_Yefeng')
+    Yefeng_Losia <- rbind(Yefeng_Losia_exp, Yefeng_Losia_con)
+
+    
+ # Stack data of Yefeng_Yong
+  # Split data into experiment group and control group
+    Yefeng_Yong_exp <- subset(Yefeng_Yong, select = -c(con_mean, con_se, con_n))
+    Yefeng_Yong_exp$group <- c('exp')
+    Yefeng_Yong_con <- subset(Yefeng_Yong, select = -c(exp_mean, exp_se, exp_n))
+    Yefeng_Yong_con$group <- c('con')
+  # Renames the column names
+    names(Yefeng_Yong_exp)[str_detect(names(Yefeng_Yong_exp), c('exp_mean|exp_se|exp_n'))] <- c('mean_Yefeng', 'se_Yefeng', 'n_Yefeng')
+    names(Yefeng_Yong_con)[str_detect(names(Yefeng_Yong_con), c('con_mean|con_se|con_n'))] <- c('mean_Yefeng', 'se_Yefeng', 'n_Yefeng')
+    Yefeng_Yong <- rbind(Yefeng_Yong_exp, Yefeng_Yong_con)
+
+ # Stack data of Losia
+  # Split data into experiment group and control group
+    Losia_exp <- subset(Losia, select = -c(con_mean, con_se, con_n))
+    Losia_exp$group <- c('exp')
+    Losia_con <- subset(Losia, select = -c(exp_mean, exp_se, exp_n))
+    Losia_con$group <- c('con')
+    names(Losia_exp)[str_detect(names(Losia_exp), c('exp_mean|exp_se|exp_n'))] <- c('mean_Losia', 'se_Losia', 'n_Losia')
+    names(Losia_con)[str_detect(names(Losia_con), c('con_mean|con_se|con_n'))] <- c('mean_Losia', 'se_Losia', 'n_Losia')
+    Losia <- rbind(Losia_exp, Losia_con)
+
+ # stack data of Yong
+  # split data into experiment group and control group
+    Yong_exp <- subset(Yong, select = -c(con_mean, con_se, con_n))
+    Yong_exp$group <- c('exp')
+    Yong_con <- subset(Yong, select = -c(exp_mean, exp_se, exp_n))
+    Yong_con$group <- ('con')
+  # renames the column names
+    names(Yong_exp)[str_detect(names(Yong_exp), c('exp_mean|exp_se|exp_n'))] <- c('mean_Yong', 'se_Yong', 'n_Yong')
+    names(Yong_con)[str_detect(names(Yong_con), c('con_mean|con_se|con_n'))] <- c('mean_Yong', 'se_Yong', 'n_Yong')
+    Yong <- rbind(Yong_exp, Yong_con)
+
+ # merge extractions from different performers
+  # Yefeng VS Losia
+    Yefeng_VS_Losia <- cbind(Yefeng_Losia, subset(Losia, select = c('mean_Losia', 'se_Losia', 'n_Losia')))
+
+  # Yefeng VS Yong
+    Yefeng_VS_Yong <- cbind(Yefeng_Yong, subset(Yong, select = c('mean_Yong', 'se_Yong', 'n_Yong')))
+
+
+
+# Intra-class coefficient (ICC) - extractions from different performers in same columns
+
+ # Losia
+  Yefeng_Losia_intra <- Yefeng_Losia
+  names(Yefeng_Losia_intra)[str_detect(names(Yefeng_Losia_intra), c('mean_Yefeng|se_Yefeng|n_Yefeng'))] <- c('mean', 'se', 'n')
+
+  Losia_intra <- Losia
+  names(Losia_intra)[str_detect(names(Losia_intra), c('mean_Losia|se_Losia|n_Losia'))] <- c('mean', 'se', 'n')
+
+  Yefeng_VS_Losia_intra <- rbind(Yefeng_Losia_intra, Losia_intra)
+  Yefeng_VS_Losia_intra$identifier <- rep(1:length(Yefeng_Losia_intra$mean), 2) # pairwise
+
+
+ # Yong
+  Yefeng_Yong_intra <- Yefeng_Yong
+  names(Yefeng_Yong_intra)[str_detect(names(Yefeng_Yong_intra), c('mean_Yefeng|se_Yefeng|n_Yefeng'))] <- c('mean', 'se', 'n')
+  
+  Yong_intra <- Yong
+  names(Yong_intra)[str_detect(names(Yong_intra), c('mean_Yong|se_Yong|n_Yong'))] <- c('mean', 'se', 'n')
+  
+  Yefeng_VS_Yong_intra <- rbind(Yefeng_Yong_intra, Yong_intra)
+  Yefeng_VS_Yong_intra$identifier <- rep(1:length(Yefeng_Yong_intra$mean), 2) # pairwise
+```
+
+
+#### 6.2 Results
+
+###### (i) Summary of extractions
+
+**Extractions from YFY and ML:** 
+5 papers with 98 extracted mean, se and n. 
+
+Akhavan_2008: 24 mean, se and n
+
+Kim_2007: 8 mean, se and n
+
+Mychasiuk_2012: 16 mean, se and n
+
+Park_2013: 2 mean, se and n
+
+Sanches_2018: 48 mean, se and n
+
+**Extractions from YFY and YF:** 
+5 papers with 80 extracted mean, se and n. 
+ 
+Duran_2018 : 20  mean, se and n
+
+Maruoka_2009: 12 mean, se and n
+
+Park_2017: 12 mean, se and n
+
+Parnpiansil_2003: 6 mean, se and n
+
+Yin_2013: 30 mean, se and n
+
+```{r Inter-correlations, echo = TRUE}
+
+#**************************************************************#
+#                           mean
+#**************************************************************#
+
+
+# Losia
+  Pearson_mean_Losia <- with(Yefeng_VS_Losia, cor.test(mean_Yefeng, mean_Losia))
+
+
+# Yong
+  Pearson_mean_Yong <- with(Yefeng_VS_Yong, cor.test(mean_Yefeng, mean_Yong))
+
+
+
+#**************************************************************#
+#                                se
+#**************************************************************#
+
+# Losia
+  Pearson_se_Losia <- with(Yefeng_VS_Losia, cor.test(se_Yefeng, se_Losia))
+
+
+# Yong
+  Pearson_se_Yong <- with(Yefeng_VS_Yong, cor.test(se_Yefeng, se_Yong))
+```
+
+
+
+##### (ii) Inter-class correlation (Pearson's coefficient)
+
+**Pearson coefficients between YFY and ML:** 
+
+mean: 0.9999803 CI: 0.9999706 to 0.9999869, p-value < 0.0001
+
+se: 0.9997818  CI: 0.9996738 to 0.9998540, p-value < 0.0001
+
+**Pearson coefficients between YFY and YF:** 
+
+mean: 9997383  CI: 0.9995909 0.9998326, p-value < 0.0001
+
+se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
+
+**Visualising the correlations**
+
+```{r visualising the correlations and deviations, echo = TRUE}
+
+#**************************************************************#
+#                           mean
+#**************************************************************#
+
+
+# Losia
+  plot_Losia_mean <- ggplot(Yefeng_VS_Losia, 
+                            mapping = aes(x = mean_Yefeng, y = mean_Yefeng)) 
+  plot_Losia_mean <- plot_Losia_mean + 
+                    labs(y = 'mean_Losia') +
+                    geom_segment(aes(xend = mean_Yefeng, yend = mean_Losia), alpha = 1) +
+                    geom_point(aes(color = study_ID)) +          
+                    geom_point(aes(y = mean_Losia), shape = 1) + 
+  theme(axis.title = element_text(size = 18, colour = "black"),
+        axis.text = element_text(size = 18, colour = "black")) + ggtitle("A")
+
+# Yong
+  plot_Yong_mean <- ggplot(Yefeng_VS_Yong, 
+                           mapping = aes(x = mean_Yefeng, y = mean_Yefeng)) 
+  plot_Yong_mean <- plot_Yong_mean + 
+                    labs(y = 'mean_Yong') +
+                    geom_segment(aes(xend = mean_Yefeng, yend = mean_Yong), alpha = 1) +
+                    geom_point(aes(color = study_ID)) +          
+                    geom_point(aes(y = mean_Yong), shape = 1) + 
+    theme(axis.title = element_text(size = 18, colour = "black"),
+          axis.text = element_text(size = 18, colour = "black")) + ggtitle("A")
+
+
+#**************************************************************#
+#                           se
+#**************************************************************#
+
+# Losia
+  plot_Losia_se <- ggplot(Yefeng_VS_Losia, 
+                          mapping = aes(x = se_Yefeng, y = se_Yefeng)) 
+  plot_Losia_se <- plot_Losia_se + 
+                    labs(y = 'se_Losia') +
+                    geom_segment(aes(xend = se_Yefeng, yend = se_Losia), alpha = 1) +
+                    geom_point(aes(color = study_ID)) +          
+                    geom_point(aes(y = se_Losia), shape = 1) + 
+    theme(axis.title = element_text(size = 18, colour = "black"),
+          axis.text = element_text(size = 18, colour = "black")) + ggtitle("C")
+
+# Yong
+  plot_Yong_se <- ggplot(Yefeng_VS_Yong, 
+                         mapping = aes(x = se_Yefeng, y = se_Yefeng), size = 0.01) 
+  plot_Yong_se <- plot_Yong_se + 
+                  labs(y = 'se_Yong') +
+                  geom_segment(aes(xend = se_Yefeng, yend = se_Yong), alpha = 1) +
+                  geom_point(aes(color = study_ID)) +          
+                  geom_point(aes(y = se_Yong), shape = 1) + 
+    theme(axis.title = element_text(size = 18, colour = "black"),
+          axis.text = element_text(size = 18, colour = "black")) + ggtitle("C")
+
+
+
+
+
+#**************************************************************#
+#                           log(mean)
+#**************************************************************#
+
+# Losia
+  plot_Losia_logmean <- ggplot(Yefeng_VS_Losia, 
+                               mapping = aes(x = log(mean_Yefeng), y = log(mean_Yefeng))) 
+  plot_Losia_logmean <- plot_Losia_logmean + 
+                         labs(y = 'log(mean_Losia)') +
+                         geom_segment(aes(xend = log(mean_Yefeng), yend = log(mean_Losia)), alpha = 1) +
+                         geom_point(aes(color = study_ID)) +          
+                         geom_point(aes(y = log(mean_Losia)), shape = 1) + 
+    theme(axis.title = element_text(size = 18, colour = "black"),
+          axis.text = element_text(size = 18, colour = "black")) + ggtitle("B")
+
+# Yong
+  plot_Yong_logmean <- ggplot(Yefeng_VS_Yong, 
+                              mapping = aes(x = log(mean_Yefeng), y = log(mean_Yefeng))) 
+  plot_Yong_logmean <- plot_Yong_logmean + 
+                       labs(y = 'log(mean_Losia)') +
+                       geom_segment(aes(xend = log(mean_Yefeng), yend = log(mean_Yong)), alpha = 1) +
+                       geom_point(aes(color = study_ID)) +          
+                       geom_point(aes(y = log(mean_Yong)), shape = 1) + 
+    theme(axis.title = element_text(size = 18, colour = "black"),
+          axis.text = element_text(size = 18, colour = "black")) + ggtitle("B")
+
+
+  
+#**************************************************************#
+#                           log(se)
+#**************************************************************#
+
+# Losia
+  plot_Losia_logse <- ggplot(Yefeng_VS_Losia, 
+                             mapping = aes(x = log(se_Yefeng), y = log(se_Yefeng))) 
+  plot_Losia_logse <- plot_Losia_logse + 
+                       labs(y = 'log(se_Losia)') +
+                       geom_segment(aes(xend = log(se_Yefeng), yend = log(se_Losia)), alpha = 1) +
+                       geom_point(aes(color = study_ID)) +          
+                       geom_point(aes(y = log(se_Losia)), shape = 1) + 
+    theme(axis.title = element_text(size = 18, colour = "black"),
+          axis.text = element_text(size = 18, colour = "black")) + ggtitle("D")
+
+# Yong
+  plot_Yong_logse <- ggplot(Yefeng_VS_Yong, 
+                            mapping = aes(x = log(se_Yefeng), y = log(se_Yefeng))) 
+  plot_Yong_logse <- plot_Yong_logse + 
+                     labs(y = 'log(se_Yong)') +
+                     geom_segment(aes(xend = log(se_Yefeng), yend = log(se_Yong)), alpha = 1) +
+                     geom_point(aes(color = study_ID)) +          
+                     geom_point(aes(y = log(se_Yong)), shape = 1) + 
+    theme(axis.title = element_text(size = 18, colour = "black"),
+          axis.text = element_text(size = 18, colour = "black")) + ggtitle("D")
+
+
+
+
+
+
+
+# Saving
+
+plot_intercorrelation_Losia <- plot_Losia_mean + plot_Losia_logmean + 
+                               plot_Losia_se + plot_Losia_logse +
+                               plot_layout(nrow = 2, ncol = 2, widths = 10, heights = 10)
+
+
+
+plot_intercorrelation_Yong <- plot_Yong_mean + plot_Yong_logmean + 
+                               plot_Yong_se + plot_Yong_logse +
+                               plot_layout(nrow = 2, ncol = 2, widths = 10, heights = 10)
+  
+  
+print(plot_intercorrelation_Losia)
+png(filename = "./results/Figures/extraction_cross_check_1.png", units = "in", pointsize = 15, type = "windows", width = 15, height = 12, res = 400)
+plot_intercorrelation_Losia
+dev.off()
+
+
+print(plot_intercorrelation_Yong)
+png(filename = "./results/Figures/extraction_cross_check_2.png", units = "in", pointsize = 15, type = "windows", width = 15, height = 12, res = 400)
+plot_intercorrelation_Yong
+dev.off()
+```
+
+
+##### (iii) Intra-class coefficient (ICC)
+
+**intra-class coefficient between YFY and ML:**
+
+mean: repeatability: 1, SE: 0, p-value < 0.0001 [LRT]
+
+se: repeatability: 1, SE: 0, p-value < 0.0001 [LRT]
+
+**intra-class coefficient between YFY and YFL:**
+
+mean: repeatability: 1, SE: 0, p-value < 0.0001 [LRT]
+
+se: repeatability: 1, SE: 0, p-value < 0.0001 [LRT]
+
+
+```{r Intra-correlations, echo = TRUE}
+
+#**************************************************************#
+#                           mean
+#**************************************************************#
+
+# Losia
+  ICC_mean_Losia <- rpt(mean ~ 1+(1|identifier), grname = 'identifier',  data = Yefeng_VS_Losia_intra, datatype = 'Gaussian')
+
+# Yong
+  ICC_mean_Yong <- rpt(mean ~ 1+(1|identifier), grname = 'identifier', data = Yefeng_VS_Yong_intra, datatype = 'Gaussian')
+
+
+#**************************************************************#
+#                           se
+#**************************************************************#
+
+# Losia
+  ICC_se_Losia <- rpt(se ~ 1+(1|identifier), grname = 'identifier',  data = Yefeng_VS_Losia_intra, datatype = 'Gaussian')
+
+# Yong
+  ICC_se_Yong <- rpt(se ~ 1+(1|identifier), grname = 'identifier', data = Yefeng_VS_Yong_intra, datatype = 'Gaussian')
+```

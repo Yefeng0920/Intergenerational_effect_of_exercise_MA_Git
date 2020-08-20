@@ -1,0 +1,420 @@
+---
+title: "Preparing data for analyses presented in: Intergenerational effects of physical exercise on cognition and brain: a multilevel meta-analysis of mean and variance"
+output:
+  html_document: default
+---
+
+
+## Step 1 - Loading, checking, cleaning and calculating effect size
+
+### 1. Install and load required packages
+
+```{r setup, echo = FALSE}
+# Tidy
+ # rm(list=ls())
+
+# Workspace
+  knitr::opts_chunk$set(echo = TRUE, include = TRUE)
+
+# Loading packages
+ # install.packages("pacman") # install this if you never installed it before
+   pacman::p_load(knitr, # knit this markdown
+                  readxl, # read Excel files  
+                  metafor,
+                  dplyr, # transforming data
+                  tidyverse, # tidy family to manioulate data
+                  matrixcalc, # positive-definite matrix check; first time to install from devtools::install_github('cran/matrixcalc')
+                  purrr, # functional programming tools
+                  janitor # tabulating overlaps
+                 )
+
+   
+  source('./functions/functions.R')
+```
+
+
+### 2. Dataset
+
+
+```{r Import and check}
+# Import the dataset
+  raw_all_traits <- read_excel('./database/all_traits.xlsx', col_names = TRUE)
+
+# Check
+  dim(raw_all_traits)
+  head(raw_all_traits)
+  str(raw_all_traits)
+  names(raw_all_traits)
+```
+
+
+### 3. Data preprocessing
+
+```{r Preprocessing }
+# Fixing factors (variables) types
+ # Locating columns which are numeric
+   num_column <- c('year', 'age_manipulation_d', 'age_mating_d', 'n_con_parent', 'n_exp_parent','manipulation_duration', 'response_age_PND', 'exp_mean', 'exp_se', 'exp_n', 'con_mean', 'con_se', 'con_n', 'biological_direction')
+
+ # Turning into numeric
+   pos <- lapply(as.list(names(raw_all_traits)), function(x) is_empty(which(str_detect(x, num_column) == T)) == F) %>% unlist
+  raw_all_traits[,pos] <- lapply(raw_all_traits[,pos], as.numeric)
+
+
+ # Locating rest columns which should be factors
+   fac_column <- which((unlist(lapply(as.list(names(raw_all_traits)), function(x) ifelse(test = is_empty(which(str_detect(x, num_column) == T)), yes = 'fac_column', no = 'num_column'))) == 'fac_column') == T)
+
+ # Turning into factors
+   raw_all_traits[,fac_column] <- lapply(raw_all_traits [,fac_column], as.factor)
+
+# Checking missing data
+  dim(raw_all_traits[is.na(raw_all_traits$exp_mean | raw_all_traits$exp_n | raw_all_traits$con_mean | raw_all_traits$con_n), ]) # no records with missing descriptive statistics
+
+# Checking included studies
+  length(unique(raw_all_traits$study_ID)) # 52 included studies
+
+# Checking  effect size
+  length(unique(raw_all_traits$ES_ID)) #410 unique effect sizes from 410 observations   
+
+# Checking random effects and moderators
+ # F0 attributes (random effects)
+   tabyl(raw_all_traits, species) # 73 mice and 339 rats
+   tabyl(raw_all_traits, strain) # 73 C57BL/6, 23 Sprague-Dawley, 28 Long-Evans, 288 Wistar
+
+ # F0 moderators (fixed effects)
+   tabyl(raw_all_traits, F0_sex_exercise) # 340 female of F0 and 72 male of F0
+   tabyl(raw_all_traits, manipulation_type) # 90 swimming, 160 treadmill-running and 80 wheel-running, 82 environmental enrichment
+   tabyl(raw_all_traits, manipulation_mode) # 250 forced exercise and 162 voluntary exercise
+   tabyl(raw_all_traits, manipulation_window) # 111 pre-conception, 205 pregnancy, 78  pre-conception to pregnancy, 18 pre-conception to post-partum
+
+ # F1 attributes (additional moderators)
+   tabyl(raw_all_traits, F1_sex_test) # 64 F1 female, 221 F1 male and 127 F1 mixed-sex
+   tabyl(raw_all_traits, response_age_life_phase) # 25 prenatal, 64 early postnatal, 224 adolescence, 99 adulthood
+ 
+   # Overlap of moderators and random factors
+   tabyl(raw_all_traits, manipulation_type, F0_sex_exercise) 
+   tabyl(raw_all_traits, manipulation_mode, F0_sex_exercise) 
+   tabyl(raw_all_traits, manipulation_window, F0_sex_exercise) 
+   tabyl(raw_all_traits, manipulation_type, F1_sex_test) 
+   tabyl(raw_all_traits, manipulation_mode, F1_sex_test) 
+   tabyl(raw_all_traits, manipulation_window, F1_sex_test) 
+   tabyl(raw_all_traits, manipulation_mode, response_age_life_phase) 
+
+# Pass check
+  all_traits <- raw_all_traits
+```
+
+
+### 4. Calculate effect size
+Calculate effect size and sampling variance for each pairwise group (exp-control) from included studies
+exp = F0 exposed to exercise, con = F0 exposed to sedentary
+effect size (sampling variance): lnRR(VlnRR), lnCVR(VlnCVR)
+
+```{r Calculation}
+# Computing standard deviations
+  all_traits$exp_sd <- all_traits$exp_se*sqrt(all_traits$exp_n)
+  all_traits$con_sd <- all_traits$con_se*sqrt(all_traits$con_n)
+
+# Computing effect size and sampling variance
+ # lnRR
+   lnRR <- with(all_traits, escalc(measure = 'ROM',
+                                m1i = exp_mean,
+                                m2i = con_mean,
+                                sd1i = exp_sd,
+                                sd2i = con_sd,
+                                n1i = exp_n,
+                                n2i = con_n))
+
+ # lnCVR
+   lnCVR <- with(all_traits, escalc(measure = 'CVR',
+                                m1i = exp_mean,
+                                m2i = con_mean,
+                                sd1i = exp_sd,
+                                sd2i = con_sd,
+                                n1i = exp_n,
+                                n2i = con_n))
+# Flip negative sign
+  effect_size <- data.frame(RR = lnRR$yi*all_traits$biological_direction, 
+                          VRR = lnRR$vi,
+                          CVR = lnCVR$yi, 
+                          VCVR = lnCVR$vi) # Because some of the measures are negatively related with neurodevelopment, so we need to flip them
+
+all_traits <- cbind(all_traits, effect_size)
+
+ # lnCV
+   #all_traits$exerciselnCV <- Calc.lnCV(Mean = all_traits$exp_mean, SD = all_traits$con_sd, N = all_traits$con_n)
+   #all_traits$controllnCV <- Calc.lnCV(Mean = all_traits$con_mean, SD = all_traits$con_sd, N = all_traits$con_n)
+   #all_traits$exerciseVlnCV <- Calc.var.lnCV(Mean = all_traits$exp_mean, SD =    all_traits$con_sd, N = all_traits$con_n)
+   #all_traits$controlVlnCV <- Calc.var.lnCV(Mean = all_traits$con_mean, SD = all_traits$con_sd, N = all_traits$con_n)
+
+
+# Quick visual check 
+  hist(all_traits$RR, breaks = 100)
+  plot(all_traits$RR, 1/all_traits$VRR)
+  hist(all_traits$CVR, breaks = 50)
+  plot(all_traits$CVR, 1/all_traits$VCVR)
+
+# Visulizing mean-variance relationship
+ # Corretion of control group
+   plot(log(all_traits$con_mean), log(all_traits$con_sd))
+   cor.test(all_traits$con_mean, all_traits$con_sd) # 0.951138 
+ # Corretion of experiment group
+   plot(log(all_traits$exp_mean), log(all_traits$exp_sd))
+   cor.test(all_traits$exp_mean, all_traits$exp_sd) # 9964369 
+```
+
+
+
+### 5. Spliting dataset
+Preparing specific trait catefories
+
+```{r Subsets}
+# Check trait types
+  tabyl(all_traits, response_type) 
+ # 71 neuron count, 24 brain size
+ # 60 BDNF, 14 TrkB, 25 VEGF,  14 reelin, 10 GFAP, 8 syptophysin 
+ # 11 mitochondrial biogenesis,  9 DNA methylation
+ # 29 learning(MWM), 30 memory(MWM), 17 memory(NOR), 32 anxiety(EPM), 58 anxiety(OFT)
+
+# Define trait categories
+ # Some traits have similar  biological effect, so we can group them
+ # Adding column to group specific trait into four categories: genes (brain growth factors), brain development, behavior (neurobehavior) and others
+   grouped_traits <- NA
+   
+ # Behavior: learning(MWM), memory(MWM), memory(NOR), anxiety(EPM), anxiety(OFT)
+   grouped_traits[all_traits$response_type == 'learning(MWM)'|
+                  all_traits$response_type == 'memory(MWM)'|
+                  all_traits$response_type == 'memory(NOR)'|
+                  all_traits$response_type == 'anxiety(EPM)'|
+                  all_traits$response_type == 'anxiety(OFT)'] <- c('behavior') 
+   
+ # Genes: BDNF, TrkB, VEGF, reelin,  GFAP, syptophysin
+   grouped_traits[all_traits$response_type == 'BDNF'|
+                  all_traits$response_type == 'TrkB'|
+                  all_traits$response_type == 'VEGF'|
+                  all_traits$response_type == 'reelin'|
+                  all_traits$response_type == 'GFAP'|
+                  all_traits$response_type == 'syptophysin'] <- c('genes')
+   
+ # Brain development: neuron count and brain size
+   grouped_traits[all_traits$response_type == 'neuron count'|
+                 all_traits$response_type == 'brain size'] <- c('brain development')
+
+
+
+ # Others: mitochondrial biogenesis, DNA methylation
+   grouped_traits[all_traits$response_type == 'mitochondrial biogenesis'|
+                 all_traits$response_type == 'DNA methylation'] <- c('others')
+
+
+all_traits$grouped_traits <- as.factor(grouped_traits)
+
+ # Split into specific trait categories 
+   neuron_count <- all_traits[all_traits$response_type == 'neuron count',] # also can use filter() to split: all_traits %>% filter(response_type == 'trait')
+   brain_size <- all_traits[all_traits$response_type == 'brain size',]
+   BDNF <- all_traits[all_traits$response_type == 'BDNF',]
+   TrkB <- all_traits[all_traits$response_type == 'TrkB',]
+   VEGF <- all_traits[all_traits$response_type == 'VEGF',]
+   reelin <- all_traits[all_traits$response_type == 'reelin',]
+   GFAP <- all_traits[all_traits$response_type == 'GFAP',]
+   syptophysin <- all_traits[all_traits$response_type == 'syptophysin',]
+   mitochondrial_biogenesis <- all_traits[all_traits$response_type == 'mitochondrial biogenesis',]
+   DNA_methylation <- all_traits[all_traits$response_type == 'DNA methylation',]
+   learning_MWM <- all_traits[all_traits$response_type == 'learning(MWM)',]
+   memory_MWM <- all_traits[all_traits$response_type == 'memory(MWM)',] 
+   memory_NOR <- all_traits[all_traits$response_type == 'memory(NOR)',]
+   anxiety_OFT <- all_traits[all_traits$response_type == 'anxiety(OFT)',]
+   anxiety_EPM <- all_traits[all_traits$response_type == 'anxiety(EPM)',]
+
+ # Split into board trait categories
+   behavior <- all_traits %>% filter(grouped_traits == 'behavior') 
+   genes <- all_traits %>% filter(grouped_traits == 'genes') 
+   brain_development <- all_traits %>% filter(grouped_traits == 'brain development') 
+
+
+ # we are also inverested in the component of behavior, so we divided behavior into cognition and anxiety
+  # cognition <- rbind(learning_MWM, memory_MWM, memory_NOR)
+  # anxiety <- rbind(anxiety_OFT, anxiety_EPM)
+
+
+
+# Pre-processed subsets for study-level correlations among traits
+ # The maximum effect size within each study
+   group_by(all_traits, study_ID, grouped_traits) %>% summarise(max.RR = max(RR), max.CVR = max(CVR)) -> overlap.max
+   overlap.max <- pivot_wider(overlap.max, names_from = grouped_traits, values_from = c('max.RR', 'max.CVR'))
+
+
+ # The averaged effect size within each study
+   group_by(all_traits, study_ID, grouped_traits) %>% summarise(ave.RR = mean(RR), ave.CVR = mean(CVR)) -> overlap.ave
+   overlap.ave <- pivot_wider(overlap.ave, names_from = grouped_traits, values_from = c('ave.RR', 'ave.CVR'))
+
+
+ # The minmum effect size within each study
+   group_by(all_traits,study_ID, grouped_traits) %>% summarise(min.RR = min(RR), min.CVR = min(CVR)) -> overlap.min
+   overlap.min <- pivot_wider(overlap.min, names_from = grouped_traits, values_from = c('min.RR', 'min.CVR'))
+```
+
+
+
+         
+### 6. Construct variance-covariance matrices
+
+Effect sizes belong to same cohort (shared cluster) are assumed to be nonindependent (correlated). We quantify the nonindependence caused by shared clusters, then we can abate the impact of nonindependence (more reasonable sampling variance). We assume 0.5 correlation for shared traits from the same animal cohort (conservative assumption)
+
+```{r Variance-covariance matrices}
+# Variance-covariance matrices for lnRR
+ # Specific catefories
+   cov_VRR_neuron_count <- make_VCV_matrix(data = neuron_count, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_brain_size <- make_VCV_matrix(data = brain_size, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_BDNF <- make_VCV_matrix(data = BDNF, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_TrkB <- make_VCV_matrix(data = TrkB, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_VEGF <- make_VCV_matrix(data = VEGF, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_reelin <- make_VCV_matrix(data = reelin, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_GFAP <- make_VCV_matrix(data = GFAP, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_syptophysin <- make_VCV_matrix(data = syptophysin, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_mitochondrial_biogenesis <- make_VCV_matrix(data = mitochondrial_biogenesis, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_learning_MWM <- make_VCV_matrix(data = learning_MWM, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+# cov_VRR_DNA_methylation <- make_VCV_matrix(data = DNA_methylation, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5) # no shared clusters in DNA_methylation
+   cov_VRR_memory_MWM <- make_VCV_matrix(data = memory_MWM, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_memory_NOR <- make_VCV_matrix(data = memory_NOR, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_anxiety_OFT <- make_VCV_matrix(data = anxiety_OFT, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_anxiety_EPM <- make_VCV_matrix(data = anxiety_EPM, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+
+ # Board categories
+   cov_VRR_genes <- make_VCV_matrix(data = genes, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_behavior <- make_VCV_matrix(data = behavior, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VRR_brain_development <- make_VCV_matrix(data = brain_development, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+
+
+# Variance-covariance matrices for lnCVR
+ # Specific categories
+   cov_VCVR_neuron_count <- make_VCV_matrix(data = neuron_count, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_brain_size <- make_VCV_matrix(data = brain_size, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_BDNF <- make_VCV_matrix(data = BDNF, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_TrkB <- make_VCV_matrix(data = TrkB, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_VEGF <- make_VCV_matrix(data = VEGF, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_reelin <- make_VCV_matrix(data = reelin, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_GFAP <- make_VCV_matrix(data = GFAP, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_syptophysin <- make_VCV_matrix(data = syptophysin, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_mitochondrial_biogenesis <- make_VCV_matrix(data = mitochondrial_biogenesis, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_learning_MWM <- make_VCV_matrix(data = learning_MWM, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   # cov_VCVR_DNA_methylation <- make_VCV_matrix(data = DNA_methylation, V = 'VCVRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5) # no shared clusters in DNA_methylation
+   cov_VCVR_memory_MWM <- make_VCV_matrix(data = memory_MWM, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_memory_NOR <- make_VCV_matrix(data = memory_NOR, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_anxiety_OFT <- make_VCV_matrix(data = anxiety_OFT, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_anxiety_EPM <- make_VCV_matrix(data = anxiety_EPM, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+
+ # Board categories
+   cov_VCVR_genes <- make_VCV_matrix(data = genes, V = 'VCVR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_behavior <- make_VCV_matrix(data = behavior, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+   cov_VCVR_brain_development <- make_VCV_matrix(data = brain_development , V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
+
+
+# Confirming whether matrices are positive definite or not
+ # lnRR
+   is.positive.definite(cov_VRR_neuron_count) #TRUE
+   is.positive.definite(cov_VRR_brain_size) #TRUE
+   is.positive.definite(cov_VRR_BDNF) #TRUE
+   is.positive.definite(cov_VRR_TrkB) #TRUE
+   is.positive.definite(cov_VRR_VEGF) #TRUE
+   is.positive.definite(cov_VRR_reelin) #TRUE
+   is.positive.definite(cov_VRR_syptophysin) #TRUE
+   is.positive.definite(cov_VRR_mitochondrial_biogenesis) #TRUE
+   is.positive.definite(cov_VRR_learning_MWM) #TRUE
+   is.positive.definite(cov_VRR_memory_MWM) #TRUE
+   is.positive.definite(cov_VRR_memory_NOR) #TRUE
+   is.positive.definite(cov_VRR_anxiety_OFT) #TRUE
+   is.positive.definite(cov_VRR_genes) #TRUE
+   is.positive.definite(cov_VRR_behavior) #TRUE
+   is.positive.definite(cov_VRR_brain_development) #TRUE
+
+   # lnCVR
+   is.positive.definite(cov_VCVR_neuron_count) #TRUE
+   is.positive.definite(cov_VCVR_brain_size) #TRUE
+   is.positive.definite(cov_VCVR_BDNF) #TRUE
+   is.positive.definite(cov_VCVR_TrkB) #TRUE
+   is.positive.definite(cov_VCVR_VEGF) #TRUE
+   is.positive.definite(cov_VCVR_reelin) #TRUE
+   is.positive.definite(cov_VCVR_syptophysin) #TRUE
+   is.positive.definite(cov_VCVR_mitochondrial_biogenesis) #TRUE
+   is.positive.definite(cov_VCVR_learning_MWM) #TRUE
+   is.positive.definite(cov_VCVR_memory_MWM) #TRUE
+   is.positive.definite(cov_VCVR_memory_NOR) #TRUE
+   is.positive.definite(cov_VCVR_anxiety_OFT) #TRUE
+   is.positive.definite(cov_VCVR_genes) #TRUE
+   is.positive.definite(cov_VCVR_behavior) #TRUE
+   is.positive.definite(cov_VCVR_brain_development) #TRUE
+```
+
+
+
+### 7. Saving processed data
+
+```{r Saving}
+# Processed dataset
+  write.csv(neuron_count, file = './database/neuron_count.csv', row.names = F)
+  write.csv(brain_size, file = './database/brain_size.csv', row.names = F)
+  write.csv(BDNF, file = './database/BDNF.csv', row.names = F)
+  write.csv(TrkB, file = './database/TrkB.csv', row.names = F)
+  write.csv(VEGF, file = './database/VEGF.csv', row.names = F)
+  write.csv(reelin, file = './database/reelin.csv', row.names = F)
+  write.csv(GFAP, file = './database/GFAP.csv', row.names = F) 
+  write.csv(syptophysin, file = './database/syptophysin.csv', row.names = F) 
+  write.csv(mitochondrial_biogenesis, file = './database/mitochondrial_biogenesis.csv', row.names = F) 
+  write.csv(DNA_methylation, file = './database/DNA_methylation.csv', row.names = F)
+  write.csv(learning_MWM, file = './database/learning_MWM.csv', row.names = F) 
+  write.csv(memory_MWM, file = './database/memory_MWM.csv', row.names = F) 
+  write.csv(memory_NOR, file = './database/memory_NOR.csv', row.names = F) 
+  write.csv(anxiety_OFT, file = './database/anxiety_OFT.csv', row.names = F) 
+  write.csv(anxiety_EPM, file = './database/anxiety_EPM.csv', row.names = F) 
+  write.csv(genes, file = './database/genes.csv', row.names = F) 
+  write.csv(behavior, file = './database/behavior.csv', row.names = F) 
+  write.csv(brain_development, file = './database/brain_development.csv', row.names = F)
+
+# Variance-covariance matrices
+ # RR
+   save(cov_VRR_neuron_count, file = './database/cov_VRR_neuron_count.Rdata')
+   save(cov_VRR_brain_size, file = './database/cov_VRR_brain_size.Rdata')
+   save(cov_VRR_BDNF, file = './database/cov_VRR_BDNF.Rdata')
+   save(cov_VRR_TrkB, file = './database/cov_VRR_TrkB.Rdata')
+   save(cov_VRR_VEGF, file = './database/cov_VRR_VEGF.Rdata')
+   save(cov_VRR_reelin, file = './database/cov_VRR_reelin.Rdata')
+   save(cov_VRR_GFAP, file = './database/cov_VRR_GFAP.Rdata')
+   save(cov_VRR_syptophysin, file = './database/cov_VRR_syptophysin.Rdata')
+   save(cov_VRR_mitochondrial_biogenesis, file = './database/cov_VRR_mitochondrial_biogenesis.Rdata')
+   #save(cov_VRR_DNA_methylation, file = './database/cov_VRR_DNA_methylation.Rdata')
+   save(cov_VRR_learning_MWM, file = './database/cov_VRR_learning_MWM.Rdata')
+   save(cov_VRR_memory_MWM, file = './database/cov_VRR_memory_MWM.Rdata')
+   save(cov_VRR_memory_NOR, file = './database/cov_VRR_memory_NOR.Rdata')
+   save(cov_VRR_anxiety_OFT, file = './database/cov_VRR_anxiety_OFT.Rdata')
+   save(cov_VRR_anxiety_EPM, file = './database/cov_VRR_anxiety_EPM.Rdata')
+   save(cov_VRR_genes, file = './database/cov_VRR_genes.Rdata')
+   save(cov_VRR_behavior, file = './database/cov_VRR_behavior.Rdata')
+   save(cov_VRR_brain_development, file = './database/cov_VRR_brain_development.Rdata')
+
+ # lnCVR
+   save(cov_VCVR_neuron_count, file = './database/cov_VCVR_neuron_count.Rdata')
+   
+   save(cov_VCVR_brain_size, file = './database/cov_VCVR_brain_size.Rdata')
+   save(cov_VCVR_BDNF, file = './database/cov_VCVR_BDNF.Rdata')
+   save(cov_VCVR_TrkB, file = './database/cov_VCVR_TrkB.Rdata')
+   save(cov_VCVR_VEGF, file = './database/cov_VCVR_VEGF.Rdata')
+   save(cov_VCVR_reelin, file = './database/cov_VCVR_reelin.Rdata')
+   save(cov_VCVR_GFAP, file = './database/cov_VCVR_GFAP.Rdata')
+   save(cov_VCVR_syptophysin, file = './database/cov_VCVR_syptophysin.Rdata')
+   save(cov_VCVR_mitochondrial_biogenesis, file = './database/cov_VCVR_mitochondrial_biogenesis.Rdata')
+   #save(cov_VRR_DNA_methylation, file = './database/cov_VRR_DNA_methylation.Rdata')
+   save(cov_VCVR_learning_MWM, file = './database/cov_VCVR_learning_MWM.Rdata')
+   save(cov_VCVR_memory_MWM, file = './database/cov_VCVR_memory_MWM.Rdata')
+   save(cov_VCVR_memory_NOR, file = './database/cov_VCVR_memory_NOR.Rdata')
+   save(cov_VCVR_anxiety_OFT, file = './database/cov_VCVR_anxiety_OFT.Rdata')
+   save(cov_VCVR_anxiety_EPM, file = './database/cov_VCVR_anxiety_EPM.Rdata')
+   save(cov_VCVR_genes, file = './database/cov_VCVR_genes.Rdata')
+   save(cov_VCVR_behavior, file = './database/cov_VCVR_behavior.Rdata')
+   save(cov_VCVR_brain_development, file = './database/cov_VCVR_brain_development.Rdata')
+
+
+# Pre-processed dataset for study-level correlations
+  save(overlap.max, file = './database/overlap.max.Rdata')
+  save(overlap.ave, file = './database/overlap.ave.Rdata')
+  save(overlap.min, file = './database/overlap.min.Rdata')
+```

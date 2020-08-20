@@ -1,0 +1,3430 @@
+---
+title: "Models presented in: Intergenerational effects of physical exercise on cognition and brain: a multilevel meta-analysis of mean and variance"
+output:
+  html_document: default
+---
+
+
+## Step 2 - Running models
+
+
+### 1. Setup
+
+```{r setup, echo = FALSE, include = FALSE, warning = FALSE}
+# Tidy
+ # rm(list=ls())
+
+# Workspace
+  knitr::opts_chunk$set(echo = TRUE, warning = FALSE, eval = FALSE)
+
+# Loading packages
+  pacman::p_load(metafor, # running models
+                 readr, # reading csv files
+                 ggplot2, # visualizing
+                 dplyr # manipulating data
+              )
+  
+  
+   source('./functions/functions.R')
+  
+# Importing processed datasets
+ # Specific categories
+   neuron_count <- read.csv(file = './database/neuron_count.csv')
+   brain_size <- read.csv(file = './database/brain_size.csv')
+   BDNF <- read.csv(file = './database/BDNF.csv')
+   TrkB <- read.csv(file = './database/TrkB.csv')
+   VEGF <- read.csv(file = './database/VEGF.csv')
+   reelin <- read.csv(file = './database/reelin.csv')
+   GFAP <- read.csv(file = './database/GFAP.csv')
+   syptophysin <- read.csv(file = './database/syptophysin.csv')
+   mitochondrial_biogenesis <- read.csv(file = './database/mitochondrial_biogenesis.csv')
+   DNA_methylation <- read.csv(file = './database/DNA_methylation.csv')
+   learning_MWM <- read.csv(file = './database/learning_MWM.csv')
+   memory_MWM <- read.csv(file = './database/memory_MWM.csv')
+   memory_NOR <- read.csv(file = './database/memory_NOR.csv')
+   anxiety_OFT <- read.csv(file = './database/anxiety_OFT.csv')
+   anxiety_EPM <- read.csv(file = './database/anxiety_EPM.csv')
+ # Borad categories
+   behavior <- read.csv(file = './database/behavior.csv')
+   genes <- read.csv(file = './database/genes.csv')
+   brain_development <- read.csv(file = './database/brain_development.csv')  
+
+
+# Importing variance-corvariance matrices
+ # VRR
+   load(file = './database/cov_VRR_neuron_count.Rdata')
+   load(file = './database/cov_VRR_brain_size.Rdata')
+   load(file = './database/cov_VRR_BDNF.Rdata')
+   load(file = './database/cov_VRR_TrkB.Rdata')
+   load(file = './database/cov_VRR_VEGF.Rdata')
+   load(file = './database/cov_VRR_reelin.Rdata')
+   load(file = './database/cov_VRR_GFAP.Rdata')
+   load(file = './database/cov_VRR_syptophysin.Rdata')
+   load(file = './database/cov_VRR_mitochondrial_biogenesis.Rdata')
+   load(file = './database/cov_VRR_learning_MWM.Rdata')
+   load(file = './database/cov_VRR_memory_MWM.Rdata')
+   load(file = './database/cov_VRR_memory_NOR.Rdata')
+   load(file = './database/cov_VRR_anxiety_OFT.Rdata')
+   load(file = './database/cov_VRR_anxiety_EPM.Rdata')
+   load(file = './database/cov_VRR_genes.Rdata')
+   load(file = './database/cov_VRR_behavior.Rdata')
+   load(file = './database/cov_VRR_brain_development.Rdata')
+
+ # VCVR
+   load(file = './database/cov_VCVR_neuron_count.Rdata')
+   load(file = './database/cov_VCVR_brain_size.Rdata')
+   load(file = './database/cov_VCVR_BDNF.Rdata')
+   load(file = './database/cov_VCVR_TrkB.Rdata')
+   load(file = './database/cov_VCVR_VEGF.Rdata')
+   load(file = './database/cov_VCVR_reelin.Rdata')
+   load(file = './database/cov_VCVR_GFAP.Rdata')
+   load(file = './database/cov_VCVR_syptophysin.Rdata')
+   load(file = './database/cov_VCVR_mitochondrial_biogenesis.Rdata')
+   load(file = './database/cov_VCVR_learning_MWM.Rdata')
+   load(file = './database/cov_VCVR_memory_MWM.Rdata')
+   load(file = './database/cov_VCVR_memory_NOR.Rdata')
+   load(file = './database/cov_VCVR_anxiety_OFT.Rdata')
+   load(file = './database/cov_VCVR_anxiety_EPM.Rdata')
+   load(file = './database/cov_VCVR_genes.Rdata')
+   load(file = './database/cov_VCVR_behavior.Rdata')
+   load(file = './database/cov_VCVR_brain_development.Rdata')
+```
+
+
+
+### 2. Non-contrast model
+
+#### (i) Intercept-only model
+
+
+```{r Overall}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model1.neuron_count_RR <- with(neuron_count, rma.mv(yi = RR,
+                                                      V = cov_VRR_neuron_count,
+                                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                      method = 'REML',
+                                                      test = 'z'))
+
+
+# BDNF
+  model1.BDNF_RR <- with(BDNF, rma.mv(yi = RR,
+                                      V = cov_VRR_BDNF,
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      method = 'REML',
+                                      test = 'z'))
+
+
+# brain_size
+  model1.brain_size_RR <- with(brain_size, rma.mv(yi = RR,
+                               V = cov_VRR_brain_size,
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               method = 'REML',
+                               test = 'z'))
+# TrkB
+  model1.TrkB_RR <- with(TrkB, rma.mv(yi = RR,
+                                      V = cov_VRR_TrkB,
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      method = 'REML',
+                                      test = 'z'))
+# VEGF
+  model1.VEGF_RR <- with(VEGF, rma.mv(yi = RR,
+                                      V = cov_VRR_VEGF,
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      method = 'REML',
+                                      test = 'z'))
+# reelin
+  model1.reelin_RR <- with(reelin, rma.mv(yi = RR,
+                                          V = cov_VRR_reelin,
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          method = 'REML',
+                                          test = 'z'))
+# GFAP
+  model1.GFAP_RR <- with(GFAP, rma.mv(yi = RR,
+                                      V = cov_VRR_GFAP,
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      method = 'REML',
+                                      test = 'z'))
+# syptophysin
+  model1.syptophysin_RR <- with(syptophysin, rma.mv(yi = RR,
+                                                    V = cov_VRR_syptophysin,
+                                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                    method = 'REML',
+                                                    test = 'z'))
+# mitochondrial_biogenesis
+  model1.mitochondrial_biogenesis_RR <- with(mitochondrial_biogenesis, rma.mv(yi = RR,
+                                                                              V = cov_VRR_mitochondrial_biogenesis,
+                                                                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                                              method = 'REML',
+                                                                              test = 'z'))
+
+# DNA_methylation 
+ # subset is not enough to achieve convergency, so we replace cor-variance matrix and reduce random effect numbers
+
+  model1.DNA_methylation_RR <- with(DNA_methylation, rma.mv(yi = RR,
+                                                            V = VRR,
+                                                            random = list( ~1|ES_ID),
+                                                            method = 'REML',
+                                                            test = 'z'))
+
+# learning_MWM
+  model1.learning_MWM_RR <- with(learning_MWM, rma.mv(yi = RR,
+                                                      V = cov_VRR_learning_MWM,
+                                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                      method = 'REML',
+                                                      test = 'z'))
+
+# memory_MWM
+  model1.memory_MWM_RR <- with(memory_MWM, rma.mv(yi = RR,
+                                                  V = cov_VRR_memory_MWM,
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  method = 'REML',
+                                                  test = 'z'))
+# memory_NOR
+  model1.memory_NOR_RR <- with(memory_NOR, rma.mv(yi = RR,
+                                                  V = cov_VRR_memory_NOR,
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  method = 'REML',
+                                                  test = 'z'))
+# anxiety_OFT
+  model1.anxiety_OFT_RR <- with(anxiety_OFT, rma.mv(yi = RR,
+                                                    V = cov_VRR_anxiety_OFT,
+                                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                    method = 'REML',
+                                                  test = 'z'))
+# anxiety_EPM
+model1.anxiety_EPM_RR <- with(anxiety_EPM, rma.mv(yi = RR,
+                                                  V = cov_VRR_anxiety_EPM,
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  method = 'REML',
+                                                  test = 'z'))
+
+#--------------------- Board traits----------------------#
+
+
+
+# brain_development
+  model1.brain_development_RR <- with(brain_development, rma.mv(yi = RR,
+                                      V = cov_VRR_brain_development,
+                                      random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      method = 'REML',
+                                      test = 'z'))
+
+# genes
+model1.genes_RR <- with(genes, rma.mv(yi = RR,
+                                      V = cov_VRR_genes,
+                                      random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      method = 'REML',
+                                      test = 'z'))
+
+# behavior
+  model1.behavior_RR <- with(behavior, rma.mv(yi = RR,
+                                              V = cov_VRR_behavior,
+                                              random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                              method = 'REML',
+                                              test = 'z'))
+
+
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model1.neuron_count_CVR <- with(neuron_count, rma.mv(yi = CVR,
+                                                       V = cov_VCVR_neuron_count,
+                                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                       method = 'REML',
+                                                       test = 'z'))
+
+
+# BDNF
+  model1.BDNF_CVR <- with(BDNF, rma.mv(yi = CVR,
+                                       V = cov_VCVR_BDNF,
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       method = 'REML',
+                                       test = 'z'))
+
+
+# brain_size
+  model1.brain_size_CVR <- with(brain_size, rma.mv(yi = CVR,
+                                                   V = cov_VCVR_brain_size,
+                                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                   method = 'REML',
+                                                   test = 'z'))
+# TrkB
+  model1.TrkB_CVR <- with(TrkB, rma.mv(yi = CVR,
+                                       V = cov_VCVR_TrkB,
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       method = 'REML',
+                                       test = 'z'))
+# VEGF
+  model1.VEGF_CVR <- with(VEGF, rma.mv(yi = CVR,
+                                       V = cov_VCVR_VEGF,
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       method = 'REML',
+                                       test = 'z'))
+# reelin
+  model1.reelin_CVR <- with(reelin, rma.mv(yi = CVR,
+                                           V = cov_VCVR_reelin,
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           method = 'REML',
+                                           test = 'z'))
+# GFAP
+  model1.GFAP_CVR <- with(GFAP, rma.mv(yi = CVR,
+                                       V = cov_VCVR_GFAP,
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       method = 'REML',
+                                       test = 'z'))
+# syptophysin
+  model1.syptophysin_CVR <- with(syptophysin, rma.mv(yi = CVR,
+                                                     V = cov_VCVR_syptophysin,
+                                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                     method = 'REML',
+                                                     test = 'z'))
+# mitochondrial_biogenesis
+  model1.mitochondrial_biogenesis_CVR <- with(mitochondrial_biogenesis, rma.mv(yi = CVR,
+                                                                               V = cov_VCVR_mitochondrial_biogenesis,
+                                                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                                               method = 'REML',
+                                                                               test = 'z'))
+
+# DNA_methylation 
+ # subset is not enough to achieve convergency, so we replace cor-variance matrix and reduce random effect numbers
+
+  model1.DNA_methylation_CVR <- with(DNA_methylation, rma.mv(yi = CVR,
+                                                             V = VCVR,
+                                                             random = list( ~1|ES_ID),
+                                                             method = 'REML',
+                                                             test = 'z'))
+
+# learning_MWM
+  model1.learning_MWM_CVR <- with(learning_MWM, rma.mv(yi = CVR,
+                                                       V = cov_VCVR_learning_MWM,
+                                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                       method = 'REML',
+                                                       test = 'z'))
+
+# memory_MWM
+  model1.memory_MWM_CVR <- with(memory_MWM, rma.mv(yi = CVR,
+                                                   V = VCVR,
+                                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                   method = 'REML',
+                                                   test = 'z'))
+# memory_NOR
+model1.memory_NOR_CVR <- with(memory_NOR, rma.mv(yi = CVR,
+                                                 V = cov_VCVR_memory_NOR,
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 method = 'REML',
+                                                 test = 'z'))
+# anxiety_OFT
+  model1.anxiety_OFT_CVR <- with(anxiety_OFT, rma.mv(yi = CVR,
+                                                   V = cov_VCVR_anxiety_OFT,
+                                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                   method = 'REML',
+                                                   test = 'z'))
+# anxiety_EPM
+model1.anxiety_EPM_CVR <- with(anxiety_EPM, rma.mv(yi = CVR,
+                                                   V = cov_VCVR_anxiety_EPM,
+                                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                   method = 'REML',
+                                                   test = 'z'))
+
+#--------------------- Board traits----------------------#
+
+
+
+# brain_development
+  model1.brain_development_CVR <- with(brain_development, rma.mv(yi = CVR,
+                                                                 V = cov_VCVR_brain_development,
+                                                                random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                                method = 'REML',
+                                                                test = 'z'))
+
+# genes
+  model1.genes_CVR <- with(genes, rma.mv(yi = CVR,
+                                         V = cov_VCVR_genes,
+                                         random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         method = 'REML',
+                                         test = 'z'))
+
+# behavior
+  model1.behavior_CVR <- with(behavior, rma.mv(yi = CVR,
+                                               V = cov_VCVR_behavior,
+                                               random = list(~1|response_type, ~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               method = 'REML',
+                                               test = 'z'))
+
+
+
+# Saving models for overall effect
+ # Improvement (lnRR) 
+   save(model1.neuron_count_RR, file = './models/model1.neuron_count_RR.Rdata')
+   save(model1.brain_size_RR, file = './models/model1.brain_size_RR.Rdata')
+   save(model1.BDNF_RR, file = './models/model1.BDNF_RR.Rdata')
+   save(model1.TrkB_RR, file = './models/model1.TrkB_RR.Rdata')
+   save(model1.VEGF_RR, file = './models/model1.VEGF_RR.Rdata')
+   save(model1.reelin_RR, file = './models/model1.reelin_RR.Rdata')
+   save(model1.GFAP_RR, file = './models/model1.GFAP_RR.Rdata')
+   save(model1.syptophysin_RR, file = './models/model1.syptophysin_RR.Rdata')
+   save(model1.mitochondrial_biogenesis_RR, file = './models/model1.mitochondrial_biogenesis_RR.Rdata')
+   save(model1.DNA_methylation_RR, file = './models/model1.DNA_methylation_RR.Rdata')
+   save(model1.learning_MWM_RR, file = './models/model1.learning_MWM_RR.Rdata')
+   save(model1.memory_MWM_RR, file = './models/model1.memory_MWM_RR.Rdata')
+   save(model1.anxiety_OFT_RR, file = './models/model1.anxiety_OFT_RR.Rdata')
+   save(model1.anxiety_EPM_RR, file = './models/model1.anxiety_EPM_RR.Rdata')
+   save(model1.genes_RR, file = './models/model1.genes_RR.Rdata')
+   save(model1.behavior_RR, file = './models/model1.behavior_RR.Rdata')
+   save(model1.brain_development_RR, file = './models/model1.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model1.neuron_count_CVR, file = './models/model1.neuron_count_CVR.Rdata')
+   save(model1.brain_size_CVR, file = './models/model1.brain_size_CVR.Rdata')
+   save(model1.BDNF_CVR, file = './models/model1.BDNF_CVR.Rdata')
+   save(model1.TrkB_CVR, file = './models/model1.TrkB_CVR.Rdata')
+   save(model1.VEGF_CVR, file = './models/model1.VEGF_CVR.Rdata')
+   save(model1.reelin_CVR, file = './models/model1.reelin_CVR.Rdata')
+   save(model1.GFAP_CVR, file = './models/model1.GFAP_CVR.Rdata')
+   save(model1.syptophysin_CVR, file = './models/model1.syptophysin_CVR.Rdata')
+   save(model1.mitochondrial_biogenesis_CVR, file = './models/model1.mitochondrial_biogenesis_CVR.Rdata')
+   save(model1.DNA_methylation_CVR, file = './models/model1.DNA_methylation_CVR.Rdata')
+   save(model1.learning_MWM_CVR, file = './models/model1.learning_MWM_CVR.Rdata')
+   save(model1.memory_MWM_CVR, file = './models/model1.memory_MWM_CVR.Rdata')
+   save(model1.memory_NOR_CVR, file = './models/model1.memory_NOR_CVR.Rdata')
+   save(model1.anxiety_OFT_CVR, file = './models/model1.anxiety_OFT_CVR.Rdata')
+   save(model1.anxiety_EPM_CVR, file = './models/model1.anxiety_EPM_CVR.Rdata')
+   save(model1.genes_CVR, file = './models/model1.genes_CVR.Rdata')
+   save(model1.behavior_CVR, file = './models/model1.behavior_CVR.Rdata')
+   save(model1.brain_development_CVR, file = './models/model1.brain_development_CVR.Rdata')
+```
+
+
+
+#### (ii) Univariate regression model - parental sex
+
+
+```{r parental sex)}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model2.neuron_count_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_neuron_count, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                   data = neuron_count)
+
+# BDNF
+  model2.BDNF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_BDNF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                           data = BDNF)
+
+# brain_siz
+  model2.brain_size_RR <- rma.mv(yi = RR, 
+                               V = cov_VRR_brain_size, 
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                               data = brain_size)
+
+# TrkB
+  model2.TrkB_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_TrkB, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                           data = TrkB)
+
+# VEGF
+  model2.VEGF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_VEGF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                           data = VEGF)
+# reelin
+  model2.reelin_RR <- rma.mv(yi = RR, 
+                             V = cov_VRR_reelin, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                             data = reelin)
+# GFAP
+  model2.GFAP_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_GFAP, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                           data = GFAP)
+# syptophysin
+  model2.syptophysin_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_syptophysin, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                  data = syptophysin)
+# mitochondrial_biogenesis
+  model2.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                               V = cov_VRR_mitochondrial_biogenesis, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                               data = mitochondrial_biogenesis)
+# DNA_methylation
+  model2.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                      V = VRR, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                      data = DNA_methylation)
+# learning_MWM
+  model2.learning_MWM_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_learning_MWM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                   data = learning_MWM)
+# memory_MWM
+model2.memory_MWM_RR <- rma.mv(yi = RR, 
+                               V = cov_VRR_memory_MWM, 
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                               data = memory_MWM)
+# memory_NOR
+  model2.memory_NOR_RR <- rma.mv(yi = RR, 
+                                 V = VRR, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                 data = memory_NOR)
+# anxiety_OFT
+  model2.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_OFT, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                  data = anxiety_OFT)
+# anxiety_EPM
+  model2.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_EPM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                  data = anxiety_EPM)
+
+
+#--------------------- Board traits----------------------#
+
+
+# brain_development
+  model2.brain_development_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_brain_development, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                        data = brain_development)
+
+# genes
+  model2.genes_RR <- rma.mv(yi = RR, 
+                            V = cov_VRR_genes, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                            data = genes)
+
+
+# behavior
+  model2.behavior_RR <- rma.mv(yi = RR, 
+                               V = cov_VRR_behavior, 
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                               data = behavior)
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model2.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_neuron_count, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                    data = neuron_count)
+
+# brain_size
+  model2.brain_size_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_brain_size, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                  data = brain_size)
+
+# BDNF
+  model2.BDNF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_BDNF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                            data = BDNF)
+
+#TrkB
+  model2.TrkB_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_TrkB, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                            data = TrkB)
+# VEGF
+  model2.VEGF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_VEGF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                            data = VEGF)
+# reelin
+  model2.reelin_CVR <- rma.mv(yi = CVR, 
+                              V = cov_VCVR_reelin, 
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                              data = reelin)
+# GFAP
+  model2.GFAP_CVR <- rma.mv(yi = CVR, 
+                            V = VCVR, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                            data = GFAP)
+# syptophysin
+  model2.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_syptophysin, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                   data = syptophysin)
+# mitochondrial_biogenesis
+  model2.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                V = cov_VCVR_mitochondrial_biogenesis, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                                data = mitochondrial_biogenesis)
+# DNA_methylation
+model2.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                     V = VCVR, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                     data = DNA_methylation)
+# learning_MWM
+  model2.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_learning_MWM, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                    data = learning_MWM)
+# memory_MWM
+  model2.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_MWM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                  data = memory_MWM)
+# memory_NOR
+  model2.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_NOR, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                  data = memory_NOR)
+# anxiety_OFT
+  model2.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_OFT, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                   data = anxiety_OFT)
+# anxiety_EPM
+  model2.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_EPM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                   data = anxiety_EPM)
+
+
+#--------------------- Board traits----------------------#		
+
+
+
+# brain_development
+  model2.brain_development_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_brain_development, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                         data = brain_development)
+
+
+# genes
+  model2.genes_CVR <- rma.mv(yi = CVR, 
+                             V = cov_VCVR_genes, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                             data = genes)
+
+
+# behavior
+  model2.behavior_CVR <- rma.mv(yi = CVR, 
+                                V = cov_VCVR_behavior, 
+                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
+                                data = behavior)
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model2.neuron_count_RR, file = './models/model2.neuron_count_RR.Rdata')
+   save(model2.brain_size_RR, file = './models/model2.brain_size_RR.Rdata')
+   save(model2.BDNF_RR, file = './models/model2.BDNF_RR.Rdata')
+   save(model2.TrkB_RR, file = './models/model2.TrkB_RR.Rdata')
+   save(model2.VEGF_RR, file = './models/model2.VEGF_RR.Rdata')
+   save(model2.reelin_RR, file = './models/model2.reelin_RR.Rdata')
+   save(model2.GFAP_RR, file = './models/model2.GFAP_RR.Rdata')
+   save(model2.syptophysin_RR, file = './models/model2.syptophysin_RR.Rdata')
+   save(model2.mitochondrial_biogenesis_RR, file = './models/model2.mitochondrial_biogenesis_RR.Rdata')
+   save(model2.DNA_methylation_RR, file = './models/model2.DNA_methylation_RR.Rdata')
+   save(model2.learning_MWM_RR, file = './models/model2.learning_MWM_RR.Rdata')
+   save(model2.memory_MWM_RR, file = './models/model2.memory_MWM_RR.Rdata')
+   save(model2.memory_NOR_RR, file = './models/model2.memory_NOR_RR.Rdata')
+   save(model2.anxiety_OFT_RR, file = './models/model2.anxiety_OFT_RR.Rdata')
+   save(model2.anxiety_EPM_RR, file = './models/model2.anxiety_EPM_RR.Rdata')
+   save(model2.genes_RR, file = './models/model2.genes_RR.Rdata')
+   save(model2.behavior_RR, file = './models/model2.behavior_RR.Rdata')
+   save(model2.brain_development_RR, file = './models/model2.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model2.neuron_count_CVR, file = './models/model2.neuron_count_CVR.Rdata')
+   save(model2.brain_size_CVR, file = './models/model2.brain_size_CVR.Rdata')
+   save(model2.BDNF_CVR, file = './models/model2.BDNF_CVR.Rdata')
+   save(model2.TrkB_CVR, file = './models/model2.TrkB_CVR.Rdata')
+   save(model2.VEGF_CVR, file = './models/model2.VEGF_CVR.Rdata')
+   save(model2.reelin_CVR, file = './models/model2.reelin_CVR.Rdata')
+   save(model2.GFAP_CVR, file = './models/model2.GFAP_CVR.Rdata')
+   save(model2.syptophysin_CVR, file = './models/model2.syptophysin_CVR.Rdata')
+   save(model2.mitochondrial_biogenesis_CVR, file = './models/model2.mitochondrial_biogenesis_CVR.Rdata')
+   save(model2.DNA_methylation_CVR, file = './models/model2.DNA_methylation_CVR.Rdata')
+   save(model2.learning_MWM_CVR, file = './models/model2.learning_MWM_CVR.Rdata')
+   save(model2.memory_MWM_CVR, file = './models/model2.memory_MWM_CVR.Rdata')
+   save(model2.memory_NOR_CVR, file = './models/model2.memory_NOR_CVR.Rdata')
+  save(model2.anxiety_OFT_CVR, file = './models/model2.anxiety_OFT_CVR.Rdata')
+  save(model2.anxiety_EPM_CVR, file = './models/model2.anxiety_EPM_CVR.Rdata')
+  save(model2.behavior_CVR, file = './models/model2.behavior_CVR.Rdata')
+  save(model2.brain_development_CVR, file = './models/model2.brain_development_CVR.Rdata')
+```
+
+
+#### (iii) Univariate regression model - offspring sex
+
+```{r offspring sex}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model3.neuron_count_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_neuron_count, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                   data = neuron_count)
+
+# brain_size
+  model3.brain_size_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_brain_size, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                 data = brain_size)
+
+# BDNF
+  model3.BDNF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_BDNF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                           data = BDNF)
+
+
+# TrkB
+  model3.TrkB_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_TrkB, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F1_sex_test, ref = 'male') -1,  # no  female F1
+                           data = TrkB)
+# VEGF
+  model3.VEGF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_VEGF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                           data = VEGF)
+# reelin
+  model3.reelin_RR <- rma.mv(yi = RR, 
+                             V = cov_VRR_reelin, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                             data = reelin)
+
+# GFAP
+  model3.GFAP_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_GFAP, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(F1_sex_test, ref = 'male') -1, # no  female F1
+                           data = GFAP)
+# syptophysin
+  model3.syptophysin_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_syptophysin, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F1_sex_test, ref = 'male') -1, # no  female F1
+                                  data = syptophysin)
+# mitochondrial_biogenesis
+  model3.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                               V = cov_VRR_mitochondrial_biogenesis, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(F1_sex_test, ref = 'male') -1, # no  female F1
+                                               data = mitochondrial_biogenesis)
+# DNA_methylation
+  model3.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                      V = VRR, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(F1_sex_test, ref = 'male') -1, # no  female F1
+                                      data = DNA_methylation)
+# learning_MWM
+  model3.learning_MWM_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_learning_MWM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                   data = learning_MWM)
+# memory_MWM
+  model3.memory_MWM_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_MWM, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                 data = memory_MWM)
+# memory_NOR
+  model3.memory_NOR_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_NOR, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                 data = memory_NOR)
+# anxiety_OFT
+  model3.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_OFT, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                  data = anxiety_OFT)
+# anxiety_EPM
+  model3.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_EPM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                  data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+
+# brain_development
+  model3.brain_development_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_brain_development, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                        data = brain_development)
+
+# genes
+  model3.genes_RR <- rma.mv(yi = RR, 
+                            V = cov_VRR_genes, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                            data = genes)
+
+# behavior
+  model3.behavior_RR <- rma.mv(yi = RR, 
+                               V = cov_VRR_behavior, 
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                               data = behavior)
+  
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model3.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_neuron_count, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                    data = neuron_count)
+
+# brain_size
+model3.brain_size_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_brain_size, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                  data = brain_size)
+
+# BDNF
+  model3.BDNF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_BDNF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                            data = BDNF)
+
+# TrkB
+  model3.TrkB_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_TrkB, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                            data = TrkB)
+# VEGF
+  model3.VEGF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_VEGF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                            data = VEGF)
+# reelin
+  model3.reelin_CVR <- rma.mv(yi = CVR, 
+                              V = cov_VCVR_reelin, 
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                              data = reelin)
+# GFAP
+  model3.GFAP_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_GFAP, 
+                            random = list(~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                            data = GFAP)
+# syptophysin
+  model3.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_syptophysin, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                   data = syptophysin)
+# mitochondrial_biogenesis
+  model3.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                V = cov_VCVR_mitochondrial_biogenesis, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                                data = mitochondrial_biogenesis)
+# DNA_methylation
+  model3.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                       V = VCVR, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                       data = DNA_methylation)
+# learning_MWM
+  model3.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_learning_MWM, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                    data = learning_MWM)
+# memory_MWM
+  model3.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_MWM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                  data = memory_MWM)
+# memory_NOR
+  model3.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_NOR, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                  data = memory_NOR)
+# anxiety_OFT
+  model3.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_OFT, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                   data = anxiety_OFT)
+# anxiety_EPM
+  model3.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_EPM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                                   data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#		
+
+# brain_development
+  model3.brain_development_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_brain_development, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~relevel(F1_sex_test, ref = 'male') -1,
+                                         data = brain_development)	
+
+# genes
+  model3.genes_CVR <- rma.mv(yi = CVR, 
+                             V = cov_VCVR_genes, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~relevel(F1_sex_test, ref = 'male') -1, 
+                             data = genes)
+
+# behavior
+  model3.behavior_CVR <- rma.mv(yi = CVR, 
+                                V = cov_VCVR_behavior, 
+                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                mod = ~relevel(F1_sex_test, ref = 'male') -1,
+                                data = behavior)	
+
+
+# Saving
+ # Improvement (lnRR) 
+   save(model3.neuron_count_RR, file = './models/model3.neuron_count_RR.Rdata')
+   save(model3.brain_size_RR, file = './models/model3.brain_size_RR.Rdata')
+   save(model3.BDNF_RR, file = './models/model3.BDNF_RR.Rdata')
+   save(model3.TrkB_RR, file = './models/model3.TrkB_RR.Rdata')
+   save(model3.VEGF_RR, file = './models/model3.VEGF_RR.Rdata')
+   save(model3.reelin_RR, file = './models/model3.reelin_RR.Rdata')
+   save(model3.GFAP_RR, file = './models/model3.GFAP_RR.Rdata')
+   save(model3.syptophysin_RR, file = './models/model3.syptophysin_RR.Rdata')
+   save(model3.mitochondrial_biogenesis_RR, file = './models/model3.mitochondrial_biogenesis_RR.Rdata')
+   save(model3.DNA_methylation_RR, file = './models/model3.DNA_methylation_RR.Rdata')
+   save(model3.learning_MWM_RR, file = './models/model3.learning_MWM_RR.Rdata')
+   save(model3.memory_MWM_RR, file = './models/model3.memory_MWM_RR.Rdata')
+   save(model3.memory_NOR_RR, file = './models/model3.memory_NOR_RR.Rdata')
+   save(model3.anxiety_OFT_RR, file = './models/model3.anxiety_OFT_RR.Rdata')
+   save(model3.anxiety_EPM_RR, file = './models/model3.anxiety_EPM_RR.Rdata')
+   save(model3.genes_RR, file = './models/model3.genes_RR.Rdata')
+   save(model3.behavior_RR, file = './models/model3.behavior_RR.Rdata')
+   save(model3.brain_development_RR, file = './models/model3.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model3.neuron_count_CVR, file = './models/model3.neuron_count_CVR.Rdata')
+   save(model3.brain_size_CVR, file = './models/model3.brain_size_CVR.Rdata')
+   save(model3.BDNF_CVR, file = './models/model3.BDNF_CVR.Rdata')
+   save(model3.TrkB_CVR, file = './models/model3.TrkB_CVR.Rdata')
+   save(model3.VEGF_CVR, file = './models/model3.VEGF_CVR.Rdata')
+   save(model3.reelin_CVR, file = './models/model3.reelin_CVR.Rdata')
+   save(model3.GFAP_CVR, file = './models/model3.GFAP_CVR.Rdata')
+   save(model3.syptophysin_CVR, file = './models/model3.syptophysin_CVR.Rdata')
+   save(model3.mitochondrial_biogenesis_CVR, file = './models/model3.mitochondrial_biogenesis_CVR.Rdata')
+   save(model3.DNA_methylation_CVR, file = './models/model3.DNA_methylation_CVR.Rdata')
+   save(model3.learning_MWM_CVR, file = './models/model3.learning_MWM_CVR.Rdata')
+   save(model3.memory_MWM_CVR, file = './models/model3.memory_MWM_CVR.Rdata')
+   save(model3.memory_NOR_CVR, file = './models/model3.memory_NOR_CVR.Rdata')
+   save(model3.anxiety_OFT_CVR, file = './models/model3.anxiety_OFT_CVR.Rdata')
+   save(model3.anxiety_EPM_CVR, file = './models/model3.anxiety_EPM_CVR.Rdata')
+   save(model3.genes_CVR, file = './models/model3.genes_CVR.Rdata')
+   save(model3.behavior_CVR, file = './models/model3.behavior_CVR.Rdata')
+   save(model3.brain_development_CVR, file = './models/model3.brain_development_CVR.Rdata')
+```
+
+
+
+#### (iv) Univariate regression mode - exerise mode
+
+```{r exercise mode}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model4.neuron_count_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_neuron_count, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                   data = neuron_count)
+
+# brain_size
+  model4.brain_size_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_brain_size, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                 data = brain_size)
+
+# BDNF
+  model4.BDNF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_BDNF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                           data = BDNF)
+
+# TrkB
+  model4.TrkB_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_TrkB, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                           data = TrkB)
+# VEGF
+  model4.VEGF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_VEGF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                           data = VEGF)
+# reelin
+  model4.reelin_RR <- rma.mv(yi = RR, 
+                             V = cov_VRR_reelin, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                             data = reelin)
+# GFAP
+  model4.GFAP_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_GFAP, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                           data = GFAP)
+# syptophysin
+  model4.syptophysin_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_syptophysin, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = syptophysin)
+# mitochondrial_biogenesis
+  model4.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                               V = cov_VRR_mitochondrial_biogenesis, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                               data = mitochondrial_biogenesis)
+  
+# DNA_methylation
+  model4.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                      V = VRR, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                      data = DNA_methylation)
+# learning_MWM
+  model4.learning_MWM_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_learning_MWM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                   data = learning_MWM)
+# memory_MWM
+  model4.memory_MWM_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_MWM, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                 data = memory_MWM)
+# memory_NOR
+  model4.memory_NOR_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_NOR, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                 data = memory_NOR)
+# anxiety_OFT
+  model4.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_OFT, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = anxiety_OFT)
+# anxiety_EPM
+  model4.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_EPM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+
+# brain_development
+  model4.brain_development_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_brain_development, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(manipulation_mode, ref = 'forced') -1,
+                                        data = brain_development)
+
+# genes
+  model4.genes_RR <- rma.mv(yi = RR, 
+                            V = cov_VRR_genes, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_mode, ref = 'forced') -1,
+                            data = genes)
+
+# behavior
+  model4.behavior_RR <- rma.mv(yi = RR, 
+                               V = cov_VRR_behavior, 
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mod = ~relevel(manipulation_mode, ref = 'forced') -1,
+                               data = behavior)
+
+
+
+#***************************************************************#
+#------------- Inter-individual differencesb(lnCVR)-------------# 
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model4.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_neuron_count, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                    data = neuron_count)
+
+# brain_size
+  model4.brain_size_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_brain_size, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = brain_size)
+
+# BDNF
+  model4.BDNF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_BDNF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                            data = BDNF)
+
+# TrkB
+  model4.TrkB_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_TrkB, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = TrkB)
+# VEGF
+  model4.VEGF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_VEGF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                            data = VEGF)
+# reelin
+  model4.reelin_CVR <- rma.mv(yi = CVR, 
+                              V = cov_VCVR_reelin, 
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                              data = reelin)
+# GFAP
+  model4.GFAP_CVR <- rma.mv(yi = CVR, 
+                                  V = VCVR,#cov_VCVR_GFAP, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = GFAP)
+# syptophysin
+model4.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                 V = cov_VCVR_syptophysin, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                 data = syptophysin)
+# mitochondrial_biogenesis
+  model4.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                V = cov_VCVR_mitochondrial_biogenesis, 
+                                                random = list(~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                                data = mitochondrial_biogenesis)
+# DNA_methylation
+  model4.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                       V = VCVR, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                       data = DNA_methylation)
+# learning_MWM
+  model4.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_learning_MWM, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                    data = learning_MWM)
+# memory_MWM
+  model4.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_MWM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = memory_MWM)
+# memory_NOR
+  model4.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_NOR, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                  data = memory_NOR)
+# anxiety_OFT
+  model4.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_OFT, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                   data = anxiety_OFT)
+# anxiety_EPM
+  model4.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_EPM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
+                                   data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#		
+
+# brain_development
+  model4.brain_development_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_brain_development, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~relevel(manipulation_mode, ref = 'forced') -1,
+                                         data = brain_development)
+
+# genes
+  model4.genes_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_genes, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced') -1,
+                                  data = genes)
+
+# behavior
+model4.behavior_CVR <- rma.mv(yi = CVR, 
+                              V = cov_VCVR_behavior, 
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mod = ~relevel(manipulation_mode, ref = 'forced') -1,
+                              data = behavior)
+
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model4.neuron_count_RR, file = './models/model4.neuron_count_RR.Rdata')
+   save(model4.brain_size_RR, file = './models/model4.brain_size_RR.Rdata')
+   save(model4.BDNF_RR, file = './models/model4.BDNF_RR.Rdata')
+   save(model4.TrkB_RR, file = './models/model4.TrkB_RR.Rdata')
+   save(model4.VEGF_RR, file = './models/model4.VEGF_RR.Rdata')
+   save(model4.reelin_RR, file = './models/model4.reelin_RR.Rdata')
+   save(model4.GFAP_RR, file = './models/model4.GFAP_RR.Rdata')
+   save(model4.syptophysin_RR, file = './models/model4.syptophysin_RR.Rdata')
+   save(model4.mitochondrial_biogenesis_RR, file = './models/model4.mitochondrial_biogenesis_RR.Rdata')
+   save(model4.DNA_methylation_RR, file = './models/model4.DNA_methylation_RR.Rdata')
+   save(model4.learning_MWM_RR, file = './models/model4.learning_MWM_RR.Rdata')
+   save(model4.memory_MWM_RR, file = './models/model4.memory_MWM_RR.Rdata')
+   save(model4.memory_NOR_RR, file = './models/model4.memory_NOR_RR.Rdata')
+   save(model4.anxiety_OFT_RR, file = './models/model4.anxiety_OFT_RR.Rdata')
+   save(model4.anxiety_EPM_RR, file = './models/model4.anxiety_EPM_RR.Rdata')
+   save(model4.genes_RR, file = './models/model4.genes_RR.Rdata')
+   save(model4.behavior_RR, file = './models/model4.behavior_RR.Rdata')
+   save(model4.brain_development_RR, file = './models/model4.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model4.neuron_count_CVR, file = './models/model4.neuron_count_CVR.Rdata')
+   save(model4.brain_size_CVR, file = './models/model4.brain_size_CVR.Rdata')
+   save(model4.BDNF_CVR, file = './models/model4.BDNF_CVR.Rdata')
+   save(model4.TrkB_CVR, file = './models/model4.TrkB_CVR.Rdata')
+   save(model4.VEGF_CVR, file = './models/model4.VEGF_CVR.Rdata')
+   save(model4.reelin_CVR, file = './models/model4.reelin_CVR.Rdata')
+   save(model4.GFAP_CVR, file = './models/model4.GFAP_CVR.Rdata')
+   save(model4.syptophysin_CVR, file = './models/model4.syptophysin_CVR.Rdata')
+   save(model4.mitochondrial_biogenesis_CVR, file = './models/model4.mitochondrial_biogenesis_CVR.Rdata')
+   save(model4.DNA_methylation_CVR, file = './models/model4.DNA_methylation_CVR.Rdata')
+   save(model4.learning_MWM_CVR, file = './models/model4.learning_MWM_CVR.Rdata')
+   save(model4.memory_MWM_CVR, file = './models/model4.memory_MWM_CVR.Rdata')
+   save(model4.memory_NOR_CVR, file = './models/model4.memory_NOR_CVR.Rdata')
+   save(model4.anxiety_OFT_CVR, file = './models/model4.anxiety_OFT_CVR.Rdata')
+   save(model4.anxiety_EPM_CVR, file = './models/model4.anxiety_EPM_CVR.Rdata')
+   save(model4.genes_CVR, file = './models/model4.genes_CVR.Rdata')
+   save(model4.behavior_CVR, file = './models/model4.behavior_CVR.Rdata')
+   save(model4.brain_development_CVR, file = './models/model4.brain_development_CVR.Rdata')
+```
+
+
+
+#### (v) Univariate regression model - exercise timming
+
+```{r exercise timming}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model5.neuron_count_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_neuron_count, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                   data = neuron_count)
+# brain_size
+  model5.brain_size_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_brain_size, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                 data = brain_size)
+
+# BDNF
+  model5.BDNF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_BDNF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                           data = BDNF)
+
+
+# TrkB
+  model5.TrkB_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_TrkB, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                           data = TrkB)
+# VEGF
+  model5.VEGF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_VEGF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                           data = VEGF)
+# reelin
+  model5.reelin_RR <- rma.mv(yi = RR, 
+                             V = cov_VRR_reelin, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                             data = reelin)
+# GFAP
+  model5.GFAP_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_GFAP, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                           data = GFAP)
+# syptophysin
+  model5.syptophysin_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_syptophysin, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                  data = syptophysin)
+
+# mitochondrial_biogenesis
+  model5.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                               V = cov_VRR_mitochondrial_biogenesis, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                               data = mitochondrial_biogenesis)
+  
+# DNA_methylation
+  model5.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                      V = VRR, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                      data = DNA_methylation)
+# learning_MWM
+  model5.learning_MWM_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_learning_MWM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                   data = learning_MWM)
+# memory_MWM
+  model5.memory_MWM_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_MWM, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                 data = memory_MWM)
+# memory_NOR
+  model5.memory_NOR_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_NOR, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                 data = memory_NOR)
+# anxiety_OFT
+  model5.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_OFT, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                  data = anxiety_OFT)
+# anxiety_EPM
+  model5.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_EPM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                  data = anxiety_EPM)
+
+#---------------------  Board traits----------------------#
+
+
+# brain_development
+  model5.brain_development_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_brain_development, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(manipulation_window, ref = 'pre-conception') -1,
+                                        data = brain_development)
+
+
+# genes
+  model5.genes_RR <- rma.mv(yi = RR, 
+                            V = cov_VRR_genes, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_window, ref = 'pre-conception') -1,
+                            data = genes)
+
+
+# behavior
+  model5.behavior_RR <- rma.mv(yi = RR, 
+                               V = cov_VRR_behavior, 
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mod = ~relevel(manipulation_window, ref = 'pre-conception') -1,
+                               data = behavior)
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model5.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_neuron_count, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                    data = neuron_count)
+
+# BDNF
+  model5.BDNF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_BDNF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                            data = BDNF)
+# brain_size
+  model5.brain_size_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_brain_size, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                  data = brain_size)
+
+# TrkB
+  model5.TrkB_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_TrkB, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                            data = TrkB)
+# VEGF
+  model5.VEGF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_VEGF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                            data = VEGF)
+# reelin
+  model5.reelin_CVR <- rma.mv(yi = CVR, 
+                              V = cov_VCVR_reelin, 
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                              data = reelin)
+# GFAP
+  model5.GFAP_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_GFAP, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                            data = GFAP)
+# syptophysin
+  model5.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_syptophysin, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                   data = syptophysin)
+# mitochondrial_biogenesis
+  model5.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                V = cov_VCVR_mitochondrial_biogenesis, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                                data = mitochondrial_biogenesis)
+# DNA_methylation
+  model5.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                       V = VCVR, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                       data = DNA_methylation)
+# learning_MWM
+  model5.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_learning_MWM, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                    data = learning_MWM)
+# memory_MWM
+  model5.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                  V = VCVR,#cov_VCVR_memory_MWM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                  data = memory_MWM)
+# memory_NOR
+  model5.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_NOR, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                  data = memory_NOR)
+# anxiety_OFT
+  model5.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_OFT, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                   data = anxiety_OFT)
+# anxiety_EPM
+  model5.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_EPM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
+                                   data = anxiety_EPM)
+
+#--------------------- grouped traits----------------------#		
+
+
+
+# brain_development
+  model5.brain_development_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_brain_development, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~relevel(manipulation_window, ref = 'pre-conception') -1,
+                                         data = brain_development)	
+
+
+# genes
+  model5.genes_CVR <- rma.mv(yi = CVR, 
+                             V = cov_VCVR_genes, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~relevel(manipulation_window, ref = 'pre-conception') -1,
+                             data = genes)
+
+
+# behavior
+  model5.behavior_CVR <- rma.mv(yi = CVR, 
+                                V = cov_VCVR_behavior, 
+                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                mod = ~relevel(manipulation_window, ref = 'pre-conception') -1,
+                               data = behavior)	
+
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model5.neuron_count_RR, file = './models/model5.neuron_count_RR.Rdata')
+   save(model5.brain_size_RR, file = './models/model5.brain_size_RR.Rdata')
+   save(model5.BDNF_RR, file = './models/model5.BDNF_RR.Rdata')
+   save(model5.TrkB_RR, file = './models/model5.TrkB_RR.Rdata')
+   save(model5.VEGF_RR, file = './models/model5.VEGF_RR.Rdata')
+   save(model5.reelin_RR, file = './models/model5.reelin_RR.Rdata')
+   save(model5.GFAP_RR, file = './models/model5.GFAP_RR.Rdata')
+   save(model5.syptophysin_RR, file = './models/model5.syptophysin_RR.Rdata')
+   save(model5.mitochondrial_biogenesis_RR, file = './models/model5.mitochondrial_biogenesis_RR.Rdata')
+   save(model5.DNA_methylation_RR, file = './models/model5.DNA_methylation_RR.Rdata')
+   save(model5.learning_MWM_RR, file = './models/model5.learning_MWM_RR.Rdata')
+   save(model5.memory_MWM_RR, file = './models/model5.memory_MWM_RR.Rdata')
+   save(model5.memory_NOR_RR, file = './models/model5.memory_NOR_RR.Rdata')
+   save(model5.anxiety_OFT_RR, file = './models/model5.anxiety_OFT_RR.Rdata')
+   save(model5.anxiety_EPM_RR, file = './models/model5.anxiety_EPM_RR.Rdata')
+   save(model5.behavior_RR, file = './models/model5.behavior_RR.Rdata')
+   save(model5.brain_development_RR, file = './models/model5.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+  save(model5.neuron_count_CVR, file = './models/model5.neuron_count_CVR.Rdata')
+  save(model5.brain_size_CVR, file = './models/model5.brain_size_CVR.Rdata')
+  save(model5.BDNF_CVR, file = './models/model5.BDNF_CVR.Rdata')
+  save(model5.TrkB_CVR, file = './models/model5.TrkB_CVR.Rdata')
+  save(model5.VEGF_CVR, file = './models/model5.VEGF_CVR.Rdata')
+  save(model5.reelin_CVR, file = './models/model5.reelin_CVR.Rdata')
+  save(model5.GFAP_CVR, file = './models/model5.GFAP_CVR.Rdata')
+  save(model5.syptophysin_CVR, file = './models/model5.syptophysin_CVR.Rdata')
+  save(model5.mitochondrial_biogenesis_CVR, file = './models/model5.mitochondrial_biogenesis_CVR.Rdata')
+  save(model5.DNA_methylation_CVR, file = './models/model5.DNA_methylation_CVR.Rdata')
+  save(model5.learning_MWM_CVR, file = './models/model5.learning_MWM_CVR.Rdata')
+  save(model5.memory_MWM_CVR, file = './models/model5.memory_MWM_CVR.Rdata')
+  save(model5.memory_NOR_CVR, file = './models/model5.memory_NOR_CVR.Rdata')
+  save(model5.anxiety_OFT_CVR, file = './models/model5.anxiety_OFT_CVR.Rdata')
+  save(model5.anxiety_EPM_CVR, file = './models/model5.anxiety_EPM_CVR.Rdata')
+  save(model5.genes_CVR, file = './models/model5.genes_CVR.Rdata')
+  save(model5.brain_development_CVR, file = './models/model5.brain_development_CVR.Rdata')
+```
+
+
+
+
+#### (vi) Univariate regression model - F1 ontogenetic stage
+
+```{r F1 ontogenetic stage}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model6.neuron_count_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_neuron_count, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~response_age_life_phase -1, 
+                                   data = neuron_count)
+
+# BDNF
+model6.BDNF_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_BDNF, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~response_age_life_phase -1, 
+                                 data = BDNF)
+
+# brain_size
+  model6.brain_size_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_brain_size, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~response_age_life_phase -1, 
+                                 data = brain_size)
+
+# TrkB
+  model6.TrkB_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_TrkB, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~response_age_life_phase -1, 
+                           data = TrkB)
+# VEGF
+  model6.VEGF_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_VEGF, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~response_age_life_phase -1, 
+                          data = VEGF)
+# reelin
+  model6.reelin_RR <- rma.mv(yi = RR, 
+                             V = cov_VRR_reelin, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~response_age_life_phase -1, 
+                             data = reelin)
+# GFAP
+  model6.GFAP_RR <- rma.mv(yi = RR, 
+                           V = cov_VRR_GFAP, 
+                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                           mod = ~response_age_life_phase -1, 
+                           data = GFAP)
+# syptophysin
+  model6.syptophysin_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_syptophysin, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase -1, 
+                                  data = syptophysin)
+# mitochondrial_biogenesis
+  model6.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                               V = VRR, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~response_age_life_phase -1, 
+                                               data = mitochondrial_biogenesis)
+# DNA_methylation
+  model6.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                      V = VRR, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~response_age_life_phase -1, 
+                                      data = DNA_methylation)
+# learning_MWM
+  model6.learning_MWM_RR <- rma.mv(yi = RR, 
+                                   V = cov_VRR_learning_MWM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~response_age_life_phase -1, 
+                                   data = learning_MWM)
+# memory_MWM
+  model6.memory_MWM_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_MWM, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~response_age_life_phase -1, 
+                                 data = memory_MWM)
+# memory_NOR
+  model6.memory_NOR_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_memory_NOR, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~response_age_life_phase -1, 
+                                 data = memory_NOR)
+# anxiety_OFT
+  model6.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_OFT, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase -1, 
+                                  data = anxiety_OFT)
+# anxiety_EPM
+  model6.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_anxiety_EPM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mods = ~response_age_life_phase -1, 
+                                  data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+
+
+# genes
+  model6.genes_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_genes, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase -1,
+                                  data = genes)
+
+
+# behavior
+model6.behavior_RR <- rma.mv(yi = RR, 
+                             V = cov_VRR_behavior, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~response_age_life_phase -1,
+                             data = behavior)
+
+# brain_development
+  model6.brain_development_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_brain_development, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~response_age_life_phase -1,
+                                        data = brain_development)
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model6.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_neuron_count, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~response_age_life_phase -1, 
+                                    data = neuron_count)
+
+# BDNF
+  model6.BDNF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_BDNF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~response_age_life_phase -1, 
+                            data = BDNF)
+# brain_size
+  model6.brain_size_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_brain_size, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase -1, 
+                                  data = brain_size)
+# TrkB
+  model6.TrkB_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_TrkB, 
+                            random = list(~1|study_ID, ~1|ES_ID),
+                            mod = ~response_age_life_phase -1, 
+                            data = TrkB)
+# VEGF
+  model6.VEGF_CVR <- rma.mv(yi = CVR, 
+                            V = cov_VCVR_VEGF, 
+                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                            mod = ~response_age_life_phase -1, 
+                            data = VEGF)
+# reelin
+  model6.reelin_CVR <- rma.mv(yi = CVR, 
+                              V = cov_VCVR_reelin, 
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mod = ~response_age_life_phase -1, 
+                              data = reelin)
+# GFAP
+  model6.GFAP_CVR <- rma.mv(yi = CVR, 
+                            V = VCVR,#cov_VCVR_GFAP, 
+                            random = list(~1|study_ID, ~1|ES_ID),
+                            mod = ~response_age_life_phase -1, 
+                            data = GFAP)
+# syptophysin
+  model6.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_syptophysin, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~response_age_life_phase -1, 
+                                   data = syptophysin)
+# mitochondrial_biogenesis
+  model6.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                V = cov_VCVR_mitochondrial_biogenesis, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~response_age_life_phase -1, 
+                                                data = mitochondrial_biogenesis)
+# DNA_methylation
+  model6.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                       V = VCVR, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~response_age_life_phase -1, 
+                                       data = DNA_methylation)
+# learning_MWM
+  model6.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_learning_MWM, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~response_age_life_phase -1, 
+                                    data = learning_MWM)
+# memory_MWM
+  model6.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_MWM, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase -1, 
+                                  data = memory_MWM)
+# memory_NOR
+  model6.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_memory_NOR, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase -1, 
+                                  data = memory_NOR)
+# anxiety_OFT
+  model6.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_OFT, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~response_age_life_phase -1, 
+                                   data = anxiety_OFT)
+# anxiety_EPM
+  model6.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_anxiety_EPM, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~response_age_life_phase -1, 
+                                   data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#		
+
+
+# genes
+  model6.genes_CVR <- rma.mv(yi = CVR, 
+                             V = cov_VCVR_genes, 
+                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                             mod = ~response_age_life_phase -1,
+                             data = genes)
+
+
+# behavior
+model6.behavior_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_behavior, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase -1,
+                                  data = behavior)
+
+# brain_development
+  model6.brain_development_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_brain_development, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~response_age_life_phase -1,
+                                         data = brain_development)
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model6.neuron_count_RR, file = './models/model6.neuron_count_RR.Rdata')
+   save(model6.brain_size_RR, file = './models/model6.brain_size_RR.Rdata')
+   save(model6.BDNF_RR, file = './models/model6.BDNF_RR.Rdata')
+   save(model6.TrkB_RR, file = './models/model6.TrkB_RR.Rdata')
+   save(model6.VEGF_RR, file = './models/model6.VEGF_RR.Rdata')
+   save(model6.reelin_RR, file = './models/model6.reelin_RR.Rdata')
+   save(model6.GFAP_RR, file = './models/model6.GFAP_RR.Rdata')
+   save(model6.syptophysin_RR, file = './models/model6.syptophysin_RR.Rdata')
+   save(model6.mitochondrial_biogenesis_RR, file = './models/model6.mitochondrial_biogenesis_RR.Rdata')
+   save(model6.DNA_methylation_RR, file = './models/model6.DNA_methylation_RR.Rdata')
+   save(model6.learning_MWM_RR, file = './models/model6.learning_MWM_RR.Rdata')
+   save(model6.memory_MWM_RR, file = './models/model6.memory_MWM_RR.Rdata')
+   save(model6.memory_NOR_RR, file = './models/model6.memory_NOR_RR.Rdata')
+   save(model6.anxiety_OFT_RR, file = './models/model6.anxiety_OFT_RR.Rdata')
+   save(model6.anxiety_EPM_RR, file = './models/model6.anxiety_EPM_RR.Rdata')
+   save(model6.genes_RR, file = './models/model6.genes_RR.Rdata')
+   save(model6.behavior_RR, file = './models/model6.behavior_RR.Rdata')
+   save(model6.brain_development_RR, file = './models/model6.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model6.neuron_count_CVR, file = './models/model6.neuron_count_CVR.Rdata')
+   save(model6.brain_size_CVR, file = './models/model6.brain_size_CVR.Rdata')
+   save(model6.BDNF_CVR, file = './models/model6.BDNF_CVR.Rdata')
+   save(model6.TrkB_CVR, file = './models/model6.TrkB_CVR.Rdata')
+   save(model6.VEGF_CVR, file = './models/model6.VEGF_CVR.Rdata')
+   save(model6.reelin_CVR, file = './models/model6.reelin_CVR.Rdata')
+   save(model6.GFAP_CVR, file = './models/model6.GFAP_CVR.Rdata')
+   save(model6.syptophysin_CVR, file = './models/model6.syptophysin_CVR.Rdata')
+   save(model6.mitochondrial_biogenesis_CVR, file = './models/model6.mitochondrial_biogenesis_CVR.Rdata')
+   save(model6.DNA_methylation_CVR, file = './models/model6.DNA_methylation_CVR.Rdata')
+   save(model6.learning_MWM_CVR, file = './models/model6.learning_MWM_CVR.Rdata')
+   save(model6.memory_MWM_CVR, file = './models/model6.memory_MWM_CVR.Rdata')
+   save(model6.memory_NOR_CVR, file = './models/model6.memory_NOR_CVR.Rdata')
+   save(model6.anxiety_OFT_CVR, file = './models/model6.anxiety_OFT_CVR.Rdata')
+   save(model6.anxiety_EPM_CVR, file = './models/model6.anxiety_EPM_CVR.Rdata')
+   save(model6.genes_CVR, file = './models/model6.genes_CVR.Rdata')
+   save(model6.behavior_CVR, file = './models/model6.behavior_CVR.Rdata')
+   save(model6.brain_development_CVR, file = './models/model6.brain_development_CVR.Rdata')
+```
+
+
+
+
+
+
+### 3. Contrast models
+
+
+#### (ii) Univariate regression model - parental sex
+
+```{r parental sex}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast2.neuron_count_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_neuron_count, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                            data = neuron_count)
+
+# BDNF
+  model.contrast2.BDNF_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_BDNF, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                  data = BDNF)
+
+# brain_siz
+model.contrast2.brain_size_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_brain_size, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                        data = brain_size)
+
+# TrkB
+  model.contrast2.TrkB_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_TrkB, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                    data = TrkB)
+
+# VEGF
+  model.contrast2.VEGF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_VEGF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                    data = VEGF)
+# reelin
+  model.contrast2.reelin_RR <- rma.mv(yi = RR, 
+                                      V = cov_VRR_reelin, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                      data = reelin)
+# GFAP
+  model.contrast2.GFAP_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_GFAP, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                    data = GFAP)
+# syptophysin
+  model.contrast2.syptophysin_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_syptophysin, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                           data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast2.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                                        V = cov_VRR_mitochondrial_biogenesis, 
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                                        data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast2.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                               V = VRR, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                               data = DNA_methylation)
+# learning_MWM
+  model.contrast2.learning_MWM_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_learning_MWM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                            data = learning_MWM)
+# memory_MWM
+  model.contrast2.memory_MWM_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_MWM, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                          data = memory_MWM)
+# memory_NOR
+  model.contrast2.memory_NOR_RR <- rma.mv(yi = RR, 
+                                          V = VRR,#cov_VRR_memory_NOR, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                          data = memory_NOR)
+# anxiety_OFT
+  model.contrast2.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_OFT, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                           data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast2.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_EPM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                           data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+# brain_development
+  model.contrast2.brain_development_RR <- rma.mv(yi = RR, 
+                                                 V = cov_VRR_brain_development, 
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                                 data = brain_development)
+
+# genes
+  model.contrast2.genes_RR <- rma.mv(yi = RR, 
+                                     V = cov_VRR_genes, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                     data = genes)
+
+
+# behavior
+  model.contrast2.behavior_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_behavior, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                        data = behavior)
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast2.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_neuron_count, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                             data = neuron_count)
+
+# brain_size
+  model.contrast2.brain_size_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_brain_size, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                           data = brain_size)
+
+# BDNF
+  model.contrast2.BDNF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_BDNF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                     data = BDNF)
+
+#TrkB
+  model.contrast2.TrkB_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_TrkB, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                     data = TrkB)
+# VEGF
+  model.contrast2.VEGF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_VEGF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                     data = VEGF)
+# reelin
+  model.contrast2.reelin_CVR <- rma.mv(yi = CVR, 
+                                       V = cov_VCVR_reelin, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                       data = reelin)
+# GFAP
+  model.contrast2.GFAP_CVR <- rma.mv(yi = CVR, 
+                                     V = VCVR,
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                     data = GFAP)
+# syptophysin
+  model.contrast2.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_syptophysin, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                            data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast2.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                         V = cov_VCVR_mitochondrial_biogenesis, 
+                                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                         mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                                         data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast2.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                                V = VCVR, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                                data = DNA_methylation)
+# learning_MWM
+  model.contrast2.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_learning_MWM, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                             data = learning_MWM)
+# memory_MWM
+  model.contrast2.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_MWM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                           data = memory_MWM)
+# memory_NOR
+  model.contrast2.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_NOR, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                           data = memory_NOR)
+# anxiety_OFT
+  model.contrast2.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_OFT, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                            data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast2.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_EPM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                            data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#		
+
+# brain_development
+  model.contrast2.brain_development_CVR <- rma.mv(yi = CVR, 
+                                                  V = cov_VCVR_brain_development, 
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                                  data = brain_development)
+
+
+# genes
+  model.contrast2.genes_CVR <- rma.mv(yi = CVR, 
+                                      V = cov_VCVR_genes, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                      data = genes)
+
+
+# behavior
+  model.contrast2.behavior_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_behavior, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~relevel(F0_sex_exercise, ref = 'male'), 
+                                         data = behavior)
+
+
+# Saving models
+
+ # Improvement (lnRR) 
+   save(model.contrast2.neuron_count_RR, file = './models/model.contrast2.neuron_count_RR.Rdata')
+   save(model.contrast2.brain_size_RR, file = './models/model.contrast2.brain_size_RR.Rdata')
+   save(model.contrast2.BDNF_RR, file = './models/model.contrast2.BDNF_RR.Rdata')
+   save(model.contrast2.TrkB_RR, file = './models/model.contrast2.TrkB_RR.Rdata')
+   save(model.contrast2.VEGF_RR, file = './models/model.contrast2.VEGF_RR.Rdata')
+   save(model.contrast2.reelin_RR, file = './models/model.contrast2.reelin_RR.Rdata')
+   save(model.contrast2.GFAP_RR, file = './models/model.contrast2.GFAP_RR.Rdata')
+   save(model.contrast2.syptophysin_RR, file = './models/model.contrast2.syptophysin_RR.Rdata')
+  save(model.contrast2.mitochondrial_biogenesis_RR, file = './models/model.contrast2.mitochondrial_biogenesis_RR.Rdata')
+  save(model.contrast2.DNA_methylation_RR, file = './models/model.contrast2.DNA_methylation_RR.Rdata')
+  save(model.contrast2.learning_MWM_RR, file = './models/model.contrast2.learning_MWM_RR.Rdata')
+  save(model.contrast2.memory_MWM_RR, file = './models/model.contrast2.memory_MWM_RR.Rdata')
+  save(model.contrast2.memory_NOR_RR, file = './models/model.contrast2.memory_NOR_RR.Rdata')
+  save(model.contrast2.anxiety_OFT_RR, file = './models/model.contrast2.anxiety_OFT_RR.Rdata')
+  save(model.contrast2.anxiety_EPM_RR, file = './models/model.contrast2.anxiety_EPM_RR.Rdata')
+  save(model.contrast2.genes_RR, file = './models/model.contrast2.genes_RR.Rdata')
+  save(model.contrast2.behavior_RR, file = './models/model.contrast2.behavior_RR.Rdata')
+  save(model.contrast2.brain_development_RR, file = './models/model.contrast2.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model.contrast2.neuron_count_CVR, file = './models/model.contrast2.neuron_count_CVR.Rdata')
+   save(model.contrast2.brain_size_CVR, file = './models/model.contrast2.brain_size_CVR.Rdata')
+   save(model.contrast2.BDNF_CVR, file = './models/model.contrast2.BDNF_CVR.Rdata')
+   save(model.contrast2.TrkB_CVR, file = './models/model.contrast2.TrkB_CVR.Rdata')
+   save(model.contrast2.VEGF_CVR, file = './models/model.contrast2.VEGF_CVR.Rdata')
+   save(model.contrast2.reelin_CVR, file = './models/model.contrast2.reelin_CVR.Rdata')
+   save(model.contrast2.GFAP_CVR, file = './models/model.contrast2.GFAP_CVR.Rdata')
+   save(model.contrast2.syptophysin_CVR, file = './models/model.contrast2.syptophysin_CVR.Rdata')
+   save(model.contrast2.mitochondrial_biogenesis_CVR, file = './models/model.contrast2.mitochondrial_biogenesis_CVR.Rdata')
+   save(model.contrast2.DNA_methylation_CVR, file = './models/model.contrast2.DNA_methylation_CVR.Rdata')
+   save(model.contrast2.learning_MWM_CVR, file = './models/model.contrast2.learning_MWM_CVR.Rdata')
+   save(model.contrast2.memory_MWM_CVR, file = './models/model.contrast2.memory_MWM_CVR.Rdata')
+   save(model.contrast2.memory_NOR_CVR, file = './models/model.contrast2.memory_NOR_CVR.Rdata')
+   save(model.contrast2.anxiety_OFT_CVR, file = './models/model.contrast2.anxiety_OFT_CVR.Rdata')
+   save(model.contrast2.anxiety_EPM_CVR, file = './models/model.contrast2.anxiety_EPM_CVR.Rdata')
+   save(model.contrast2.genes_CVR, file = './models/model.contrast2.genes_CVR.Rdata')
+   save(model.contrast2.behavior_CVR, file = './models/model.contrast2.behavior_CVR.Rdata')
+   save(model.contrast2.brain_development_CVR, file = './models/model.contrast2.brain_development_CVR.Rdata')
+```
+
+
+#### (iii) Univariate regression model - offspring sex
+
+```{r offspring sex}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast3.neuron_count_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_neuron_count, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                            data = neuron_count)
+
+# brain_size
+  model.contrast3.brain_size_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_brain_size, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                          data = brain_size)
+
+# BDNF
+  model.contrast3.BDNF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_BDNF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                    data = BDNF)
+
+# TrkB
+  model.contrast3.TrkB_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_TrkB, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F1_sex_test, ref = 'male'),  # no  female F1
+                                    data = TrkB)
+# VEGF
+  model.contrast3.VEGF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_VEGF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                    data = VEGF)
+# reelin
+  model.contrast3.reelin_RR <- rma.mv(yi = RR, 
+                                      V = cov_VRR_reelin, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                      data = reelin)
+
+# GFAP
+  model.contrast3.GFAP_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_GFAP, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F1_sex_test, ref = 'male'), # no  female F1
+                                    data = GFAP)
+# syptophysin
+  model.contrast3.syptophysin_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_syptophysin, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F1_sex_test, ref = 'male'), # no  female F1
+                                           data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast3.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                                        V = cov_VRR_mitochondrial_biogenesis, 
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mod = ~relevel(F1_sex_test, ref = 'male'), # no  female F1
+                                                        data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast3.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                               V = VRR, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(F1_sex_test, ref = 'male'), # no  female F1
+                                               data = DNA_methylation)
+# learning_MWM
+  model.contrast3.learning_MWM_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_learning_MWM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                            data = learning_MWM)
+# memory_MWM
+  model.contrast3.memory_MWM_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_MWM, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                          data = memory_MWM)
+# memory_NOR
+  model.contrast3.memory_NOR_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_NOR, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                          data = memory_NOR)
+# anxiety_OFT
+  model.contrast3.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_OFT, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                           data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast3.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_EPM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                           data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+
+# brain_development
+  model.contrast3.brain_development_RR <- rma.mv(yi = RR, 
+                                                 V = cov_VRR_brain_development, 
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                                 data = brain_development)
+
+# genes
+  model.contrast3.genes_RR <- rma.mv(yi = RR, 
+                                     V = cov_VRR_genes, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                     data = genes)
+
+# behavior
+  model.contrast3.behavior_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_behavior, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                        data = behavior)
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast3.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_neuron_count, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                             data = neuron_count)
+
+# brain_size
+  model.contrast3.brain_size_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_brain_size, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                           data = brain_size)
+
+# BDNF
+  model.contrast3.BDNF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_BDNF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                     data = BDNF)
+
+# TrkB
+  model.contrast3.TrkB_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_TrkB, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                     data = TrkB)
+# VEGF
+  model.contrast3.VEGF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_VEGF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                     data = VEGF)
+# reelin
+  model.contrast3.reelin_CVR <- rma.mv(yi = CVR, 
+                                       V = cov_VCVR_reelin, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                       data = reelin)
+# GFAP
+  model.contrast3.GFAP_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_GFAP, 
+                                     random = list(~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                     data = GFAP)
+# syptophysin
+  model.contrast3.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_syptophysin, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                     data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast3.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                    V = cov_VCVR_mitochondrial_biogenesis, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                    data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast3.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                                V = VCVR, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                                data = DNA_methylation)
+# learning_MWM
+  model.contrast3.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_learning_MWM, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                             data = learning_MWM)
+# memory_MWM
+  model.contrast3.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_MWM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                           data = memory_MWM)
+# memory_NOR
+  model.contrast3.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_NOR, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                           data = memory_NOR)
+# anxiety_OFT
+  model.contrast3.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_OFT, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                            data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast3.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                          V = cov_VCVR_anxiety_EPM, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                          data = anxiety_EPM)
+
+#--------------------- grouped traits----------------------#		
+
+
+# brain_development
+  model.contrast3.brain_development_CVR <- rma.mv(yi = CVR, 
+                                                  V = cov_VCVR_brain_development, 
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  mod = ~relevel(F1_sex_test, ref = 'male'),
+                                                  data = brain_development)	
+
+# genes
+model.contrast3.genes_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_genes, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(F1_sex_test, ref = 'male'), 
+                                  data = genes)
+
+# behavior
+  model.contrast3.behavior_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_behavior, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~relevel(F1_sex_test, ref = 'male'),
+                                         data = behavior)	
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model.contrast3.neuron_count_RR, file = './models/model.contrast3.neuron_count_RR.Rdata')
+   save(model.contrast3.brain_size_RR, file = './models/model.contrast3.brain_size_RR.Rdata')
+   save(model.contrast3.BDNF_RR, file = './models/model.contrast3.BDNF_RR.Rdata')
+   save(model.contrast3.TrkB_RR, file = './models/model.contrast3.TrkB_RR.Rdata')
+   save(model.contrast3.VEGF_RR, file = './models/model.contrast3.VEGF_RR.Rdata')
+   save(model.contrast3.reelin_RR, file = './models/model.contrast3.reelin_RR.Rdata')
+   save(model.contrast3.GFAP_RR, file = './models/model.contrast3.GFAP_RR.Rdata')
+   save(model.contrast3.syptophysin_RR, file = './models/model.contrast3.syptophysin_RR.Rdata')
+   save(model.contrast3.mitochondrial_biogenesis_RR, file = './models/model.contrast3.mitochondrial_biogenesis_RR.Rdata')
+   save(model.contrast3.DNA_methylation_RR, file = './models/model.contrast3.DNA_methylation_RR.Rdata')
+   save(model.contrast3.learning_MWM_RR, file = './models/model.contrast3.learning_MWM_RR.Rdata')
+   save(model.contrast3.memory_MWM_RR, file = './models/model.contrast3.memory_MWM_RR.Rdata')
+   save(model.contrast3.memory_NOR_RR, file = './models/model.contrast3.memory_NOR_RR.Rdata')
+   save(model.contrast3.anxiety_OFT_RR, file = './models/model.contrast3.anxiety_OFT_RR.Rdata')
+   save(model.contrast3.anxiety_EPM_RR, file = './models/model.contrast3.anxiety_EPM_RR.Rdata')
+   save(model.contrast3.genes_RR, file = './models/model.contrast3.genes_RR.Rdata')
+   save(model.contrast3.behavior_RR, file = './models/model.contrast3.behavior_RR.Rdata')
+   save(model.contrast3.brain_development_RR, file = './models/model.contrast3.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model.contrast3.neuron_count_CVR, file = './models/model.contrast3.neuron_count_CVR.Rdata')
+   save(model.contrast3.brain_size_CVR, file = './models/model.contrast3.brain_size_CVR.Rdata')
+   save(model.contrast3.BDNF_CVR, file = './models/model.contrast3.BDNF_CVR.Rdata')
+   save(model.contrast3.TrkB_CVR, file = './models/model.contrast3.TrkB_CVR.Rdata')
+   save(model.contrast3.VEGF_CVR, file = './models/model.contrast3.VEGF_CVR.Rdata')
+   save(model.contrast3.reelin_CVR, file = './models/model.contrast3.reelin_CVR.Rdata')
+   save(model.contrast3.GFAP_CVR, file = './models/model.contrast3.GFAP_CVR.Rdata')
+   save(model.contrast3.syptophysin_CVR, file = './models/model.contrast3.syptophysin_CVR.Rdata')
+   save(model.contrast3.mitochondrial_biogenesis_CVR, file = './models/model.contrast3.mitochondrial_biogenesis_CVR.Rdata')
+   save(model.contrast3.DNA_methylation_CVR, file = './models/model.contrast3.DNA_methylation_CVR.Rdata')
+   save(model.contrast3.learning_MWM_CVR, file = './models/model.contrast3.learning_MWM_CVR.Rdata')
+   save(model.contrast3.memory_MWM_CVR, file = './models/model.contrast3.memory_MWM_CVR.Rdata')
+   save(model.contrast3.memory_NOR_CVR, file = './models/model.contrast3.memory_NOR_CVR.Rdata')
+   save(model.contrast3.anxiety_OFT_CVR, file = './models/model.contrast3.anxiety_OFT_CVR.Rdata')
+   save(model.contrast3.anxiety_EPM_CVR, file = './models/model.contrast3.anxiety_EPM_CVR.Rdata')
+   save(model.contrast3.genes_CVR, file = './models/model.contrast3.genes_CVR.Rdata')
+   save(model.contrast3.behavior_CVR, file = './models/model.contrast3.behavior_CVR.Rdata')
+   save(model.contrast3.brain_development_CVR, file = './models/model.contrast3.brain_development_CVR.Rdata')
+```
+
+
+
+#### (iv) Univariate regression mode - exerise mode
+
+```{r exercise mode}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast4.neuron_count_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_neuron_count, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                            data = neuron_count)
+
+# brain_size
+  model.contrast4.brain_size_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_brain_size, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                          data = brain_size)
+
+
+# BDNF
+  model.contrast4.BDNF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_BDNF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                    data = BDNF)
+
+
+# TrkB
+  model.contrast4.TrkB_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_TrkB, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                    data = TrkB)
+# VEGF
+model.contrast4.VEGF_RR <- rma.mv(yi = RR, 
+                                 V = cov_VRR_VEGF, 
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                 data = VEGF)
+# reelin
+  model.contrast4.reelin_RR <- rma.mv(yi = RR, 
+                                      V = cov_VRR_reelin, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                      data = reelin)
+# GFAP
+  model.contrast4.GFAP_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_GFAP, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                    data = GFAP)
+# syptophysin
+  model.contrast4.syptophysin_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_syptophysin, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                           data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast4.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                                        V = cov_VRR_mitochondrial_biogenesis, 
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                                        data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast4.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                               V = VRR, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                               data = DNA_methylation)
+# learning_MWM
+  model.contrast4.learning_MWM_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_learning_MWM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                            data = learning_MWM)
+# memory_MWM
+  model.contrast4.memory_MWM_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_MWM, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                          data = memory_MWM)
+# memory_NOR
+  model.contrast4.memory_NOR_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_NOR, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                          data = memory_NOR)
+# anxiety_OFT
+  model.contrast4.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_OFT, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                           data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast4.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_EPM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                           data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+# brain_development
+  model.contrast4.brain_development_RR <- rma.mv(yi = RR, 
+                                                 V = cov_VRR_brain_development, 
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 mod = ~relevel(manipulation_mode, ref = 'forced'),
+                                                 data = brain_development)
+
+# genes
+  model.contrast4.genes_RR <- rma.mv(yi = RR, 
+                                     V = cov_VRR_genes, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_mode, ref = 'forced'),
+                                     data = genes)
+
+# behavior
+model.contrast4.behavior_RR <- rma.mv(yi = RR, 
+                                  V = cov_VRR_behavior, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mod = ~relevel(manipulation_mode, ref = 'forced'),
+                                  data = behavior)
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast4.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_neuron_count, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                             data = neuron_count)
+
+# brain_size
+  model.contrast4.brain_size_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_brain_size, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                           data = brain_size)
+
+# BDNF
+  model.contrast4.BDNF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_BDNF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                     data = BDNF)
+
+# TrkB
+  model.contrast4.TrkB_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_TrkB, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                     data = TrkB)
+# VEGF
+  model.contrast4.VEGF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_VEGF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                     data = VEGF)
+# reelin
+  model.contrast4.reelin_CVR <- rma.mv(yi = CVR, 
+                                       V = cov_VCVR_reelin, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                       data = reelin)
+# GFAP
+  model.contrast4.GFAP_CVR <- rma.mv(yi = CVR, 
+                                     V = VCVR,#cov_VCVR_GFAP, 
+                                     random = list(~1|ES_ID),
+                                     mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                     data = GFAP)
+# syptophysin
+  model.contrast4.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_syptophysin, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                            data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast4.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                         V = VCVR,#cov_VCVR_mitochondrial_biogenesis, 
+                                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                         mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                                         data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast4.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                                V = VCVR, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                                data = DNA_methylation)
+# learning_MWM
+  model.contrast4.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_learning_MWM, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                             data = learning_MWM)
+# memory_MWM
+  model.contrast4.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_MWM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                           data = memory_MWM)
+# memory_NOR
+  model.contrast4.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_NOR, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                           data = memory_NOR)
+# anxiety_OFT
+  model.contrast4.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_OFT, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                            data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast4.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_EPM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_mode, ref = 'forced'), 
+                                            data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#		
+
+
+# brain_development
+  model.contrast4.brain_development_CVR <- rma.mv(yi = CVR, 
+                                                  V = cov_VCVR_brain_development, 
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  mod = ~relevel(manipulation_mode, ref = 'forced'),
+                                                  data = brain_development)
+
+# genes
+  model.contrast4.genes_CVR <- rma.mv(yi = CVR, 
+                                      V = cov_VCVR_genes, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(manipulation_mode, ref = 'forced'),
+                                      data = genes)
+
+# behavior
+  model.contrast4.behavior_CVR <- rma.mv(yi = CVR, 
+                                         V = VCVR,#cov_VCVR_behavior, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~relevel(manipulation_mode, ref = 'forced'),
+                                         data = behavior)
+
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model.contrast4.neuron_count_RR, file = './models/model.contrast4.neuron_count_RR.Rdata')
+   save(model.contrast4.brain_size_RR, file = './models/model.contrast4.brain_size_RR.Rdata')
+   save(model.contrast4.BDNF_RR, file = './models/model.contrast4.BDNF_RR.Rdata')
+   save(model.contrast4.TrkB_RR, file = './models/model.contrast4.TrkB_RR.Rdata')
+   save(model.contrast4.VEGF_RR, file = './models/model.contrast4.VEGF_RR.Rdata')
+   save(model.contrast4.reelin_RR, file = './models/model.contrast4.reelin_RR.Rdata')
+   save(model.contrast4.GFAP_RR, file = './models/model.contrast4.GFAP_RR.Rdata')
+   save(model.contrast4.syptophysin_RR, file = './models/model.contrast4.syptophysin_RR.Rdata')
+   save(model.contrast4.mitochondrial_biogenesis_RR, file = './models/model.contrast4.mitochondrial_biogenesis_RR.Rdata')
+   save(model.contrast4.DNA_methylation_RR, file = './models/model.contrast4.DNA_methylation_RR.Rdata')
+   save(model.contrast4.learning_MWM_RR, file = './models/model.contrast4.learning_MWM_RR.Rdata')
+   save(model.contrast4.memory_MWM_RR, file = './models/model.contrast4.memory_MWM_RR.Rdata')
+   save(model.contrast4.memory_NOR_RR, file = './models/model.contrast4.memory_NOR_RR.Rdata')
+   save(model.contrast4.anxiety_OFT_RR, file = './models/model.contrast4.anxiety_OFT_RR.Rdata')
+   save(model.contrast4.anxiety_EPM_RR, file = './models/model.contrast4.anxiety_EPM_RR.Rdata')
+   save(model.contrast4.genes_RR, file = './models/model.contrast4.genes_RR.Rdata')
+   save(model.contrast4.behavior_RR, file = './models/model.contrast4.behavior_RR.Rdata')
+   save(model.contrast4.brain_development_RR, file = './models/model.contrast4.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model.contrast4.neuron_count_CVR, file = './models/model.contrast4.neuron_count_CVR.Rdata')
+   save(model.contrast4.brain_size_CVR, file = './models/model.contrast4.brain_size_CVR.Rdata')
+   save(model.contrast4.BDNF_CVR, file = './models/model.contrast4.BDNF_CVR.Rdata')
+   save(model.contrast4.TrkB_CVR, file = './models/model.contrast4.TrkB_CVR.Rdata')
+   save(model.contrast4.VEGF_CVR, file = './models/model.contrast4.VEGF_CVR.Rdata')
+   save(model.contrast4.reelin_CVR, file = './models/model.contrast4.reelin_CVR.Rdata')
+   save(model.contrast4.GFAP_CVR, file = './models/model.contrast4.GFAP_CVR.Rdata')
+   save(model.contrast4.syptophysin_CVR, file = './models/model.contrast4.syptophysin_CVR.Rdata')
+   save(model.contrast4.mitochondrial_biogenesis_CVR, file = './models/model.contrast4.mitochondrial_biogenesis_CVR.Rdata')
+   save(model.contrast4.DNA_methylation_CVR, file = './models/model.contrast4.DNA_methylation_CVR.Rdata')
+   save(model.contrast4.learning_MWM_CVR, file = './models/model.contrast4.learning_MWM_CVR.Rdata')
+   save(model.contrast4.memory_MWM_CVR, file = './models/model.contrast4.memory_MWM_CVR.Rdata')
+   save(model.contrast4.memory_NOR_CVR, file = './models/model.contrast4.memory_NOR_CVR.Rdata')
+   save(model.contrast4.anxiety_OFT_CVR, file = './models/model.contrast4.anxiety_OFT_CVR.Rdata')
+   save(model.contrast4.anxiety_EPM_CVR, file = './models/model.contrast4.anxiety_EPM_CVR.Rdata')
+   save(model.contrast4.genes_CVR, file = './models/model.contrast4.genes_CVR.Rdata')
+   save(model.contrast4.behavior_CVR, file = './models/model.contrast4.behavior_CVR.Rdata')
+   save(model.contrast4.brain_development_CVR, file = './models/model.contrast4.brain_development_CVR.Rdata')
+```
+
+
+
+#### (v) Univariate regression model - exercise timming
+
+```{r exercise timming}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast5.neuron_count_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_neuron_count, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                            data = neuron_count)
+
+
+# brain_size
+  model.contrast5.brain_size_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_brain_size, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                          data = brain_size)
+
+# BDNF
+  model.contrast5.BDNF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_BDNF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                    data = BDNF)
+
+# TrkB
+  model.contrast5.TrkB_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_TrkB, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                    data = TrkB)
+# VEGF
+  model.contrast5.VEGF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_VEGF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                    data = VEGF)
+# reelin
+  model.contrast5.reelin_RR <- rma.mv(yi = RR, 
+                                      V = cov_VRR_reelin, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                      data = reelin)
+# GFAP
+  model.contrast5.GFAP_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_GFAP, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                    data = GFAP)
+# syptophysin
+  model.contrast5.syptophysin_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_syptophysin, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                           data = syptophysin)
+
+# mitochondrial_biogenesis
+  model.contrast5.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                                        V = cov_VRR_mitochondrial_biogenesis, 
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                                        data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast5.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                               V = VRR, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                               data = DNA_methylation)
+# learning_MWM
+  model.contrast5.learning_MWM_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_learning_MWM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                            data = learning_MWM)
+# memory_MWM
+  model.contrast5.memory_MWM_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_MWM, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                          data = memory_MWM)
+# memory_NOR
+  model.contrast5.memory_NOR_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_NOR, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                          data = memory_NOR)
+# anxiety_OFT
+  model.contrast5.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_OFT, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                           data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast5.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_EPM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                           data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+
+# brain_development
+  model.contrast5.brain_development_RR <- rma.mv(yi = RR, 
+                                                 V = cov_VRR_brain_development, 
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 mod = ~relevel(manipulation_window, ref = 'pre-conception'),
+                                                 data = brain_development)
+
+
+# genes
+  model.contrast5.genes_RR <- rma.mv(yi = RR, 
+                                     V = cov_VRR_genes, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_window, ref = 'pre-conception'),
+                                     data = genes)
+
+
+# behavior
+  model.contrast5.behavior_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_behavior, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~relevel(manipulation_window, ref = 'pre-conception'),
+                                        data = behavior)
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast5.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_neuron_count, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                             data = neuron_count)
+
+# brain_size
+  model.contrast5.brain_size_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_brain_size, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                           data = brain_size)
+
+# BDNF
+  model.contrast5.BDNF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_BDNF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                     data = BDNF)
+
+# TrkB
+  model.contrast5.TrkB_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_TrkB, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                    data = TrkB)
+# VEGF
+  model.contrast5.VEGF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_VEGF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                     data = VEGF)
+# reelin
+  model.contrast5.reelin_CVR <- rma.mv(yi = CVR, 
+                                       V = cov_VCVR_reelin, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                       data = reelin)
+# GFAP
+  model.contrast5.GFAP_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_GFAP, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                     data = GFAP)
+# syptophysin
+  model.contrast5.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_syptophysin, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                            data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast5.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                         V = cov_VCVR_mitochondrial_biogenesis, 
+                                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                         mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                                         data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast5.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                                V = VCVR, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                                data = DNA_methylation)
+# learning_MWM
+  model.contrast5.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_learning_MWM, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                             data = learning_MWM)
+# memory_MWM
+  model.contrast5.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_MWM, 
+                                           random = list(~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                           data = memory_MWM)
+# memory_NOR
+  model.contrast5.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_NOR, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                           data = memory_NOR)
+# anxiety_OFT
+  model.contrast5.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_OFT, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                            data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast5.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_EPM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
+                                            data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#		
+
+# brain_development
+  model.contrast5.brain_development_CVR <- rma.mv(yi = CVR, 
+                                                  V = cov_VCVR_brain_development, 
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  mod = ~relevel(manipulation_window, ref = 'pre-conception'),
+                                                  data = brain_development)	
+
+
+# genes
+  model.contrast5.genes_CVR <- rma.mv(yi = CVR, 
+                                      V = cov_VCVR_genes, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~relevel(manipulation_window, ref = 'pre-conception'),
+                                      data = genes)
+
+
+# behavior
+model.contrast5.behavior_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_behavior, 
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~relevel(manipulation_window, ref = 'pre-conception'),
+                                  data = behavior)	
+
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model.contrast5.neuron_count_RR, file = './models/model.contrast5.neuron_count_RR.Rdata')
+   save(model.contrast5.brain_size_RR, file = './models/model.contrast5.brain_size_RR.Rdata')
+   save(model.contrast5.BDNF_RR, file = './models/model.contrast5.BDNF_RR.Rdata')
+   save(model.contrast5.TrkB_RR, file = './models/model.contrast5.TrkB_RR.Rdata')
+   save(model.contrast5.VEGF_RR, file = './models/model.contrast5.VEGF_RR.Rdata')
+   save(model.contrast5.reelin_RR, file = './models/model.contrast5.reelin_RR.Rdata')
+   save(model.contrast5.GFAP_RR, file = './models/model.contrast5.GFAP_RR.Rdata')
+   save(model.contrast5.syptophysin_RR, file = './models/model.contrast5.syptophysin_RR.Rdata')
+   save(model.contrast5.mitochondrial_biogenesis_RR, file = './models/model.contrast5.mitochondrial_biogenesis_RR.Rdata')
+   save(model.contrast5.DNA_methylation_RR, file = './models/model.contrast5.DNA_methylation_RR.Rdata')
+   save(model.contrast5.learning_MWM_RR, file = './models/model.contrast5.learning_MWM_RR.Rdata')
+   save(model.contrast5.memory_MWM_RR, file = './models/model.contrast5.memory_MWM_RR.Rdata')
+   save(model.contrast5.memory_NOR_RR, file = './models/model.contrast5.memory_NOR_RR.Rdata')
+   save(model.contrast5.anxiety_OFT_RR, file = './models/model.contrast5.anxiety_OFT_RR.Rdata')
+   save(model.contrast5.anxiety_EPM_RR, file = './models/model.contrast5.anxiety_EPM_RR.Rdata')
+   save(model.contrast5.genes_RR, file = './models/model.contrast5.genes_RR.Rdata')
+   save(model.contrast5.behavior_RR, file = './models/model.contrast5.behavior_RR.Rdata')
+   save(model.contrast5.brain_development_RR, file = './models/model.contrast5.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model.contrast5.neuron_count_CVR, file = './models/model.contrast5.neuron_count_CVR.Rdata')
+   save(model.contrast5.brain_size_CVR, file = './models/model.contrast5.brain_size_CVR.Rdata')
+   save(model.contrast5.BDNF_CVR, file = './models/model.contrast5.BDNF_CVR.Rdata')
+   save(model.contrast5.TrkB_CVR, file = './models/model.contrast5.TrkB_CVR.Rdata')
+   save(model.contrast5.VEGF_CVR, file = './models/model.contrast5.VEGF_CVR.Rdata')
+   save(model.contrast5.reelin_CVR, file = './models/model.contrast5.reelin_CVR.Rdata')
+   save(model.contrast5.GFAP_CVR, file = './models/model.contrast5.GFAP_CVR.Rdata')
+   save(model.contrast5.syptophysin_CVR, file = './models/model.contrast5.syptophysin_CVR.Rdata')
+   save(model.contrast5.mitochondrial_biogenesis_CVR, file = './models/model.contrast5.mitochondrial_biogenesis_CVR.Rdata')
+   save(model.contrast5.DNA_methylation_CVR, file = './models/model.contrast5.DNA_methylation_CVR.Rdata')
+   save(model.contrast5.learning_MWM_CVR, file = './models/model.contrast5.learning_MWM_CVR.Rdata')
+   save(model.contrast5.memory_MWM_CVR, file = './models/model.contrast5.memory_MWM_CVR.Rdata')
+   save(model.contrast5.memory_NOR_CVR, file = './models/model.contrast5.memory_NOR_CVR.Rdata')
+   save(model.contrast5.anxiety_OFT_CVR, file = './models/model.contrast5.anxiety_OFT_CVR.Rdata')
+   save(model.contrast5.anxiety_EPM_CVR, file = './models/model.contrast5.anxiety_EPM_CVR.Rdata')
+   save(model.contrast5.genes_CVR, file = './models/model.contrast5.genes_CVR.Rdata')
+   save(model.contrast5.brain_development_CVR, file = './models/model.contrast5.brain_development_CVR.Rdata')
+```
+
+
+
+
+#### (vi) Univariate regression model - F1 ontogenetic stage
+
+```{r F1 ontogenetic stage}
+#***************************************************************#
+#--------------------- improvement (lnRR) ----------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast6.neuron_count_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_neuron_count, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~response_age_life_phase, 
+                                            data = neuron_count)
+
+# brain_size
+  model.contrast6.brain_size_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_brain_size, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~response_age_life_phase, 
+                                          data = brain_size)
+
+# BDNF
+  model.contrast6.BDNF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_BDNF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~response_age_life_phase, 
+                                    data = BDNF)
+
+# TrkB
+  model.contrast6.TrkB_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_TrkB, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~response_age_life_phase, 
+                                    data = TrkB)
+# VEGF
+  model.contrast6.VEGF_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_VEGF, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~response_age_life_phase, 
+                                    data = VEGF)
+# reelin
+  model.contrast6.reelin_RR <- rma.mv(yi = RR, 
+                                      V = cov_VRR_reelin, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~response_age_life_phase, 
+                                      data = reelin)
+# GFAP
+  model.contrast6.GFAP_RR <- rma.mv(yi = RR, 
+                                    V = cov_VRR_GFAP, 
+                                    random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                    mod = ~response_age_life_phase, 
+                                    data = GFAP)
+# syptophysin
+  model.contrast6.syptophysin_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_syptophysin, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~response_age_life_phase, 
+                                           data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast6.mitochondrial_biogenesis_RR <- rma.mv(yi = RR, 
+                                                        V = VRR,#cov_VRR_mitochondrial_biogenesis, 
+                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                        mod = ~response_age_life_phase, 
+                                                        data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast6.DNA_methylation_RR <- rma.mv(yi = RR, 
+                                               V = VRR, 
+                                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                               mod = ~response_age_life_phase, 
+                                               data = DNA_methylation)
+# learning_MWM
+  model.contrast6.learning_MWM_RR <- rma.mv(yi = RR, 
+                                            V = cov_VRR_learning_MWM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~response_age_life_phase, 
+                                            data = learning_MWM)
+# memory_MWM
+  model.contrast6.memory_MWM_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_MWM, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~response_age_life_phase, 
+                                          data = memory_MWM)
+# memory_NOR
+  model.contrast6.memory_NOR_RR <- rma.mv(yi = RR, 
+                                          V = cov_VRR_memory_NOR, 
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mod = ~response_age_life_phase, 
+                                          data = memory_NOR)
+# anxiety_OFT
+  model.contrast6.anxiety_OFT_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_OFT, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~response_age_life_phase, 
+                                           data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast6.anxiety_EPM_RR <- rma.mv(yi = RR, 
+                                           V = cov_VRR_anxiety_EPM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~response_age_life_phase, 
+                                           data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#
+
+# genes
+  model.contrast6.genes_RR <- rma.mv(yi = RR, 
+                                     V = cov_VRR_genes, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~response_age_life_phase,
+                                     data = genes)
+
+
+# behavior
+  model.contrast6.behavior_RR <- rma.mv(yi = RR, 
+                                        V = cov_VRR_behavior, 
+                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                        mod = ~response_age_life_phase,
+                                        data = behavior)
+
+# brain_development
+  model.contrast6.brain_development_RR <- rma.mv(yi = RR, 
+                                                 V = cov_VRR_brain_development, 
+                                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                 mod = ~response_age_life_phase,
+                                                 data = brain_development)
+
+
+#***************************************************************#
+#------------------ Inter-individual differences (lnCVR) -------------------#
+#***************************************************************#
+
+
+#--------------------- Separate traits----------------------#
+
+# neuron count
+  model.contrast6.neuron_count_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_neuron_count, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~response_age_life_phase, 
+                                             data = neuron_count)
+
+# brain_size
+  model.contrast6.brain_size_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_brain_size, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~response_age_life_phase, 
+                                           data = brain_size)
+
+# BDNF
+  model.contrast6.BDNF_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_BDNF, 
+                                     random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                     mod = ~response_age_life_phase, 
+                                     data = BDNF)
+
+# TrkB
+  model.contrast6.TrkB_CVR <- rma.mv(yi = CVR, 
+                                  V = cov_VCVR_TrkB, 
+                                  random = list(~1|study_ID, ~1|ES_ID),
+                                  mod = ~response_age_life_phase, 
+                                  data = TrkB)
+# VEGF
+model.contrast6.VEGF_CVR <- rma.mv(yi = CVR, 
+                                   V = cov_VCVR_VEGF, 
+                                   random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                   mod = ~response_age_life_phase, 
+                                   data = VEGF)
+# reelin
+  model.contrast6.reelin_CVR <- rma.mv(yi = CVR, 
+                                       V = cov_VCVR_reelin, 
+                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                       mod = ~response_age_life_phase, 
+                                       data = reelin)
+# GFAP
+  model.contrast6.GFAP_CVR <- rma.mv(yi = CVR, 
+                                     V = cov_VCVR_GFAP, 
+                                     random = list(~1|study_ID, ~1|ES_ID),
+                                     mod = ~response_age_life_phase, 
+                                     data = GFAP)
+# syptophysin
+  model.contrast6.syptophysin_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_syptophysin, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~response_age_life_phase, 
+                                            data = syptophysin)
+# mitochondrial_biogenesis
+  model.contrast6.mitochondrial_biogenesis_CVR <- rma.mv(yi = CVR, 
+                                                         V = cov_VCVR_mitochondrial_biogenesis, 
+                                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                         mod = ~response_age_life_phase, 
+                                                         data = mitochondrial_biogenesis)
+# DNA_methylation
+  model.contrast6.DNA_methylation_CVR <- rma.mv(yi = CVR, 
+                                                V = VCVR, 
+                                                random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                mod = ~response_age_life_phase, 
+                                                data = DNA_methylation)
+# learning_MWM
+  model.contrast6.learning_MWM_CVR <- rma.mv(yi = CVR, 
+                                             V = cov_VCVR_learning_MWM, 
+                                             random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                             mod = ~response_age_life_phase, 
+                                             data = learning_MWM)
+# memory_MWM
+  model.contrast6.memory_MWM_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_MWM, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~response_age_life_phase, 
+                                           data = memory_MWM)
+# memory_NOR
+  model.contrast6.memory_NOR_CVR <- rma.mv(yi = CVR, 
+                                           V = cov_VCVR_memory_NOR, 
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mod = ~response_age_life_phase, 
+                                           data = memory_NOR)
+# anxiety_OFT
+  model.contrast6.anxiety_OFT_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_OFT, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~response_age_life_phase, 
+                                            data = anxiety_OFT)
+# anxiety_EPM
+  model.contrast6.anxiety_EPM_CVR <- rma.mv(yi = CVR, 
+                                            V = cov_VCVR_anxiety_EPM, 
+                                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                            mod = ~response_age_life_phase, 
+                                            data = anxiety_EPM)
+
+#--------------------- Board traits----------------------#		
+
+# genes
+  model.contrast6.genes_CVR <- rma.mv(yi = CVR, 
+                                      V = cov_VCVR_genes, 
+                                      random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                      mod = ~response_age_life_phase,
+                                      data = genes)
+
+
+# behavior
+  model.contrast6.behavior_CVR <- rma.mv(yi = CVR, 
+                                         V = cov_VCVR_behavior, 
+                                         random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                         mod = ~response_age_life_phase,
+                                         data = behavior)
+
+# brain_development
+  model.contrast6.brain_development_CVR <- rma.mv(yi = CVR, 
+                                                  V = cov_VCVR_brain_development, 
+                                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                                  mod = ~response_age_life_phase,
+                                                  data = brain_development)
+
+
+# Saving models
+ # Improvement (lnRR) 
+   save(model.contrast6.neuron_count_RR, file = './models/model.contrast6.neuron_count_RR.Rdata')
+   save(model.contrast6.brain_size_RR, file = './models/model.contrast6.brain_size_RR.Rdata')
+   save(model.contrast6.BDNF_RR, file = './models/model.contrast6.BDNF_RR.Rdata')
+   save(model.contrast6.TrkB_RR, file = './models/model.contrast6.TrkB_RR.Rdata')
+   save(model.contrast6.VEGF_RR, file = './models/model.contrast6.VEGF_RR.Rdata')
+   save(model.contrast6.reelin_RR, file = './models/model.contrast6.reelin_RR.Rdata')
+   save(model.contrast6.GFAP_RR, file = './models/model.contrast6.GFAP_RR.Rdata')
+   save(model.contrast6.syptophysin_RR, file = './models/model.contrast6.syptophysin_RR.Rdata')
+   save(model.contrast6.mitochondrial_biogenesis_RR, file = './models/model.contrast6.mitochondrial_biogenesis_RR.Rdata')
+   save(model.contrast6.DNA_methylation_RR, file = './models/model.contrast6.DNA_methylation_RR.Rdata')
+   save(model.contrast6.learning_MWM_RR, file = './models/model.contrast6.learning_MWM_RR.Rdata')
+   save(model.contrast6.memory_MWM_RR, file = './models/model.contrast6.memory_MWM_RR.Rdata')
+   save(model.contrast6.memory_NOR_RR, file = './models/model.contrast6.memory_NOR_RR.Rdata')
+   save(model.contrast6.anxiety_OFT_RR, file = './models/model.contrast6.anxiety_OFT_RR.Rdata')
+   save(model.contrast6.anxiety_EPM_RR, file = './models/model.contrast6.anxiety_EPM_RR.Rdata')
+   save(model.contrast6.genes_RR, file = './models/model.contrast6.genes_RR.Rdata')
+   save(model.contrast6.behavior_RR, file = './models/model.contrast6.behavior_RR.Rdata')
+   save(model.contrast6.brain_development_RR, file = './models/model.contrast6.brain_development_RR.Rdata')
+
+ # Inter-individual differences (lnCVR) 
+   save(model.contrast6.neuron_count_CVR, file = './models/model.contrast6.neuron_count_CVR.Rdata')
+  save(model.contrast6.brain_size_CVR, file = './models/model.contrast6.brain_size_CVR.Rdata')
+   save(model.contrast6.BDNF_CVR, file = './models/model.contrast6.BDNF_CVR.Rdata')
+   save(model.contrast6.TrkB_CVR, file = './models/model.contrast6.TrkB_CVR.Rdata')
+   save(model.contrast6.VEGF_CVR, file = './models/model.contrast6.VEGF_CVR.Rdata')
+   save(model.contrast6.reelin_CVR, file = './models/model.contrast6.reelin_CVR.Rdata')
+   save(model.contrast6.GFAP_CVR, file = './models/model.contrast6.GFAP_CVR.Rdata')
+   save(model.contrast6.syptophysin_CVR, file = './models/model.contrast6.syptophysin_CVR.Rdata')
+   save(model.contrast6.mitochondrial_biogenesis_CVR, file = './models/model.contrast6.mitochondrial_biogenesis_CVR.Rdata')
+   save(model.contrast6.DNA_methylation_CVR, file = './models/model.contrast6.DNA_methylation_CVR.Rdata')
+   save(model.contrast6.learning_MWM_CVR, file = './models/model.contrast6.learning_MWM_CVR.Rdata')
+   save(model.contrast6.memory_MWM_CVR, file = './models/model.contrast6.memory_MWM_CVR.Rdata')
+   save(model.contrast6.memory_NOR_CVR, file = './models/model.contrast6.memory_NOR_CVR.Rdata')
+   save(model.contrast6.anxiety_OFT_CVR, file = './models/model.contrast6.anxiety_OFT_CVR.Rdata')
+   save(model.contrast6.anxiety_EPM_CVR, file = './models/model.contrast6.anxiety_EPM_CVR.Rdata')
+   save(model.contrast6.genes_CVR, file = './models/model.contrast6.genes_CVR.Rdata')
+   save(model.contrast6.behavior_CVR, file = './models/model.contrast6.behavior_CVR.Rdata')
+   save(model.contrast6.brain_development_CVR, file = './models/model.contrast6.brain_development_CVR.Rdata')
+```
