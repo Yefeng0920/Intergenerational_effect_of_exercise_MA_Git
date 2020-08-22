@@ -625,7 +625,7 @@ output: word_document
 ```{r Brain growth factor expression upregulation}
 
 #***************************************************************#
-#--------------------- Upregulation (lnRR) ----------------------#
+#--------------------- Upregulation (lnRR) ---------------------#
 #***************************************************************#
 
 #--------------------------------------------------------------#
@@ -1570,4 +1570,192 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   write.csv(table_ontogenetic_stage, file = './results/csv/table_ontogenetic_stage.csv', row.names = FALSE, na = '')
 ```
 
+
+
+
+
+### 9. R square 
+
+```{r}
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#
+
+  table_moderator_R_square <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'R-square', col_names = TRUE)
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+# Position
+  R2_position_genes_RR1 <- c(1, 6, 11, 16, 21, 26, 31)
+  R2_position_genes_RR2 <- c(1, 6, 11, 16, 21, 26, 31) + 1
+  R2_position_genes_RR3 <- c(1, 6, 11, 16, 21, 26, 31) + 2
+  R2_position_genes_RR4 <- c(1, 6, 11, 16, 21, 26, 31) + 3
+  R2_position_genes_RR5 <- c(1, 6, 11, 16, 21, 26, 31) + 4
+  
+
+  
+# Tabulating fixed effects
+  table_moderator_R_square$R2...4[R2_position_genes_RR1] <- c(R2(model4.genes_RR)[1],R2(model4.BDNF_RR)[1],R2(model4.TrkB_RR)[1],R2(model4.VEGF_RR)[1],R2(model4.reelin_RR)[1],R2(model4.GFAP_RR)[1],R2(model4.syptophysin_RR)[1])*100
+
+  table_moderator_R_square$R2...4[R2_position_genes_RR2] <- c(R2(model5.genes_RR)[1],R2(model5.BDNF_RR)[1],R2(model5.TrkB_RR)[1],R2(model5.VEGF_RR)[1],R2(model5.reelin_RR)[1],R2(model5.GFAP_RR)[1],R2(model5.syptophysin_RR)[1])*100
+
+  table_moderator_R_square$R2...4[R2_position_genes_RR3] <- c(R2(model2.genes_RR)[1],R2(model2.BDNF_RR)[1],R2(model2.TrkB_RR)[1],R2(model2.VEGF_RR)[1],R2(model2.reelin_RR)[1],R2(model2.GFAP_RR)[1],R2(model2.syptophysin_RR)[1])*100
+  
+  table_moderator_R_square$R2...4[R2_position_genes_RR4] <- c(R2(model3.genes_RR)[1],R2(model3.BDNF_RR)[1],R2(model3.TrkB_RR)[1],R2(model3.VEGF_RR)[1],R2(model3.reelin_RR)[1],R2(model3.GFAP_RR)[1],R2(model3.syptophysin_RR)[1])*100
+  
+  table_moderator_R_square$R2...4[R2_position_genes_RR5] <- c(R2(model6.genes_RR)[1],R2(model6.BDNF_RR)[1],R2(model6.TrkB_RR)[1],R2(model6.VEGF_RR)[1],R2(model6.reelin_RR)[1],R2(model6.GFAP_RR)[1],R2(model6.syptophysin_RR)[1])*100  
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+  
+# Position  
+  R2_position_brain_RR1 <- c(1, 6, 11) 
+  R2_position_brain_RR2 <- c(1, 6, 11) + 1
+  R2_position_brain_RR3 <- c(1, 6, 11) + 2
+  R2_position_brain_RR4 <- c(1, 6, 11) + 3
+  R2_position_brain_RR5 <- c(1, 6, 11) + 4  
+
+# Tabulating fixed effects
+  table_moderator_R_square$R2...7[R2_position_brain_RR1] <- c(R2(model4.brain_development_RR)[1],R2(model4.brain_size_RR)[1],R2(model4.neuron_count_RR)[1])*100
+
+# Range
+  # c(R2(model4.brain_development_RR)[1],R2(model4.brain_size_RR)[1],R2(model4.neuron_count_RR)[1]) %>% range() 
+    
+  table_moderator_R_square$R2...7[R2_position_brain_RR2] <- c(R2(model5.brain_development_RR)[1],R2(model5.brain_size_RR)[1],R2(model5.neuron_count_RR)[1])*100
+  
+  table_moderator_R_square$R2...7[R2_position_brain_RR3] <- c(R2(model2.brain_development_RR)[1],R2(model2.brain_size_RR)[1],R2(model2.neuron_count_RR)[1])*100  
+
+  table_moderator_R_square$R2...7[R2_position_brain_RR4] <- c(R2(model3.brain_development_RR)[1],R2(model3.brain_size_RR)[1],R2(model3.neuron_count_RR)[1])*100  
+
+  table_moderator_R_square$R2...7[R2_position_brain_RR5] <- c(R2(model6.brain_development_RR)[1],R2(model6.brain_size_RR)[1],R2(model6.neuron_count_RR)[1])*100 
+  
+
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#    
+# Position 
+  R2_position_behavior_RR1 <- c(1, 6, 11, 16, 21, 26)
+  R2_position_behavior_RR2 <- c(1, 6, 11, 16, 21, 26) + 1
+  R2_position_behavior_RR3 <- c(1, 6, 11, 16, 21, 26) + 2
+  R2_position_behavior_RR4 <- c(1, 6, 11, 16, 21, 26) + 3
+  R2_position_behavior_RR5 <- c(1, 6, 11, 16, 21, 26) + 4
+    
+  table_moderator_R_square$R2...10[R2_position_behavior_RR1] <- c(R2(model4.behavior_RR)[1],R2(model4.learning_MWM_RR)[1],R2(model4.memory_MWM_RR)[1],R2(model4.memory_NOR_RR)[1],R2(model4.anxiety_EPM_RR)[1],R2(model4.anxiety_OFT_RR)[1])*100
+    
+  table_moderator_R_square$R2...10[R2_position_behavior_RR2] <- c(R2(model5.behavior_RR)[1],R2(model5.learning_MWM_RR)[1],R2(model5.memory_MWM_RR)[1],R2(model5.memory_NOR_RR)[1],R2(model5.anxiety_EPM_RR)[1],R2(model5.anxiety_OFT_RR)[1])*100
+  
+  table_moderator_R_square$R2...10[R2_position_behavior_RR3] <- c(R2(model2.behavior_RR)[1],R2(model2.learning_MWM_RR)[1],R2(model2.memory_MWM_RR)[1],R2(model2.memory_NOR_RR)[1],R2(model2.anxiety_EPM_RR)[1],R2(model2.anxiety_OFT_RR)[1])*100
+  
+  table_moderator_R_square$R2...10[R2_position_behavior_RR4] <- c(R2(model3.behavior_RR)[1],R2(model3.learning_MWM_RR)[1],R2(model3.memory_MWM_RR)[1],R2(model3.memory_NOR_RR)[1],R2(model3.anxiety_EPM_RR)[1],R2(model3.anxiety_OFT_RR)[1])*100
+  
+  table_moderator_R_square$R2...10[R2_position_behavior_RR5] <- c(R2(model6.behavior_RR)[1],R2(model6.learning_MWM_RR)[1],R2(model6.memory_MWM_RR)[1],R2(model6.memory_NOR_RR)[1],R2(model6.anxiety_EPM_RR)[1],R2(model6.anxiety_OFT_RR)[1])*100
+
+
+
+# Saving
+  colnames(table_moderator_R_square) <- c ("Effect size", "Traits", "Moderator", "R2", "Traits", "Moderator", "R2", "Traits", "Moderator", "R2")
+  table_moderator_R_square$`Effect size`[1] <- "lnRR"
+  table_moderator_R_square_RR <- table_moderator_R_square
+  
+  write.csv(table_moderator_R_square_RR, file = './results/csv/table_moderator_R_square_RR.csv', row.names = FALSE, na = '')
+
+
+  
+#***************************************************************#
+#------------- Inter-individual difference (lnCVR) -------------#
+#***************************************************************#
+
+
+  table_moderator_R_square <- read_excel('./results/Results Tables.xlsx', skip = 1, sheet = 'R-square', col_names = TRUE)
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
+
+# Position
+  R2_position_genes_CVR1 <- c(1, 6, 11, 16, 21, 26, 31)
+  R2_position_genes_CVR2 <- c(1, 6, 11, 16, 21, 26, 31) + 1
+  R2_position_genes_CVR3 <- c(1, 6, 11, 16, 21, 26, 31) + 2
+  R2_position_genes_CVR4 <- c(1, 6, 11, 16, 21, 26, 31) + 3
+  R2_position_genes_CVR5 <- c(1, 6, 11, 16, 21, 26, 31) + 4
+  
+
+  
+# Tabulating fixed effects
+  table_moderator_R_square$R2...4[R2_position_genes_CVR1] <- c(R2(model4.genes_CVR)[1],R2(model4.BDNF_CVR)[1],R2(model4.TrkB_CVR)[1],R2(model4.VEGF_CVR)[1],R2(model4.reelin_CVR)[1],R2(model4.GFAP_CVR)[1],R2(model4.syptophysin_CVR)[1])*100
+
+  table_moderator_R_square$R2...4[R2_position_genes_CVR2] <- c(R2(model5.genes_CVR)[1],R2(model5.BDNF_CVR)[1],R2(model5.TrkB_CVR)[1],R2(model5.VEGF_CVR)[1],R2(model5.reelin_CVR)[1],R2(model5.GFAP_CVR)[1],R2(model5.syptophysin_CVR)[1])*100
+
+  table_moderator_R_square$R2...4[R2_position_genes_CVR3] <- c(R2(model2.genes_CVR)[1],R2(model2.BDNF_CVR)[1],R2(model2.TrkB_CVR)[1],R2(model2.VEGF_CVR)[1],R2(model2.reelin_CVR)[1],R2(model2.GFAP_CVR)[1],R2(model2.syptophysin_CVR)[1])*100
+  
+  table_moderator_R_square$R2...4[R2_position_genes_CVR4] <- c(R2(model3.genes_CVR)[1],R2(model3.BDNF_CVR)[1],R2(model3.TrkB_CVR)[1],R2(model3.VEGF_CVR)[1],R2(model3.reelin_CVR)[1],R2(model3.GFAP_CVR)[1],R2(model3.syptophysin_CVR)[1])*100
+  
+  table_moderator_R_square$R2...4[R2_position_genes_CVR5] <- c(R2(model6.genes_CVR)[1],R2(model6.BDNF_CVR)[1],R2(model6.TrkB_CVR)[1],R2(model6.VEGF_CVR)[1],R2(model6.reelin_CVR)[1],R2(model6.GFAP_CVR)[1],R2(model6.syptophysin_CVR)[1])*100  
+
+
+
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+  
+# Position  
+  R2_position_brain_CVR1 <- c(1, 6, 11) 
+  R2_position_brain_CVR2 <- c(1, 6, 11) + 1
+  R2_position_brain_CVR3 <- c(1, 6, 11) + 2
+  R2_position_brain_CVR4 <- c(1, 6, 11) + 3
+  R2_position_brain_CVR5 <- c(1, 6, 11) + 4  
+
+# Tabulating fixed effects
+  table_moderator_R_square$R2...7[R2_position_brain_CVR1] <- c(R2(model4.brain_development_CVR)[1],R2(model4.brain_size_CVR)[1],R2(model4.neuron_count_CVR)[1])*100
+
+
+  table_moderator_R_square$R2...7[R2_position_brain_CVR2] <- c(R2(model5.brain_development_CVR)[1],R2(model5.brain_size_CVR)[1],R2(model5.neuron_count_CVR)[1])*100
+  
+  table_moderator_R_square$R2...7[R2_position_brain_CVR3] <- c(R2(model2.brain_development_CVR)[1],R2(model2.brain_size_CVR)[1],R2(model2.neuron_count_CVR)[1])*100  
+
+  table_moderator_R_square$R2...7[R2_position_brain_CVR4] <- c(R2(model3.brain_development_CVR)[1],R2(model3.brain_size_CVR)[1],R2(model3.neuron_count_CVR)[1])*100  
+
+  table_moderator_R_square$R2...7[R2_position_brain_CVR5] <- c(R2(model6.brain_development_CVR)[1],R2(model6.brain_size_CVR)[1],R2(model6.neuron_count_CVR)[1])*100 
+  
+
+
+
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#    
+# Position 
+  R2_position_behavior_CVR1 <- c(1, 6, 11, 16, 21, 26)
+  R2_position_behavior_CVR2 <- c(1, 6, 11, 16, 21, 26) + 1
+  R2_position_behavior_CVR3 <- c(1, 6, 11, 16, 21, 26) + 2
+  R2_position_behavior_CVR4 <- c(1, 6, 11, 16, 21, 26) + 3
+  R2_position_behavior_CVR5 <- c(1, 6, 11, 16, 21, 26) + 4
+    
+  table_moderator_R_square$R2...10[R2_position_behavior_CVR1] <- c(R2(model4.behavior_CVR)[1],R2(model4.learning_MWM_CVR)[1],R2(model4.memory_MWM_CVR)[1],R2(model4.memory_NOR_CVR)[1],R2(model4.anxiety_EPM_CVR)[1],R2(model4.anxiety_OFT_CVR)[1])*100
+    
+  table_moderator_R_square$R2...10[R2_position_behavior_CVR2] <- c(R2(model5.behavior_CVR)[1],R2(model5.learning_MWM_CVR)[1],R2(model5.memory_MWM_CVR)[1],R2(model5.memory_NOR_CVR)[1],R2(model5.anxiety_EPM_CVR)[1],R2(model5.anxiety_OFT_CVR)[1])*100
+  
+  table_moderator_R_square$R2...10[R2_position_behavior_CVR3] <- c(R2(model2.behavior_CVR)[1],R2(model2.learning_MWM_CVR)[1],R2(model2.memory_MWM_CVR)[1],R2(model2.memory_NOR_CVR)[1],R2(model2.anxiety_EPM_CVR)[1],R2(model2.anxiety_OFT_CVR)[1])*100
+  
+  table_moderator_R_square$R2...10[R2_position_behavior_CVR4] <- c(R2(model3.behavior_CVR)[1],R2(model3.learning_MWM_CVR)[1],R2(model3.memory_MWM_CVR)[1],R2(model3.memory_NOR_CVR)[1],R2(model3.anxiety_EPM_CVR)[1],R2(model3.anxiety_OFT_CVR)[1])*100
+  
+  table_moderator_R_square$R2...10[R2_position_behavior_CVR5] <- c(R2(model6.behavior_CVR)[1],R2(model6.learning_MWM_CVR)[1],R2(model6.memory_MWM_CVR)[1],R2(model6.memory_NOR_CVR)[1],R2(model6.anxiety_EPM_CVR)[1],R2(model6.anxiety_OFT_CVR)[1])*100
+
+
+
+# Saving
+  colnames(table_moderator_R_square) <- c ("Effect size", "Traits", "Moderator", "R2", "Traits", "Moderator", "R2", "Traits", "Moderator", "R2")
+  table_moderator_R_square$`Effect size`[1] <- "lnCVR"
+  table_moderator_R_square_CVR <- table_moderator_R_square
+  
+  write.csv(table_moderator_R_square_CVR, file = './results/csv/table_moderator_R_square_CVR.csv', row.names = FALSE, na = '')
+```
 
