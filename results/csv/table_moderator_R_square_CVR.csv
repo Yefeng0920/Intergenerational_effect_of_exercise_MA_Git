@@ -1,0 +1,36 @@
+"Effect size","Traits","Moderator","R2","Traits","Moderator","R2","Traits","Moderator","R2"
+"lnCVR","Growth factors","Exercise mode",0.0416759285281797,"Brain development","Exercise mode",9.55239357837309,"Neurobehavior","Exercise mode",1.19437783557236
+,,"Exercise timing",1.87249877511512,,"Exercise timing",3.4751858964975,,"Exercise timing",0.638391323040102
+,,"Exercised sex",2.27551037198181,,"Exercised sex",0.506745107829914,,"Exercised sex",0.0234179453291525
+,,"Offspring sex",2.75264318193879,,"Offspring sex",4.14098738205652,,"Offspring sex",3.48196832582099
+,,"Offspring ontogenetic stage",1.48339545176798,"Brain size","Offspring ontogenetic stage",2.3481571581646,"Learning-MWM","Offspring ontogenetic stage",0.362131146745153
+,"BDNF","Exercise mode",0.451512808438242,,"Exercise mode",3.60612870678785,,"Exercise mode",38.2582253606794
+,,"Exercise timing",0.116741297710544,,"Exercise timing",1.43801188707462,,"Exercise timing",19.8282377849931
+,,"Exercised sex",1.69139844781341,,"Exercised sex",0.0019387438441063,,"Exercised sex",0.0881199223737092
+,,"Offspring sex",0.546633898519757,,"Offspring sex",6.07491174874246,,"Offspring sex",7.35939945275615
+,,"Offspring ontogenetic stage",5.54550153363976,,"Offspring ontogenetic stage",4.9254013774775,,"Offspring ontogenetic stage",18.0765176064923
+,"TrkB","Exercise mode",20.7508252449786,"Neurogenesis","Exercise mode",17.2872549527222,"Memory-MWM","Exercise mode",99.9999972509031
+,,"Exercise timing",6.20576082924509,,"Exercise timing",5.26136467937964,,"Exercise timing",35.5484691202416
+,,"Exercised sex",2.82142652101245,,"Exercised sex",0.659696409948806,,"Exercised sex",14.5734535192938
+,,"Offspring sex",4.95901078485935,,"Offspring sex",17.2749858658986,,"Offspring sex",99.9999753188937
+,,"Offspring ontogenetic stage",85.0128875393422,,"Offspring ontogenetic stage",3.5440264280286,,"Offspring ontogenetic stage",99.9999995687874
+,"VEGF","Exercise mode",0.723106610711442,,"Exercise mode",,"Memory-NOR","Exercise mode",0.212801541892022
+,,"Exercise timing",8.0405590146659,,"Exercise timing",,,"Exercise timing",35.8975696849821
+,,"Exercised sex",7.3090690096373,,"Exercised sex",,,"Exercised sex",7.48489153856863
+,,"Offspring sex",27.3533761018436,,"Offspring sex",,,"Offspring sex",5.91327496914961
+,,"Offspring ontogenetic stage",9.00800412486344,,"Offspring ontogenetic stage",,,"Offspring ontogenetic stage",1.32986547157939
+,"reelin","Exercise mode",32.6673508966295,,"Exercise mode",,"Anxiety-EPM","Exercise mode",0.650802329387191
+,,"Exercise timing",1.62395587038484,,"Exercise timing",,,"Exercise timing",5.51706239681537
+,,"Exercised sex",0.846044119178069,,"Exercised sex",,,"Exercised sex",4.25827400025389
+,,"Offspring sex",1.62395587038484,,"Offspring sex",,,"Offspring sex",12.6924320576227
+,,"Offspring ontogenetic stage",39.4128571579283,,"Offspring ontogenetic stage",,,"Offspring ontogenetic stage",0.0840298250748157
+,"GFAP","Exercise mode",36.5431438132052,,"Exercise mode",,"Anxiety-OFT","Exercise mode",0.00164745022066607
+,,"Exercise timing",11.0309204092156,,"Exercise timing",,,"Exercise timing",0.638391832713383
+,,"Exercised sex",7.06832124636088,,"Exercised sex",,,"Exercised sex",0.0413381272129685
+,,"Offspring sex",65.4222483627687,,"Offspring sex",,,"Offspring sex",9.99278401921748
+,,"Offspring ontogenetic stage",52.0917605070851,,"Offspring ontogenetic stage",,,"Offspring ontogenetic stage",7.59258894512779
+,"synapsin","Exercise mode",43.5788136429615,,"Exercise mode",,,"Exercise mode",
+,,"Exercise timing",96.7966213142463,,"Exercise timing",,,"Exercise timing",
+,,"Exercised sex",37.7510833684305,,"Exercised sex",,,"Exercised sex",
+,,"Offspring sex",3.91983588370861,,"Offspring sex",,,"Offspring sex",
+,,"Offspring ontogenetic stage",15.67316754977,,"Offspring ontogenetic stage",,,"Offspring ontogenetic stage",
