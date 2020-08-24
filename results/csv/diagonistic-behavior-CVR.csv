@@ -1,27 +1,27 @@
-"Traits","Model","Random effects","AIC","p-value","N-levels","Variance"
-"Neurobehavior","Full structure","trait category","282.3","0","5","0"
-" "," ","strain"," "," ","4","0"
-" "," ","between-study"," "," ","30","0"
-" "," ","within-study"," "," ","166","0.1136"
-" ","Reduced structure"," "," "," "," "," "
-" ","response_type removed","strain","280.3","1","4","0"
-" "," ","between-study"," "," ","30","0"
-" "," ","within-study"," "," ","166","0.1136"
-" ","Reduced structure"," "," "," "," "," "
-" ","study ID removed","strain","280.3","0.9999","5","0"
-" "," ","between-study"," "," ","4","0"
-" "," ","within-study"," "," ","166","0.1136"
-" ","Reduced structure"," "," "," "," "," "
-" ","strain removed","strain","280.3","1","5","0"
-" "," ","between-study"," "," ","30","0"
-" "," ","within-study"," "," ","166","0.1136"
-" ","Reduced structure"," "," "," "," "," "
-" ","effect size ID removed","strain","316.7","0","5","0.0026"
-" "," ","between-study"," "," ","4","0"
-" "," ","within-study"," "," ","30","0.0118"
-" ","Reduced structure"," "," "," "," "," "
-" ","response_type removed","strain","278.3","1","4","0"
-" ","study ID removed","within-study"," "," ","166","0.1136"
-" ","Reduced structure"," "," "," "," "," "
-" ","response_type removed","between-study","278.3","1","30","0"
-" ","strain ID removed","within-study"," "," ","166","0.1136"
+Traits,Model,Random effects,AIC,p-value,N-levels,Variance
+Neurobehavior,Full structure,trait category,282.3,0,5,0
+ ,,strain, , ,4,0
+ ,,between-study, , ,30,0
+ ,,within-study, , ,166,0.1136
+ ,Reduced structure,, , , , 
+ ,trait category removed,strain,280.3,1,4,0
+ ,,between-study, , ,30,0
+ ,,within-study, , ,166,0.1136
+ ,Reduced structure,, , , , 
+ ,between-study removed,strain,280.3,0.9999,5,0
+ ,,between-study, , ,4,0
+ ,,within-study, , ,166,0.1136
+ ,Reduced structure,, , , , 
+ ,strain removed,strain,280.3,1,5,0
+ ,,between-study, , ,30,0
+ ,,within-study, , ,166,0.1136
+ ,Reduced structure,, , , , 
+ ,within-study removed,strain,316.7,0,5,0.0026
+ ,,between-study, , ,4,0
+ ,,within-study, , ,30,0.0118
+ ,Reduced structure,, , , , 
+ ,trait category removed,strain,278.3,1,4,0
+ ,between-study removed,within-study, , ,166,0.1136
+ ,Reduced structure,, , , , 
+ ,trait category removed,between-study,278.3,1,30,0
+ ,strain removed,within-study, , ,166,0.1136
