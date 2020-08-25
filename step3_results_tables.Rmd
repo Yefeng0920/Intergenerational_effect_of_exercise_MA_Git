@@ -19,6 +19,7 @@ output: word_document
                  dplyr,
                  tidyverse,
                  knitr,
+                 Hmisc, # correlation matrix with significance levels (p-value)
                  readxl)
   
 
@@ -2749,4 +2750,219 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   write.csv(table_moderator_R_square_genes_CVR, file = './results/csv/table_moderator_R_square_genes_CVR.csv', row.names = FALSE, na = '')
   
 ```
+
+
+
+
+
+### 10. Study-levle correlations of traits 
+
+```{r correlations}
+
+# Subsetting data
+ # RR
+  overlap.max %>% subset(select = c(2:4)) -> overlap.RR.max
+  overlap.ave %>% subset(select = c(2:4)) -> overlap.RR.ave
+  overlap.min %>% subset(select = c(2:4)) -> overlap.RR.min
+  colnames(overlap.RR.max) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.RR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.RR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+
+ # CVR
+  overlap.max %>% subset(select = c(6:8)) -> overlap.CVR.max
+  overlap.ave %>% subset(select = c(6:8)) -> overlap.CVR.ave
+  overlap.min %>% subset(select = c(6:8)) -> overlap.CVR.min
+  colnames(overlap.CVR.max) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.CVR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.CVR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+
+
+
+#***************************************************************#
+#--------------------- Improvement (lnRR) ----------------------#
+#***************************************************************#  
+#***************************************************************#
+#                           max-RR                              #
+#***************************************************************#
+        
+# Calculating
+  correlation.max.RR <- rcorr(as.matrix(overlap.RR.max), type = "pearson")  
+  
+# Position
+  correlation.position <- c(1, 3, 5)
+  
+# Extracting coefficients
+  table.correlation.max.RR <- read_excel('./results/Results Tables.xlsx', sheet = 'correlation', col_names = TRUE)  
+ # Neurobehavior  
+  table.correlation.max.RR$Neurobehavior[correlation.position] <- round(c(correlation.max.RR$r[1], correlation.max.RR$r[4], correlation.max.RR$r[7]), 3)
+  table.correlation.max.RR$Neurobehavior[correlation.position+1] <- round(c(correlation.max.RR$P[1], correlation.max.RR$P[4], correlation.max.RR$P[7]), 3)
+ # Brain development   
+  table.correlation.max.RR$`Brain development`[correlation.position] <- round(c(correlation.max.RR$r[2], correlation.max.RR$r[5], correlation.max.RR$r[8]), 3)
+  table.correlation.max.RR$`Brain development`[correlation.position+1] <- round(c(correlation.max.RR$P[2], correlation.max.RR$P[5], correlation.max.RR$P[8]), 3)
+ # Brain growth factors   
+  table.correlation.max.RR$`Brain growth factors`[correlation.position] <- round(c(correlation.max.RR$r[3], correlation.max.RR$r[6], correlation.max.RR$r[9]), 3)
+  table.correlation.max.RR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.max.RR$P[3], correlation.max.RR$P[6], correlation.max.RR$P[9]), 3)
+
+# Saving
+  colnames(table.correlation.max.RR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")# colnames(table.correlation.max.RR)[1] <- " "
+  
+  write.csv(table.correlation.max.RR, file = './results/csv/table.correlation.max.RR.csv', row.names = FALSE)
+  
+
+  
+
+#***************************************************************#
+#                           ave-RR                              #
+#***************************************************************#
+        
+# Calculating
+  correlation.ave.RR <- rcorr(as.matrix(overlap.RR.ave), type = "pearson")  
+  
+# Position
+  correlation.position <- c(1, 3, 5)
+  
+# Extracting coefficients
+  table.correlation.ave.RR <- read_excel('./results/Results Tables.xlsx', sheet = 'correlation', col_names = TRUE)  
+ # Neurobehavior  
+  table.correlation.ave.RR$Neurobehavior[correlation.position] <- round(c(correlation.ave.RR$r[1], correlation.ave.RR$r[4], correlation.ave.RR$r[7]), 3)
+  table.correlation.ave.RR$Neurobehavior[correlation.position+1] <- round(c(correlation.ave.RR$P[1], correlation.ave.RR$P[4], correlation.ave.RR$P[7]), 3)
+ # Brain development   
+  table.correlation.ave.RR$`Brain development`[correlation.position] <- round(c(correlation.ave.RR$r[2], correlation.ave.RR$r[5], correlation.ave.RR$r[8]), 3)
+  table.correlation.ave.RR$`Brain development`[correlation.position+1] <- round(c(correlation.ave.RR$P[2], correlation.ave.RR$P[5], correlation.ave.RR$P[8]), 3)
+ # Brain growth factors   
+  table.correlation.ave.RR$`Brain growth factors`[correlation.position] <- round(c(correlation.ave.RR$r[3], correlation.ave.RR$r[6], correlation.ave.RR$r[9]), 3)
+  table.correlation.ave.RR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.ave.RR$P[3], correlation.ave.RR$P[6], correlation.ave.RR$P[9]), 3)
+
+# Saving
+  colnames(table.correlation.ave.RR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")
+  
+  write.csv(table.correlation.ave.RR, file = './results/csv/table.correlation.ave.RR.csv', row.names = FALSE)
+  
+
+  
+#***************************************************************#
+#                           min-RR                              #
+#***************************************************************#
+        
+# Calculating
+  correlation.min.RR <- rcorr(as.matrix(overlap.RR.min), type = "pearson")  
+  
+# Position
+  correlation.position <- c(1, 3, 5)
+  
+# Extracting coefficients
+  table.correlation.min.RR <- read_excel('./results/Results Tables.xlsx', sheet = 'correlation', col_names = TRUE)  
+ # Neurobehavior  
+  table.correlation.min.RR$Neurobehavior[correlation.position] <- round(c(correlation.min.RR$r[1], correlation.min.RR$r[4], correlation.min.RR$r[7]), 3)
+  table.correlation.min.RR$Neurobehavior[correlation.position+1] <- round(c(correlation.min.RR$P[1], correlation.min.RR$P[4], correlation.min.RR$P[7]), 3)
+ # Brain development   
+  table.correlation.min.RR$`Brain development`[correlation.position] <- round(c(correlation.min.RR$r[2], correlation.min.RR$r[5], correlation.min.RR$r[8]), 3)
+  table.correlation.min.RR$`Brain development`[correlation.position+1] <- round(c(correlation.min.RR$P[2], correlation.min.RR$P[5], correlation.min.RR$P[8]), 3)
+ # Brain growth factors   
+  table.correlation.min.RR$`Brain growth factors`[correlation.position] <- round(c(correlation.min.RR$r[3], correlation.min.RR$r[6], correlation.min.RR$r[9]), 3)
+  table.correlation.min.RR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.min.RR$P[3], correlation.min.RR$P[6], correlation.min.RR$P[9]), 3)
+
+# Saving
+  colnames(table.correlation.min.RR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors") 
+  
+  write.csv(table.correlation.min.RR, file = './results/csv/table.correlation.min.RR.csv', row.names = FALSE)  
+  
+
+ 
+  
+   
+
+#***************************************************************#
+#------------- Inter-individual difference (lnCVR) -------------#
+#***************************************************************#  
+#***************************************************************#
+#                           max-RR                              #
+#***************************************************************#
+        
+# Calculating
+  correlation.max.CVR <- rcorr(as.matrix(overlap.CVR.max), type = "pearson")  
+  
+# Position
+  correlation.position <- c(1, 3, 5)
+  
+# Extracting coefficients
+  table.correlation.max.CVR <- read_excel('./results/Results Tables.xlsx', sheet = 'correlation', col_names = TRUE)  
+ # Neurobehavior  
+  table.correlation.max.CVR$Neurobehavior[correlation.position] <- round(c(correlation.max.CVR$r[1], correlation.max.CVR$r[4], correlation.max.CVR$r[7]), 3)
+  table.correlation.max.CVR$Neurobehavior[correlation.position+1] <- round(c(correlation.max.CVR$P[1], correlation.max.CVR$P[4], correlation.max.CVR$P[7]), 3)
+ # Brain development   
+  table.correlation.max.CVR$`Brain development`[correlation.position] <- round(c(correlation.max.CVR$r[2], correlation.max.CVR$r[5], correlation.max.CVR$r[8]), 3)
+  table.correlation.max.CVR$`Brain development`[correlation.position+1] <- round(c(correlation.max.CVR$P[2], correlation.max.CVR$P[5], correlation.max.CVR$P[8]), 3)
+ # Brain growth factors   
+  table.correlation.max.CVR$`Brain growth factors`[correlation.position] <- round(c(correlation.max.CVR$r[3], correlation.max.CVR$r[6], correlation.max.CVR$r[9]), 3)
+  table.correlation.max.CVR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.max.CVR$P[3], correlation.max.CVR$P[6], correlation.max.CVR$P[9]), 3)
+
+# Saving
+  colnames(table.correlation.max.CVR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")# colnames(table.correlation.max.CVR)[1] <- " "
+  
+  write.csv(table.correlation.max.CVR, file = './results/csv/table.correlation.max.CVR.csv', row.names = FALSE)
+  
+
+  
+
+#***************************************************************#
+#                           ave-RR                              #
+#***************************************************************#
+        
+# Calculating
+  correlation.ave.CVR <- rcorr(as.matrix(overlap.CVR.ave), type = "pearson")  
+  
+# Position
+  correlation.position <- c(1, 3, 5)
+  
+# Extracting coefficients
+  table.correlation.ave.CVR <- read_excel('./results/Results Tables.xlsx', sheet = 'correlation', col_names = TRUE)  
+ # Neurobehavior  
+  table.correlation.ave.CVR$Neurobehavior[correlation.position] <- round(c(correlation.ave.CVR$r[1], correlation.ave.CVR$r[4], correlation.ave.CVR$r[7]), 3)
+  table.correlation.ave.CVR$Neurobehavior[correlation.position+1] <- round(c(correlation.ave.CVR$P[1], correlation.ave.CVR$P[4], correlation.ave.CVR$P[7]), 3)
+ # Brain development   
+  table.correlation.ave.CVR$`Brain development`[correlation.position] <- round(c(correlation.ave.CVR$r[2], correlation.ave.CVR$r[5], correlation.ave.CVR$r[8]), 3)
+  table.correlation.ave.CVR$`Brain development`[correlation.position+1] <- round(c(correlation.ave.CVR$P[2], correlation.ave.CVR$P[5], correlation.ave.CVR$P[8]), 3)
+ # Brain growth factors   
+  table.correlation.ave.CVR$`Brain growth factors`[correlation.position] <- round(c(correlation.ave.CVR$r[3], correlation.ave.CVR$r[6], correlation.ave.CVR$r[9]), 3)
+  table.correlation.ave.CVR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.ave.CVR$P[3], correlation.ave.CVR$P[6], correlation.ave.CVR$P[9]), 3)
+
+# Saving
+  colnames(table.correlation.ave.CVR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")
+  
+  write.csv(table.correlation.ave.CVR, file = './results/csv/table.correlation.ave.CVR.csv', row.names = FALSE)
+  
+
+  
+#***************************************************************#
+#                           min-RR                              #
+#***************************************************************#
+        
+# Calculating
+  correlation.min.CVR <- rcorr(as.matrix(overlap.CVR.min), type = "pearson")  
+  
+# Position
+  correlation.position <- c(1, 3, 5)
+  
+# Extracting coefficients
+  table.correlation.min.CVR <- read_excel('./results/Results Tables.xlsx', sheet = 'correlation', col_names = TRUE)  
+ # Neurobehavior  
+  table.correlation.min.CVR$Neurobehavior[correlation.position] <- round(c(correlation.min.CVR$r[1], correlation.min.CVR$r[4], correlation.min.CVR$r[7]), 3)
+  table.correlation.min.CVR$Neurobehavior[correlation.position+1] <- round(c(correlation.min.CVR$P[1], correlation.min.CVR$P[4], correlation.min.CVR$P[7]), 3)
+ # Brain development   
+  table.correlation.min.CVR$`Brain development`[correlation.position] <- round(c(correlation.min.CVR$r[2], correlation.min.CVR$r[5], correlation.min.CVR$r[8]), 3)
+  table.correlation.min.CVR$`Brain development`[correlation.position+1] <- round(c(correlation.min.CVR$P[2], correlation.min.CVR$P[5], correlation.min.CVR$P[8]), 3)
+ # Brain growth factors   
+  table.correlation.min.CVR$`Brain growth factors`[correlation.position] <- round(c(correlation.min.CVR$r[3], correlation.min.CVR$r[6], correlation.min.CVR$r[9]), 3)
+  table.correlation.min.CVR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.min.CVR$P[3], correlation.min.CVR$P[6], correlation.min.CVR$P[9]), 3)
+
+# Saving
+  colnames(table.correlation.min.CVR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors") 
+  
+  write.csv(table.correlation.min.CVR, file = './results/csv/table.correlation.min.CVR.csv', row.names = FALSE) 
+```
+
+
+
+
 
