@@ -1,0 +1,37 @@
+"Traits","Model","Moderator","Effect size","Estimate","Fixed effects"," "," "," "," "
+,,,,,"Mean","CI.lb","CI.ub","k","n"
+"Neurobehavior","Contrast","prenanal","lnRR","Slope (Difference)","0","0","0","0","0"
+,,,"lnCVR","Slope (Difference)","0","0","0","0","0"
+,,,,,,,,,
+,,"early postnatal","lnRR","Slope (Difference)","0.036","-0.273","0.344","10","134"
+,,,"lnCVR","Slope (Difference)","-0.095","-0.444","0.253","10","134"
+,,,,,,,,,
+,,"adolescence","lnRR","Intercept","0.177","0.069","0.285","98","1626"
+,,,"lnCVR","Intercept","-0.082","-0.198","0.035","98","1626"
+,,,,,,,,,
+,,"adulthood","lnRR","Slope (Difference)","0.038","-0.134","0.211","58","1080"
+,,,"lnCVR","Slope (Difference)","-0.054","-0.242","0.134","58","1080"
+,,,,,,,,,
+"Brain development",,"prenanal","lnRR","Slope (Difference)","-0.111","-0.309","0.086","11","95"
+,,,"lnCVR","Slope (Difference)","-0.019","-0.693","0.654","11","95"
+,,,,,,,,,
+,,"early postnatal","lnRR","Slope (Difference)","-0.004","-0.12","0.112","28","456"
+,,,"lnCVR","Slope (Difference)","0.12","-0.289","0.53","28","456"
+,,,,,,,,,
+,,"adolescence","lnRR","Intercept","0.134","-0.006","0.275","39","361"
+,,,"lnCVR","Intercept","-0.175","-0.449","0.1","39","361"
+,,,,,,,,,
+,,"adulthood","lnRR","Slope (Difference)","0.036","-0.072","0.144","17","279"
+,,,"lnCVR","Slope (Difference)","0.282","-0.165","0.729","17","279"
+,,,,,,,,,
+"Brain growth factors",,"prenanal","lnRR","Slope (Difference)","0.108","-0.092","0.309","14","109"
+,,,"lnCVR","Slope (Difference)","-0.191","-0.752","0.37","14","109"
+,,,,,,,,,
+,,"early postnatal","lnRR","Slope (Difference)","0.015","-0.119","0.149","17","147"
+,,,"lnCVR","Slope (Difference)","-0.262","-0.771","0.246","17","147"
+,,,,,,,,,
+,,"adolescence","lnRR","Intercept","0.231","0.02","0.442","81","693"
+,,,"lnCVR","Intercept","0.381","-0.256","1.018","81","693"
+,,,,,,,,,
+,,"adulthood","lnRR","Slope (Difference)","0.089","-0.063","0.24","19","198"
+,,,"lnCVR","Slope (Difference)","-0.109","-0.581","0.363","19","198"

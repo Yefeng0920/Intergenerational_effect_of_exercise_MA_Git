@@ -1,0 +1,19 @@
+"Traits","Model","Moderator","Effect size","Estimate","Fixed effects"," "," "," "," "
+,,,,,"Mean","CI.lb","CI.ub","k","n"
+"Neurobehavior","Contrast","Male F0","lnRR","Intercept","0.247","0.047","0.447","29","540"
+,,,"lnCVR","Intercept","-0.09","-0.302","0.121","29","540"
+,,,,,,,,,
+,,"Female F0","lnRR","Slope (Difference)","-0.069","-0.291","0.153","137","2189"
+,,,"lnCVR","Slope (Difference)","-0.021","-0.254","0.212","137","2189"
+,,,,,,,,,
+"Brain development",,"Male F0","lnRR","Slope (Difference)","0.114","-0.078","0.306","6","66"
+,,,"lnCVR","Slope (Difference)","-0.286","-0.869","0.297","6","66"
+,,,,,,,,,
+,,"Female F0","lnRR","Slope (Difference)","0.012","-0.149","0.173","89","1133"
+,,,"lnCVR","Slope (Difference)","0.199","-0.407","0.805","89","1133"
+,,,,,,,,,
+"Brain growth factors",,"Male F0","lnRR","Slope (Difference)","0.129","-0.136","0.394","29","264"
+,,,"lnCVR","Slope (Difference)","0.495","-0.215","1.205","29","264"
+,,,,,,,,,
+,,"Female F0","lnRR","Slope (Difference)","0.2","-0.014","0.414","102","880"
+,,,"lnCVR","Slope (Difference)","-0.294","-0.784","0.197","102","880"
