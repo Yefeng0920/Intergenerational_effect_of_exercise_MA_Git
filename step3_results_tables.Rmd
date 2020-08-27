@@ -2804,7 +2804,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   table.correlation.max.RR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.max.RR$P[3], correlation.max.RR$P[6], correlation.max.RR$P[9]), 3)
 
 # Saving
-  colnames(table.correlation.max.RR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")# colnames(table.correlation.max.RR)[1] <- " "
+  colnames(table.correlation.max.RR) <- c("Maximum lnRR", "Neurobehavior", "Brain development", "Brain growth factors")# colnames(table.correlation.max.RR)[1] <- " "
   
   write.csv(table.correlation.max.RR, file = './results/csv/table.correlation.max.RR.csv', row.names = FALSE)
   
@@ -2834,7 +2834,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   table.correlation.ave.RR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.ave.RR$P[3], correlation.ave.RR$P[6], correlation.ave.RR$P[9]), 3)
 
 # Saving
-  colnames(table.correlation.ave.RR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(table.correlation.ave.RR) <- c("Averaged lnRR", "Neurobehavior", "Brain development", "Brain growth factors")
   
   write.csv(table.correlation.ave.RR, file = './results/csv/table.correlation.ave.RR.csv', row.names = FALSE)
   
@@ -2863,7 +2863,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   table.correlation.min.RR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.min.RR$P[3], correlation.min.RR$P[6], correlation.min.RR$P[9]), 3)
 
 # Saving
-  colnames(table.correlation.min.RR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors") 
+  colnames(table.correlation.min.RR) <- c("Minimum lnRR", "Neurobehavior", "Brain development", "Brain growth factors") 
   
   write.csv(table.correlation.min.RR, file = './results/csv/table.correlation.min.RR.csv', row.names = FALSE)  
   
@@ -2898,7 +2898,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   table.correlation.max.CVR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.max.CVR$P[3], correlation.max.CVR$P[6], correlation.max.CVR$P[9]), 3)
 
 # Saving
-  colnames(table.correlation.max.CVR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")# colnames(table.correlation.max.CVR)[1] <- " "
+  colnames(table.correlation.max.CVR) <- c("Maximum lnCVR", "Neurobehavior", "Brain development", "Brain growth factors")# colnames(table.correlation.max.CVR)[1] <- " "
   
   write.csv(table.correlation.max.CVR, file = './results/csv/table.correlation.max.CVR.csv', row.names = FALSE)
   
@@ -2928,7 +2928,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   table.correlation.ave.CVR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.ave.CVR$P[3], correlation.ave.CVR$P[6], correlation.ave.CVR$P[9]), 3)
 
 # Saving
-  colnames(table.correlation.ave.CVR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(table.correlation.ave.CVR) <- c("Averaged lnCVR", "Neurobehavior", "Brain development", "Brain growth factors")
   
   write.csv(table.correlation.ave.CVR, file = './results/csv/table.correlation.ave.CVR.csv', row.names = FALSE)
   
@@ -2957,7 +2957,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   table.correlation.min.CVR$`Brain growth factors`[correlation.position+1] <- round(c(correlation.min.CVR$P[3], correlation.min.CVR$P[6], correlation.min.CVR$P[9]), 3)
 
 # Saving
-  colnames(table.correlation.min.CVR) <- c(" ", "Neurobehavior", "Brain development", "Brain growth factors") 
+  colnames(table.correlation.min.CVR) <- c("Minimum lnCVR", "Neurobehavior", "Brain development", "Brain growth factors") 
   
   write.csv(table.correlation.min.CVR, file = './results/csv/table.correlation.min.CVR.csv', row.names = FALSE) 
 ```

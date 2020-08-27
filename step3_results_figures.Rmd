@@ -2032,30 +2032,30 @@ dev.off()
   #dev.off()
 
   png(file = './results/Figures/correlation.max.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.max <- chart.Correlation(overlap.RR.max, histogram = FALSE, method = 'pearson', pch = 1)  
+  correlation.max <- chart.Correlation(overlap.RR.max, histogram = TRUE, method = 'pearson', pch = 1)  
   dev.off()
 
   
   png(file = './results/Figures/correlation.ave.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.ave <- chart.Correlation(overlap.RR.ave, histogram = FALSE, method = 'pearson', pch = 1)  
+  correlation.ave <- chart.Correlation(overlap.RR.ave, histogram=TRUE, method = 'pearson', pch = 1)  
   dev.off()
 
   
   png(file = './results/Figures/correlation.min.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.min <- chart.Correlation(overlap.RR.min, histogram=FALSE, pch = 1)  
+  correlation.min <- chart.Correlation(overlap.RR.min, histogram=TRUE, pch = 1)  
   dev.off()
    
  # CVR
   png(file = './results/Figures/correlation.max.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.max <- chart.Correlation(overlap.CVR.max, histogram = FALSE, method = 'pearson', pch = 1)  
+  correlation.max <- chart.Correlation(overlap.CVR.max, histogram = TRUE, method = 'pearson', pch = 1)  
   dev.off()
   
   png(file = './results/Figures/correlation.ave.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.ave <- chart.Correlation(overlap.CVR.ave, histogram = FALSE, method = 'pearson',pch = 1)  
+  correlation.ave <- chart.Correlation(overlap.CVR.ave, histogram = TRUE, method = 'pearson',pch = 1)  
   dev.off()
   
   png(file = './results/Figures/correlation.min.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.min <- chart.Correlation(overlap.CVR.min, histogram = FALSE, method = 'pearson',pch = 1)  
+  correlation.min <- chart.Correlation(overlap.CVR.min, histogram = TRUE, method = 'pearson',pch = 1)  
   dev.off()
 ```
 
