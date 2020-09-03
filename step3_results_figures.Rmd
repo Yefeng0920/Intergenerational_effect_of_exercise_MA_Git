@@ -427,7 +427,7 @@ set.seed(20200817)
     annotate('text', x = 5, y = 2.7, label= paste("italic(k)==", nrow(learning_MWM %>% distinct(ES_ID))), parse=TRUE, size=7)-> fig.specific.behavior.RR
 
 
-
+### NOTE YEFENG: IN the main ms I suggested adding together all lnRR and lnCVR figures into a 3 panel figure. YOu can do thsi quite easily with the package ggarrange(); in essence save your ggplot figures to objects (e.g., p1 <- ggplot(...), p2 <- ggplot(..)+..), then add each individual plot in ggarrange as follows: ggarrange(p1 + p2, labels= c("A)", "B)"))
 
 
 
@@ -447,7 +447,7 @@ set.seed(20200817)
 
   
 # Plotting
-  ggplot() +
+  p1 <- ggplot() +  # Note yefeng you can save all this to a single object and then call that object for plotting p1 at end
     geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
     geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
     scale_shape_manual(values = c(16, 16)) +
@@ -471,7 +471,7 @@ set.seed(20200817)
     annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='voluntary') %>% distinct(ES_ID))), parse=TRUE, size=7) +
     annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='forced') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.mode.behavior.RR
 
-
+p1
 
     
 #--------------------------------------------------------------#

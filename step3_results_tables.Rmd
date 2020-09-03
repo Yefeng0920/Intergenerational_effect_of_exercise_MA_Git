@@ -998,7 +998,7 @@ table_F0_sex$...7[FE_position_RR] <- round(c(model2.behavior_RR$ci.lb[1],       
         model2.genes_RR$ci.lb[1],                                         model2.genes_RR$ci.lb[2]),3)
 
 
- # ci.lb
+ # ci.ub
   table_F0_sex$...8[FE_position_RR] <- round(c(model2.behavior_RR$ci.ub[1],                                      model2.behavior_RR$ci.ub[2],											                 model2.brain_development_RR$ci.ub[1],                             model2.brain_development_RR$ci.ub[2],
         model2.genes_RR$ci.ub[1],                                         model2.genes_RR$ci.ub[2]),3)
 
@@ -1034,7 +1034,7 @@ table_F0_sex$`Fixed effect`[FE_position_CVR] <- round(c(model2.behavior_CVR$b[1]
         model2.genes_CVR$ci.lb[1],                                        model2.genes_CVR$ci.lb[2]),3)
 
 
-  # ci.lb
+  # ci.ub
   table_F0_sex$...8[FE_position_CVR] <- round(c(model2.behavior_CVR$ci.ub[1],                                     model2.behavior_CVR$ci.ub[2],											                model2.brain_development_CVR$ci.ub[1],                            model2.brain_development_CVR$ci.ub[2],
         model2.genes_CVR$ci.ub[1],                                        model2.genes_CVR$ci.ub[2]),3)
 
@@ -1084,7 +1084,7 @@ table_F0_sex$`Fixed effect`[FE_position_CVR] <- round(c(model2.behavior_CVR$b[1]
         model.contrast2.genes_RR$ci.lb[1],                                model.contrast2.genes_RR$ci.lb[2]),3)
 
 
- # ci.lb
+ # ci.ub
   table_F0_sex_contrast$...8[FE_position_RR] <- round(c(model.contrast2.behavior_RR$ci.ub[1],                             model.contrast2.behavior_RR$ci.ub[2],											        model.contrast2.brain_development_RR$ci.ub[1],                    model.contrast2.brain_development_RR$ci.ub[2],
         model.contrast2.genes_RR$ci.ub[1],                                model.contrast2.genes_RR$ci.ub[2]),3)
 
@@ -1120,7 +1120,7 @@ table_F0_sex_contrast$`Fixed effect`[FE_position_CVR] <- round(c(model.contrast2
         model.contrast2.genes_CVR$ci.lb[1],                               model.contrast2.genes_CVR$ci.lb[2]),3)
 
 
-  # ci.lb
+  # ci.ub
   table_F0_sex_contrast$...8[FE_position_CVR] <- round(c(model.contrast2.behavior_CVR$ci.ub[1],                            model.contrast2.behavior_CVR$ci.ub[2],											        model.contrast2.brain_development_CVR$ci.ub[1],                  model.contrast2.brain_development_CVR$ci.ub[2],
         model.contrast2.genes_CVR$ci.ub[1],                               model.contrast2.genes_CVR$ci.ub[2]),3)
 
@@ -1186,7 +1186,7 @@ table_F0_sex_contrast$`Fixed effect`[FE_position_CVR] <- round(c(model.contrast2
         model3.genes_RR$ci.lb[3]),3)
 
 
-## ci.lb
+## ci.ub
   table_F1_sex$...8[FE_position_RR] <- round(c(model3.behavior_RR$ci.ub[1],                                      model3.behavior_RR$ci.ub[2],
         model3.behavior_RR$ci.ub[3],
         model3.brain_development_RR$ci.ub[1],
@@ -1203,8 +1203,6 @@ table_F0_sex_contrast$`Fixed effect`[FE_position_CVR] <- round(c(model.contrast2
 
 ## n
 table_F1_sex$...10[FE_position_RR] <- c((sum(behavior[behavior$F1_sex_test=='male',]$exp_n)+ sum(behavior[behavior$F1_sex_test=='male',][!duplicated(behavior[behavior$F1_sex_test=='male',][,"shared_ID"]) ,"con_n"])), (sum(behavior[behavior$F1_sex_test=='female',]$exp_n)+ sum(behavior[behavior$F1_sex_test=='female',][!duplicated(behavior[behavior$F1_sex_test=='female',][,"shared_ID"]) ,"con_n"])), (sum(behavior[behavior$F1_sex_test=='mixed',]$exp_n)+ sum(behavior[behavior$F1_sex_test=='mixed',][!duplicated(behavior[behavior$F1_sex_test=='mixed',][,"shared_ID"]) ,"con_n"])), (sum(brain_development[brain_development$F1_sex_test=='male',]$exp_n)+ sum(brain_development[brain_development$F1_sex_test=='male',][!duplicated(brain_development[brain_development$F1_sex_test=='male',][,"shared_ID"]) ,"con_n"])), (sum(brain_development[brain_development$F1_sex_test=='female',]$exp_n)+ sum(brain_development[brain_development$F1_sex_test=='female',][!duplicated(brain_development[brain_development$F1_sex_test=='female',][,"shared_ID"]) ,"con_n"])), (sum(brain_development[brain_development$F1_sex_test=='mixed',]$exp_n)+ sum(brain_development[brain_development$F1_sex_test=='mixed',][!duplicated(brain_development[brain_development$F1_sex_test=='mixed',][,"shared_ID"]) ,"con_n"])), (sum(genes[genes$F1_sex_test=='male',]$exp_n)+ sum(genes[genes$F1_sex_test=='male',][!duplicated(genes[genes$F1_sex_test=='male',][,"shared_ID"]) ,"con_n"])), (sum(genes[genes$F1_sex_test=='female',]$exp_n)+ sum(genes[genes$F1_sex_test=='female',][!duplicated(genes[genes$F1_sex_test=='female',][,"shared_ID"]) ,"con_n"])), (sum(genes[genes$F1_sex_test=='mixed',]$exp_n)+ sum(genes[genes$F1_sex_test=='mixed',][!duplicated(genes[genes$F1_sex_test=='mixed',][,"shared_ID"]) ,"con_n"])))
-
-
 
 
 
@@ -1240,7 +1238,7 @@ table_F1_sex$...10[FE_position_RR] <- c((sum(behavior[behavior$F1_sex_test=='mal
         model3.genes_CVR$ci.lb[3]),3)
 
 
- # ci.lb
+ # ci.ub
   table_F1_sex$...8[FE_position_CVR] <- round(c(model3.behavior_CVR$ci.ub[1],                                     model3.behavior_CVR$ci.ub[2],
         model3.behavior_CVR$ci.ub[3],
         model3.brain_development_CVR$ci.ub[1],
@@ -1748,7 +1746,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   write.csv(table_exercise_winidow, file = './results/csv/table_exercise_winidow.csv', row.names = FALSE, na = '')
   
   
-
+### Again, lots of repeat code. Try to generalise what you're doing above into a single function that does this and then you don't need to repeat huge code chunks all the time. See Step 1 example of a type of function that can do this. Try to understand that and then this problem will be easy to tackle
   
   
     
@@ -2776,7 +2774,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   colnames(overlap.CVR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
   colnames(overlap.CVR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
 
-
+### NOTE: Yefeng. OK, here below you're doing the correlation between effects within studies? This isn't quite clear. Maybe a bit more annotation is needed here.
 
 #***************************************************************#
 #--------------------- Improvement (lnRR) ----------------------#

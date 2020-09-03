@@ -109,7 +109,7 @@ output:
                                                       V = cov_VRR_neuron_count,
                                                       random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
                                                       method = 'REML',
-                                                      test = 'z'))
+                                                      test = 'z')) #NOTE!! Yefeng, you may want to change test to 't' rather than 'z'. Is there a reason why you used z? z-tests are large sample approximations. 
 
 
 # BDNF
@@ -164,7 +164,7 @@ output:
                                                                               test = 'z'))
 
 # DNA_methylation 
- # subset is not enough to achieve convergency, so we replace cor-variance matrix and reduce random effect numbers
+ # subset is not enough to achieve convergence, so we replace covariance matrix and reduce random effect numbers
 
   model1.DNA_methylation_RR <- with(DNA_methylation, rma.mv(yi = RR,
                                                             V = VRR,
@@ -204,7 +204,7 @@ model1.anxiety_EPM_RR <- with(anxiety_EPM, rma.mv(yi = RR,
                                                   method = 'REML',
                                                   test = 'z'))
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 
 
@@ -299,7 +299,7 @@ model1.genes_RR <- with(genes, rma.mv(yi = RR,
                                                                                test = 'z'))
 
 # DNA_methylation 
- # subset is not enough to achieve convergency, so we replace cor-variance matrix and reduce random effect numbers
+ # subset is not enough to achieve convergence, so we replace covariance matrix and reduce random effect numbers
 
   model1.DNA_methylation_CVR <- with(DNA_methylation, rma.mv(yi = CVR,
                                                              V = VCVR,
@@ -339,7 +339,7 @@ model1.anxiety_EPM_CVR <- with(anxiety_EPM, rma.mv(yi = CVR,
                                                    method = 'REML',
                                                    test = 'z'))
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 
 
@@ -407,7 +407,7 @@ model1.anxiety_EPM_CVR <- with(anxiety_EPM, rma.mv(yi = CVR,
    save(model1.brain_development_CVR, file = './models/model1.brain_development_CVR.Rdata')
 ```
 
-
+## NOTE: Yefeng, again, you have a lot of repeat code so you could think about simplifying following suggestions from step1. Build a function like I showed. and it can fit models and save all in one step. This is of course totally fine what you have, but it just makes things harder to track and read
 
 #### (ii) Univariate regression model - parental sex
 
@@ -516,7 +516,7 @@ model2.memory_MWM_RR <- rma.mv(yi = RR,
                                   data = anxiety_EPM)
 
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 
 # brain_development
@@ -643,10 +643,7 @@ model2.DNA_methylation_CVR <- rma.mv(yi = CVR,
                                    mod = ~relevel(F0_sex_exercise, ref = 'male') -1, 
                                    data = anxiety_EPM)
 
-
-#--------------------- Board traits----------------------#		
-
-
+#--------------------- Broad traits----------------------#		
 
 # brain_development
   model2.brain_development_CVR <- rma.mv(yi = CVR, 
@@ -820,7 +817,7 @@ model2.DNA_methylation_CVR <- rma.mv(yi = CVR,
                                   mod = ~relevel(F1_sex_test, ref = 'male') -1, 
                                   data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 
 # brain_development
@@ -946,7 +943,7 @@ model3.brain_size_CVR <- rma.mv(yi = CVR,
                                    mod = ~relevel(F1_sex_test, ref = 'male') -1, 
                                    data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#		
+#--------------------- Broad traits----------------------#		
 
 # brain_development
   model3.brain_development_CVR <- rma.mv(yi = CVR, 
@@ -1119,7 +1116,7 @@ model3.brain_size_CVR <- rma.mv(yi = CVR,
                                   mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
                                   data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 
 # brain_development
@@ -1246,7 +1243,7 @@ model4.syptophysin_CVR <- rma.mv(yi = CVR,
                                    mod = ~relevel(manipulation_mode, ref = 'forced') -1, 
                                    data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#		
+#--------------------- Broad traits----------------------#		
 
 # brain_development
   model4.brain_development_CVR <- rma.mv(yi = CVR, 
@@ -1315,9 +1312,9 @@ model4.behavior_CVR <- rma.mv(yi = CVR,
 
 
 
-#### (v) Univariate regression model - exercise timming
+#### (v) Univariate regression model - exercise timing
 
-```{r exercise timming}
+```{r exercise timing}
 #***************************************************************#
 #--------------------- Improvement (lnRR) ----------------------#
 #***************************************************************#
@@ -1421,7 +1418,7 @@ model4.behavior_CVR <- rma.mv(yi = CVR,
                                   mod = ~relevel(manipulation_window, ref = 'pre-conception') -1, 
                                   data = anxiety_EPM)
 
-#---------------------  Board traits----------------------#
+#---------------------  Broad traits----------------------#
 
 
 # brain_development
@@ -1850,7 +1847,7 @@ model6.behavior_RR <- rma.mv(yi = RR,
                                    mod = ~response_age_life_phase -1, 
                                    data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#		
+#--------------------- Broad traits----------------------#		
 
 
 # genes
@@ -2031,7 +2028,7 @@ model.contrast2.brain_size_RR <- rma.mv(yi = RR,
                                            mod = ~relevel(F0_sex_exercise, ref = 'male'), 
                                            data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 # brain_development
   model.contrast2.brain_development_RR <- rma.mv(yi = RR, 
@@ -2157,7 +2154,7 @@ model.contrast2.brain_size_RR <- rma.mv(yi = RR,
                                             mod = ~relevel(F0_sex_exercise, ref = 'male'), 
                                             data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#		
+#--------------------- Broad traits----------------------#		
 
 # brain_development
   model.contrast2.brain_development_CVR <- rma.mv(yi = CVR, 
@@ -2332,7 +2329,7 @@ model.contrast2.brain_size_RR <- rma.mv(yi = RR,
                                            mod = ~relevel(F1_sex_test, ref = 'male'), 
                                            data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 
 # brain_development
@@ -2526,7 +2523,7 @@ model.contrast3.genes_CVR <- rma.mv(yi = CVR,
 
 
 
-#### (iv) Univariate regression mode - exerise mode
+#### (iv) Univariate regression mode - exercise mode
 
 ```{r exercise mode}
 #***************************************************************#
@@ -2632,7 +2629,7 @@ model.contrast4.VEGF_RR <- rma.mv(yi = RR,
                                            mod = ~relevel(manipulation_mode, ref = 'forced'), 
                                            data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 # brain_development
   model.contrast4.brain_development_RR <- rma.mv(yi = RR, 
@@ -2757,7 +2754,7 @@ model.contrast4.behavior_RR <- rma.mv(yi = RR,
                                             mod = ~relevel(manipulation_mode, ref = 'forced'), 
                                             data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#		
+#--------------------- Broad traits----------------------#		
 
 
 # brain_development
@@ -2827,9 +2824,9 @@ model.contrast4.behavior_RR <- rma.mv(yi = RR,
 
 
 
-#### (v) Univariate regression model - exercise timming
+#### (v) Univariate regression model - exercise timing
 
-```{r exercise timming}
+```{r exercise timing}
 #***************************************************************#
 #--------------------- Improvement (lnRR) ----------------------#
 #***************************************************************#
@@ -2933,7 +2930,7 @@ model.contrast4.behavior_RR <- rma.mv(yi = RR,
                                            mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
                                            data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 
 # brain_development
@@ -3061,7 +3058,7 @@ model.contrast4.behavior_RR <- rma.mv(yi = RR,
                                             mod = ~relevel(manipulation_window, ref = 'pre-conception'), 
                                             data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#		
+#--------------------- Broad traits----------------------#		
 
 # brain_development
   model.contrast5.brain_development_CVR <- rma.mv(yi = CVR, 
@@ -3236,7 +3233,7 @@ model.contrast5.behavior_CVR <- rma.mv(yi = CVR,
                                            mod = ~response_age_life_phase, 
                                            data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#
+#--------------------- Broad traits----------------------#
 
 # genes
   model.contrast6.genes_RR <- rma.mv(yi = RR, 
@@ -3362,7 +3359,7 @@ model.contrast6.VEGF_CVR <- rma.mv(yi = CVR,
                                             mod = ~response_age_life_phase, 
                                             data = anxiety_EPM)
 
-#--------------------- Board traits----------------------#		
+#--------------------- Broad traits----------------------#		
 
 # genes
   model.contrast6.genes_CVR <- rma.mv(yi = CVR, 
