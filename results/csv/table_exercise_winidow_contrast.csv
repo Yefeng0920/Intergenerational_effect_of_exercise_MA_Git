@@ -1,0 +1,37 @@
+"Traits","Model","Moderator","Effect size","Estimate","Fixed effects"," "," "," "," "
+,,,,,"Mean","CI.lb","CI.ub","k","n"
+"Neurobehavior","Contrast","pre-conception","lnRR","Intercept","0.217","0.05","0.385","40","711"
+,,,"lnCVR","Intercept","-0.147","-0.327","0.032","40","711"
+,,,,,,,,,
+,,"pregnancy","lnRR","Slope (Difference)","0.012","-0.193","0.217","87","998"
+,,,"lnCVR","Slope (Difference)","0.054","-0.166","0.274","87","998"
+,,,,,,,,,
+,,"pre to pregnancy","lnRR","Slope (Difference)","-0.17","-0.416","0.076","37","987"
+,,,"lnCVR","Slope (Difference)","0.037","-0.218","0.293","37","987"
+,,,,,,,,,
+,,"pre to post","lnRR","Slope (Difference)","0.196","-0.552","0.944","2","33"
+,,,"lnCVR","Slope (Difference)","0.356","-0.513","1.226","2","33"
+,,,,,,,,,
+"Brain development",,"pre-conception","lnRR","Intercept","0.238","0.032","0.444","15","110"
+,,,"lnCVR","Intercept","0.371","-0.315","1.057","15","110"
+,,,,,,,,,
+,,"pregnancy","lnRR","Slope (Difference)","0.048","-0.134","0.229","56","512"
+,,,"lnCVR","Slope (Difference)","-0.161","-0.549","0.227","56","512"
+,,,,,,,,,
+,,"pre to pregnancy","lnRR","Slope (Difference)","-0.133","-0.381","0.116","16","381"
+,,,"lnCVR","Slope (Difference)","0.151","-0.392","0.694","16","381"
+,,,,,,,,,
+,,"pre to post","lnRR","Slope (Difference)","-0.016","-0.516","0.484","8","196"
+,,,"lnCVR","Slope (Difference)","0.009","-0.909","0.927","8","196"
+,,,,,,,,,
+"Brain growth factors",,"pre-conception","lnRR","Intercept","0.238","0.032","0.444","45","362"
+,,,"lnCVR","Intercept","0.371","-0.315","1.057","45","362"
+,,,,,,,,,
+,,"pregnancy","lnRR","Slope (Difference)","0.048","-0.134","0.229","59","576"
+,,,"lnCVR","Slope (Difference)","-0.161","-0.549","0.227","59","576"
+,,,,,,,,,
+,,"pre to pregnancy","lnRR","Slope (Difference)","-0.133","-0.381","0.116","19","160"
+,,,"lnCVR","Slope (Difference)","0.151","-0.392","0.694","19","160"
+,,,,,,,,,
+,,"pre to post","lnRR","Slope (Difference)","-0.016","-0.516","0.484","8","54"
+,,,"lnCVR","Slope (Difference)","0.009","-0.909","0.927","8","54"

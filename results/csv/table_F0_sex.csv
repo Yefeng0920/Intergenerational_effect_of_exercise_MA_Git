@@ -1,6 +1,6 @@
 "Traits","Model","Moderator","Effect size","Estimate","Fixed effects"," "," "," "," "
 ,,,,,"Mean","CI.lb","CI.ub","k","n"
-"Neurobehavior","Univariate","Male F0","lnRR","Intercept","0.247","0.047","0.447","29","540"
+"Neurobehavior","Non-contrast","Male F0","lnRR","Intercept","0.247","0.047","0.447","29","540"
 ,,,"lnCVR","Intercept","-0.09","-0.302","0.121","29","540"
 ,,,,,,,,,
 ,,"Female F0","lnRR","Intercept","0.178","0.08","0.275","137","2189"

@@ -1,0 +1,19 @@
+"Traits","Model","Moderator","Effect size","Estimate","Fixed effects"," "," "," "," "
+,,,,,"Mean","CI.lb","CI.ub","k","n"
+"Neurobehavior","Contrast","Forced exercise","lnRR","Intercept","0.231","0.12","0.342","101","1365"
+,,,"lnCVR","Intercept","-0.163","-0.268","-0.057","101","1365"
+,,,,,,,,,
+,,"Voluntary exercise","lnRR","Slope (Difference)","-0.102","-0.277","0.073","65","1354"
+,,,"lnCVR","Slope (Difference)","0.107","-0.058","0.272","65","1354"
+,,,,,,,,,
+"Brain development",,"Forced exercise","lnRR","Intercept","0.174","0.057","0.291","56","773"
+,,,"lnCVR","Intercept","-0.297","-0.52","-0.074","56","773"
+,,,,,,,,,
+,,"Voluntary exercise","lnRR","Slope (Difference)","-0.094","-0.183","-0.006","39","425"
+,,,"lnCVR","Slope (Difference)","0.425","0.102","0.747","39","425"
+,,,,,,,,,
+"Brain growth factors",,"Forced exercise","lnRR","Intercept","0.251","0.037","0.466","79","731"
+,,,"lnCVR","Intercept","0.31","-0.292","0.912","79","731"
+,,,,,,,,,
+,,"Voluntary exercise","lnRR","Slope (Difference)","0.016","-0.174","0.206","52","413"
+,,,"lnCVR","Slope (Difference)","-0.032","-0.387","0.322","52","413"

@@ -1,0 +1,7 @@
+"Minimum lnRR","Neurobehavior","Brain development","Brain growth factors"
+"Neurobehavior",1,-0.186,-0.184
+"p value",NA,0.506,0.48
+"Brain development",-0.186,1,0.289
+"p value",0.506,NA,0.338
+"Brain growth factors",-0.184,0.289,1
+"p value",0.48,0.338,NA

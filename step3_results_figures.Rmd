@@ -314,6 +314,13 @@ set.seed(20200817)
   png(filename = './results/Figures/fig.1.png', height = 7, width = 9, units = "in", type = "windows", res = 400)
   fig.conception
   dev.off()
+  
+
+  pdf(file = './results/Figures/fig.1.pdf', height = 7, width = 9)
+  fig.conception
+  dev.off()
+  
+  
 ```
 
 
@@ -672,11 +679,17 @@ set.seed(20200817)
 # Saving
 fig.behavior.RR <- ggarrange(orchard.overall.behavior.RR, fig.specific.behavior.RR, fig.mode.behavior.RR,fig.timing.behavior.RR, fig.F0.sex.behavior.RR, fig.F1.sex.behavior.RR,fig.F1.age.behavior.RR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
 
+
 fig.behavior.RR
 png(filename = "./results/Figures/fig.behavior.RR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
 fig.behavior.RR
 dev.off()
 
+
+
+pdf(file = "./results/Figures/fig.behavior.RR.pdf", width = 16, height = 22)
+fig.behavior.RR
+dev.off()
 
 
 
@@ -1014,6 +1027,12 @@ fig.behavior.CVR
 png(filename = "./results/Figures/fig.behavior.CVR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
 fig.behavior.CVR
 dev.off()
+
+
+pdf(file = "./results/Figures/fig.behavior.CVR.pdf", width = 16, height = 22)
+fig.behavior.CVR
+dev.off()
+
 ```
 
 
@@ -1339,6 +1358,9 @@ dev.off()
 
 
 
+pdf(file = "./results/Figures/fig.brain.RR.pdf", width = 16, height = 22)
+fig.brain_development.RR
+dev.off()
 
 
 
@@ -1655,6 +1677,15 @@ fig.brain_development.CVR
 png(filename = "./results/Figures/fig.brain.CVR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
 fig.brain_development.CVR
 dev.off()
+
+
+
+
+pdf(file = "./results/Figures/fig.brain.CVR.pdf", width = 16, height = 22)
+fig.brain_development.CVR
+dev.off()
+
+
 ```
 
 
@@ -1999,6 +2030,13 @@ fig.genes.RR
 png(filename = "./results/Figures/fig.genes.RR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
 fig.genes.RR
 dev.off()
+
+
+pdf(file =  "./results/Figures/fig.genes.RR.pdf", width = 16, height = 22)
+fig.genes.RR
+dev.off()
+
+
 ```
 
 
@@ -2032,30 +2070,30 @@ dev.off()
   #dev.off()
 
   png(file = './results/Figures/correlation.max.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.max <- chart.Correlation(overlap.RR.max, histogram = FALSE, method = 'pearson', pch = 1)  
+  correlation.max <- chart.Correlation(overlap.RR.max, histogram = TRUE, method = 'pearson', pch = 1)  
   dev.off()
 
   
   png(file = './results/Figures/correlation.ave.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.ave <- chart.Correlation(overlap.RR.ave, histogram = FALSE, method = 'pearson', pch = 1)  
+  correlation.ave <- chart.Correlation(overlap.RR.ave, histogram=TRUE, method = 'pearson', pch = 1)  
   dev.off()
 
   
   png(file = './results/Figures/correlation.min.RR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.min <- chart.Correlation(overlap.RR.min, histogram=FALSE, pch = 1)  
+  correlation.min <- chart.Correlation(overlap.RR.min, histogram=TRUE, pch = 1)  
   dev.off()
    
  # CVR
   png(file = './results/Figures/correlation.max.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.max <- chart.Correlation(overlap.CVR.max, histogram = FALSE, method = 'pearson', pch = 1)  
+  correlation.max <- chart.Correlation(overlap.CVR.max, histogram = TRUE, method = 'pearson', pch = 1)  
   dev.off()
   
   png(file = './results/Figures/correlation.ave.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.ave <- chart.Correlation(overlap.CVR.ave, histogram = FALSE, method = 'pearson',pch = 1)  
+  correlation.ave <- chart.Correlation(overlap.CVR.ave, histogram = TRUE, method = 'pearson',pch = 1)  
   dev.off()
   
   png(file = './results/Figures/correlation.min.CVR.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
-  correlation.min <- chart.Correlation(overlap.CVR.min, histogram = FALSE, method = 'pearson',pch = 1)  
+  correlation.min <- chart.Correlation(overlap.CVR.min, histogram = TRUE, method = 'pearson',pch = 1)  
   dev.off()
 ```
 

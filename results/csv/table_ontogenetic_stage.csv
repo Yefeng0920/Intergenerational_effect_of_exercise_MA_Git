@@ -1,6 +1,6 @@
 "Traits","Model","Moderator","Effect size","Estimate","Fixed effects"," "," "," "," "
 ,,,,,"Mean","CI.lb","CI.ub","k","n"
-"Neurobehavior","Univariate","prenantal","lnRR","Intercept","0","0","0","0","0"
+"Neurobehavior","Non-contrast","prenanal","lnRR","Intercept","0","0","0","0","0"
 ,,,"lnCVR","Intercept","0","0","0","0","0"
 ,,,,,,,,,
 ,,"early postnatal","lnRR","Intercept","0.213","-0.08","0.505","10","134"
@@ -12,7 +12,7 @@
 ,,"adulthood","lnRR","Intercept","0.215","0.067","0.364","58","1080"
 ,,,"lnCVR","Intercept","-0.135","-0.285","0.014","58","1080"
 ,,,,,,,,,
-"Brain development",,"prenantal","lnRR","Intercept","0.023","-0.19","0.236","11","95"
+"Brain development",,"prenanal","lnRR","Intercept","0.023","-0.19","0.236","11","95"
 ,,,"lnCVR","Intercept","-0.194","-0.809","0.421","11","95"
 ,,,,,,,,,
 ,,"early postnatal","lnRR","Intercept","0.13","-0.015","0.275","28","456"
@@ -24,14 +24,14 @@
 ,,"adulthood","lnRR","Intercept","0.17","0.022","0.319","17","279"
 ,,,"lnCVR","Intercept","0.108","-0.286","0.502","17","279"
 ,,,,,,,,,
-"Brain growth factors",,"prenantal","lnRR","Intercept","0.339","0.09","0.617","14","109"
-,,,"lnCVR","Intercept","0.19","-0.462","0.983","14","109"
+"Brain growth factors",,"prenanal","lnRR","Intercept","0.339","0.061","0.617","14","109"
+,,,"lnCVR","Intercept","0.19","-0.603","0.983","14","109"
 ,,,,,,,,,
 ,,"early postnatal","lnRR","Intercept","0.246","0.011","0.482","17","147"
 ,,,"lnCVR","Intercept","0.119","-0.633","0.87","17","147"
 ,,,,,,,,,
-,,"adolescence","lnRR","Intercept","0.238","0.032","0.444","81","693"
-,,,"lnCVR","Intercept","0.371","-0.315","1.057","81","693"
+,,"adolescence","lnRR","Intercept","0.231","0.02","0.442","81","693"
+,,,"lnCVR","Intercept","0.381","-0.256","1.018","81","693"
 ,,,,,,,,,
-,,"adulthood","lnRR","Intercept","0.222","-0.284","0.728","19","198"
-,,,"lnCVR","Intercept","0.38","-0.693","1.452","19","198"
+,,"adulthood","lnRR","Intercept","0.32","0.08","0.559","19","198"
+,,,"lnCVR","Intercept","0.272","-0.447","0.991","19","198"
