@@ -1,0 +1,867 @@
+---
+title: "R scripts for scale-dependent meta-analysis simulations"
+output: html_notebook
+---
+
+```{r}
+#load libraries
+library(metafor)
+library(tidyverse)
+library(mobsim) # Spatial Simulation and Scale-Dependent Analysis of Biodiversity Changes
+library(vegan) # Community Ecology Package # “permute” - dependent package of vegan: Functions for Generating Restricted Permutations of Data
+library(plyr);library(dplyr)
+library(viridis) # Default Color Maps from 'matplotlib'
+library(simstudy) # Simulation of Study Data
+library(data.table) # Enhanced data.frame
+library(GGally) # Extension to 'ggplot2' # Error: package ‘ggplot2’ 3.2.1 is loaded, but >= 3.3.0 is required by ‘GGally’
+library(stringr)
+library(Rmisc) # The Rmisc library contains many functions useful for data analysis and utility operations.
+
+library(mvnfast) # Fast Multivariate Normal and Student's t Methods
+
+# install.packages("D:/Program Files (x86)/R packages source/mobsim_0.1.0.zip", repos = NULL, type="source")
+# install.packages("D:/Program Files (x86)/R packages source/vegan_2.5-6.zip", repos = NULL, type="source")
+# install.packages("D:/Program Files (x86)/R packages source/permute_0.9-5.zip", repos = NULL, type="source")
+# install.packages("D:/Program Files (x86)/R packages source/viridis_0.5.1.zip", repos = NULL, type="source")
+# install.packages("D:/Program Files (x86)/R packages source/simstudy_0.1.16.zip", repos = NULL, type="source") # install packages from local source
+# install.packages("D:/Program Files (x86)/R packages source/GGally_2.0.0.zip", repos = NULL, type="source")
+# install.packages("D:/Program Files (x86)/R packages source/ggplot2_3.3.2.zip", repos = NULL, type="source")
+# install.packages("D:/Program Files (x86)/R packages source/Rmisc_1.5.zip", repos = NULL, type="source")
+# install.packages("D:/Program Files (x86)/R packages source/mvnfast_0.2.5.zip", repos = NULL, type="source")
+
+```
+
+Generate true population effect sizes. Effect size (g or LR) calculated from the population SD, mean, and N of PatchRichT for 100 old-growth and secondary forest patches, set by the simulation.
+```{r}
+#true hedges g
+(hg.pop.true <- metafor::escalc(measure="SMD",m1i=70, m2i=120, sd1i=10, sd2i=10, n1i=100, n2i=100, append=T))
+# true lnr
+(lr.pop.true <- metafor::escalc(measure="ROM",m1i=70, m2i=120, sd1i=10, sd2i=10, n1i=100, n2i=100, append=T))
+```
+
+#Create functions
+
+Firstly, create a function that will generate the communities using the mobsim function sim_poisson_community(). Then randomly sample from the patches using sample_quadrats(), with specified areas. From the species x abundance matrix generated, estimate true patch level species richness using vegan's estimateR() function.
+ 
+```{r}
+# generate communities and sample them with fixed area quadrats 
+sample_comms_richness <- function(richness, n_quadrats, quadrat_area,sad_type){
+  community <- sim_poisson_community(s_pool = richness, n_sim = n_sim,
+                               sad_type = sad_type,
+                               sad_coef = list(cv_abund = 1)) # generate the communities
+  samples <- sample_quadrats(comm = community, n_quadrats = n_quadrats, quadrat_area = quadrat_area, 
+                             plot = F, # NBset plot=F for large number of simulations!
+                             avoid_overlap=FALSE, # unnecessary because only one quadrat per patch
+  method = "random", x0 = 0, y0 = 0, delta_x = 0.1,
+  delta_y = 0.1) # randomly sample from the patches with specified areas
+  samples$spec_dat <-  samples$spec_dat[, colSums(samples$spec_dat != 0) > 0]
+  # remove species with no presences
+  estimated <- estimateR(samples$spec_dat, smallsample = TRUE) # estimate the species richness PatchRichE, from the species x abundance matrix generated
+  res <- data.frame("species_density" = ncol(samples$spec_dat),"estimated_chao1"=estimated[2],"estimated_ace"=estimated[4],"chao1.se"=estimated[3], "quadrat_area"=quadrat_area)
+  return(res)
+}
+```
+
+
+Next create a function that will sample N patches from the populations of patches available to each 'study' (and their corresponding quadrats).And create summary statistics that are usedfor meta-analysis: mean, SD, N.
+```{r}
+
+sample_patches_quadrats <- function(number_patches,forest_patches){
+  selected_patch_ids <- floor(runif(n=number_patches, min=1, max=100))# select n patches of 100 available patches
+  selected_patches <- forest_patches$species_density[selected_patch_ids] #create a vector of the species densities (PatchDensityE)
+  selected_patches_true_rich <- forest_patches$true_rich[selected_patch_ids]#create a vector of their true species richness values (PatchRichT)
+  selected_patches_est <- forest_patches$estimated_chao1[selected_patch_ids]#create a vector of their estimated species richness values (PatchRichE)
+  #create a data.frame containing these data - the mean, N and SD:
+samplingdata <- data.frame("number_patches"=number_patches, "mean.plot.density"=mean(selected_patches, na.rm=T),"sd.plot.density"=sd(selected_patches,na.rm=T), "mean.true.rich"=mean(selected_patches_true_rich,na.rm=T), "sd.true.species"=sd(selected_patches_true_rich,na.rm=T), "mean.patch.rich.est"=mean(selected_patches_est), "sd.patch.rich.est"=sd(selected_patches_est))
+return(samplingdata)
+}
+```
+
+###Set up the simulation paramaters
+
+Now we want to repeat this across levels of N and A
+```{r}
+#parameterise
+poss_number_patches <- c(6,12,18,24,30) # possible levels of N n- the number of forest patches to sample
+quadrat_areas <-  c(0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9) # possible levels of plot sizes (A). These are fractions of the total patch size
+n_sim=2000 # size of community - number of individuals
+sad_type_og = "lnorm"
+sad_type_sec = "lnorm"
+```
+ 
+###First sample the old-growth forests  
+```{r}
+#og first
+OGsimulations <- list()
+for (t in 1:10){ # 5 times for each N by A combination. NB: set to 100 times in the manuscript
+og_true_richnesses <- floor(rnorm(100,120,10)) # generate population of 100 old-growth patches with their true patch richnesses. mean 120, SD is 10
+  samplesog <- ldply(1:length(quadrat_areas), function(k) {  # for each levelof quadrat_area
+    ldply(1:length(og_true_richnesses), function(j){ # and for each forest patch with its corresponding true richness value
+    out <- sample_comms_richness(richness=og_true_richnesses[j],quadrat_area=quadrat_areas[k], sad_type = sad_type_og, n_quadrats = poss_number_patches) # sample the 
+  out$quadrat_area <- quadrat_areas[k]
+    out$true_rich <- og_true_richnesses[j]
+    out$stand.no <- j
+    return(out)
+      })  
+})
+ogsummary_stats_patches <- ldply(1:length(poss_number_patches), function(k) { #for each level of stand replication
+  ldply(1:length(quadrat_areas), function(j){ #and each quadrat area
+    subsetogbyquadsize <- samplesog%>%
+      filter(quadrat_area==quadrat_areas[j]) # take a subset of the samples with specified quadrat size
+     out2 <-  sample_patches_quadrats(number_patches=poss_number_patches[k], forest_patches = subsetogbyquadsize)
+    out2$quadrat_area <- quadrat_areas[j]
+    out2$simrun <- t
+    return(out2)
+  })
+})
+OGsimulations[[t]] <- ogsummary_stats_patches
+}
+
+og.sims <- do.call("rbind", OGsimulations) # bind the listed dataframes into a single dataframe
+
+head(og.sims)
+```
+ 
+###Next sample the secondary forests  
+ 
+```{r}
+SECsimulations <- list()
+for (t in 1:10){ # 5 times for each N by A combinaiton. NB: set to 100 times in the manuscript
+sec_true_richnesses <-floor(rnorm(100,70,10))
+  samplessec <- ldply(1:length(quadrat_areas), function(k) {  # for each quadrat_area
+    ldply(1:length(sec_true_richnesses), function(j){ # for each true richness value
+    out <- sample_comms_richness(richness=sec_true_richnesses[j],quadrat_area=quadrat_areas[k], sad_type = sad_type_og, n_quadrats = n_quadrats) # compute fragstats metrics 
+  out$quadrat_area <- quadrat_areas[k]
+    out$true_rich <- sec_true_richnesses[j]
+    out$stand.no <- j
+    return(out)
+      })  
+})
+secsummary_stats_patches <- ldply(1:length(poss_number_patches), function(k) { #for each level of stand replication
+  ldply(1:length(quadrat_areas), function(j){ #and each quadrat area
+    subsetbyquadsize <- samplessec%>%
+      filter(quadrat_area==quadrat_areas[j]) # take a subset of the samples with specified quadrat size
+     out2 <-  sample_patches_quadrats(number_patches=poss_number_patches[k], forest_patches = subsetbyquadsize)
+    out2$quadrat_area <- quadrat_areas[j]
+    return(out2)
+    out2$simrun <- t
+  })
+})
+SECsimulations[[t]] <- secsummary_stats_patches
+}
+
+sec.sims <- do.call("rbind", SECsimulations) # bind the listed dataframes into a single dataframe
+
+head(sec.sims)
+```
+
+```{r}
+og.sims$forest <- "OG"
+sec.sims$forest <- "SEC"
+colnames(sec.sims)
+colnames(og.sims)
+allsims <- rbind(og.sims[,-9], sec.sims)
+```
+
+# Look at species richness accumulation curves for PlotDensityE and PatchRichE
+
+```{r}
+# allsims <- na.omit(allsims)
+specdens <- Rmisc::summarySE(allsims, measurevar="mean.plot.density", groupvars=c("quadrat_area","number_patches", "forest"))
+specdens2 <- Rmisc::summarySE(allsims, measurevar="sd.plot.density", groupvars=c("quadrat_area","number_patches", "forest"))
+specdens3 <- data.frame(quadrat_area=specdens$quadrat_area, number_patches=specdens$number_patches, mean.plot.density=specdens$mean.plot.density, ymin =specdens$mean.plot.density - specdens2$ci, ymax=specdens$mean.plot.density + specdens2$ci, forest=specdens$forest) 
+# library(ggplot2)
+pd <- position_dodge(0.00005) # move them .05 to the left and right
+
+
+pp <- ggplot(specdens)+  geom_errorbar(position=pd,aes(x=quadrat_area,ymin=mean.plot.density
+-se, ymax=mean.plot.density+se, colour=as.factor(number_patches)),width=.0005) +
+  geom_line(aes(x=quadrat_area, y=mean.plot.density, linetype=forest, colour=as.factor(number_patches))) 
+
+ppx <- pp + scale_color_discrete(name="N")+
+  geom_hline(yintercept=70, linetype="dashed", color = "darkgray")+ylab("Mean PlotDensity")+xlab("A (proportion of study area)") + theme_classic()+geom_hline(yintercept=120, linetype="dashed", color = "darkgray")
+ppx=ppx+scale_linetype_discrete(name="Forest type")+ylim(40,120)
+
+
+specdens <- Rmisc::summarySE(allsims, measurevar="mean.patch.rich.est", groupvars=c("quadrat_area","number_patches", "forest"))
+specdens2 <- Rmisc::summarySE(allsims, measurevar="sd.patch.rich.est", groupvars=c("quadrat_area","number_patches", "forest"))
+specdens3 <- data.frame(quadrat_area=specdens$quadrat_area, number_patches=specdens$number_patches, mean.plot.density=specdens$mean.patch.rich.est, ymin =specdens$mean.patch.rich.est - specdens2$ci, ymax=specdens$mean.patch.rich.est + specdens2$ci, forest=specdens$forest) 
+#library(ggplot2)
+pd <- position_dodge(0.00005) # move them .05 to the left and right
+
+ppy <- ggplot(specdens)+  geom_errorbar(position=pd,aes(x=quadrat_area,ymin=mean.patch.rich.est
+-se, ymax=mean.patch.rich.est+se, colour=as.factor(number_patches)),width=.0005) +
+  geom_line(aes(x=quadrat_area, y=mean.patch.rich.est, linetype=forest, colour=as.factor(number_patches))) 
+
+ppy <- ppy + scale_color_discrete(name="N")+
+  geom_hline(yintercept=70, linetype="dashed", color = "darkgray")+ylab("Mean PatchRichE")+xlab("A (proportion of study area)") + theme_classic()+geom_hline(yintercept=120, linetype="dashed", color = "darkgray")
+ppy=ppy+scale_linetype_discrete(name="Forest type")+ylim(40,120)
+
+
+(gridExtra::grid.arrange(ppx, ppy, ncol=2))
+
+```
+
+
+
+# Effect size estimation
+
+```{r}
+#put into long format 
+for(i in 1:ncol(og.sims)){
+  colnames(og.sims)[i] <- paste("og", colnames(og.sims)[i], sep=".")
+}
+for(i in 1:ncol(sec.sims)){
+  colnames(sec.sims)[i] <- paste("sec", colnames(sec.sims)[i], sep=".")
+}
+allsims <- cbind(og.sims, sec.sims)
+```
+
+
+Before estimating effect sizes, lets just check that each study satisifies Geary's test (necessary for using LR). 
+
+```{r}
+##GEARY'S TEST
+
+allsims2 <- allsims
+allsims2$geary <- (allsims2$og.mean.plot.density/allsims2$og.sd.plot.density)*sqrt(allsims2$og.number_patches)
+allsims2$geary2 <- (allsims2$sec.mean.plot.density/allsims2$sec.sd.plot.density)*sqrt(allsims2$og.number_patches) # plot density
+allsims2$geary3 <- (allsims2$og.mean.patch.rich.est/allsims2$og.sd.patch.rich.est)*sqrt(allsims2$og.number_patches)
+allsims2$geary4 <- (allsims2$sec.mean.patch.rich.est/allsims2$sec.sd.patch.rich.est)*sqrt(allsims2$og.number_patches)
+
+min(allsims2$geary);min(allsims2$geary2);min(allsims2$geary3);min(allsims2$geary4)
+
+
+```
+
+all pass Geary's test.
+
+###Estimate Hedges' g
+
+Do this for: i) the true values of the stands, and ii) the plot density ii) patch richness
+```{r}
+hedgesg1.density <- metafor::escalc(measure="SMD",m1i=sec.mean.plot.density, m2i=og.mean.plot.density, sd1i=sec.sd.plot.density, sd2i=og.sd.plot.density, n1i=sec.number_patches, n2i=og.number_patches, append=T, data=allsims)
+
+hedgesg2.true.rich <- metafor::escalc(measure="SMD",m1i=sec.mean.true.rich, m2i=og.mean.true.rich, sd1i=sec.sd.true.species, sd2i=og.sd.true.species, n1i=sec.number_patches, n2i=sec.number_patches, append=T, data=allsims)
+
+hedgesg3.patch.rich <- metafor::escalc(measure="SMD",m1i=sec.mean.patch.rich.est, m2i=og.mean.patch.rich.est, sd1i=sec.sd.patch.rich.est, sd2i=og.sd.patch.rich.est, n1i=sec.number_patches, n2i=sec.number_patches, append=T, data=allsims)
+#allsims$sec.sd.patch.rich.est
+
+#append
+allsims$hg.plotdens.y <- hedgesg1.density$yi
+allsims$hg.plotdens.v <- hedgesg1.density$vi
+
+allsims$hg.true.y <- hedgesg2.true.rich$yi
+allsims$hg.true.v <- hedgesg2.true.rich$vi
+
+allsims$hg.est.y <- hedgesg3.patch.rich$yi
+allsims$hg.est.v <- hedgesg3.patch.rich$vi
+
+
+```
+
+Estimate alternative estimation of variance of g, that does not use g in its estimation
+
+First, we will estimate variance using small-sample correction factor as described in Doncaster & Spake (2018)
+Secondly, we will estimate using Hedge's alternative variance estimator (V_alt)
+
+```{r}
+#adjusted variance estimation by small sample sizes
+
+#for PlotDensityE
+n1=as.numeric(allsims$og.number_patches); n2=as.numeric(allsims$og.number_patches)
+n_tilde=n2*n1/(n2+n1)
+var_d_n.DENS=((1-3/(4*(n2+n1-2)-1))^2)*(n2+n1-2)/(n_tilde*(n2+n1-4)) #Hedges variance that does not contain g https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2419
+
+allsims$hg.plotdens.vi_alt <- var_d_n.DENS 
+hedgesg1.density$vi_alt <- var_d_n.DENS
+
+#for PatchRichE
+n1=as.numeric(allsims$og.number_patches); n2=as.numeric(allsims$og.number_patches)
+n_tilde=n2*n1/(n2+n1)
+var_d_n.DENS=((1-3/(4*(n2+n1-2)-1))^2)*(n2+n1-2)/(n_tilde*(n2+n1-4)) #Hedges variance that does not contain g https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2419
+
+
+allsims$hg.est.vi_alt <- var_d_n.DENS
+hedgesg3.patch.rich$vi_alt <- var_d_n.DENS
+
+  
+```
+
+###Estimate log response ratio
+
+```{r}
+lr1.density <- metafor::escalc(measure="ROM",m1i=sec.mean.plot.density, m2i=og.mean.plot.density, sd1i=sec.sd.plot.density, sd2i=og.sd.plot.density, n1i=sec.number_patches, n2i=sec.number_patches, append=T, data=allsims)
+
+lr2.true.rich <- metafor::escalc(measure="ROM",m1i=sec.mean.true.rich, m2i=og.mean.true.rich, sd1i=sec.sd.true.species, sd2i=og.sd.true.species, n1i=sec.number_patches, n2i=sec.number_patches, append=T, data=allsims)
+
+lr3.patch.rich <- metafor::escalc(measure="ROM",m1i=sec.mean.patch.rich.est, m2i=og.mean.patch.rich.est, sd1i=sec.sd.patch.rich.est, sd2i=og.sd.patch.rich.est, n1i=sec.number_patches, n2i=sec.number_patches, append=T, data=allsims)
+#allsims$sec.sd.patch.rich.est
+#append
+allsims$lr.plotdens.y <- lr1.density$yi
+allsims$lr.plotdens.v <- lr1.density$vi
+
+allsims$lr.true.y <- lr2.true.rich$yi
+allsims$lr.true.v <- lr2.true.rich$vi
+
+allsims$lr.est.y <- lr3.patch.rich$yi
+allsims$lr.est.v <- lr3.patch.rich$vi
+
+
+```
+
+#Calculate effect size accuracy and explore correlations between effect-size metrics
+
+And produce accuracy biplots (of accuracy 
+(Figure 2 main text)
+
+```{r}
+allsims$acc_plotdens_hg <- (allsims$hg.plotdens.y-hg.pop.true$yi)/hg.pop.true$yi
+allsims$acc_plotdens_lnr <-(allsims$lr.plotdens.y-lr.pop.true$yi)/lr.pop.true$yi
+allsims$acc_est_hg <- (allsims$hg.est.y-hg.pop.true$yi)/hg.pop.true$yi
+allsims$acc_est_lnr <-(allsims$lr.est.y-lr.pop.true$yi)/lr.pop.true$yi
+
+cor(allsims$acc_plotdens_hg, allsims$acc_plotdens_lnr, method = "spearman")
+cor(allsims$acc_est_hg, allsims$acc_est_lnr, method = "spearman")
+
+plot.sd.cor <- ggplot(allsims)+geom_point(aes(x=acc_plotdens_hg, y=acc_plotdens_lnr, col=og.quadrat_area))+theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+panel.background = element_blank(), axis.line = element_line(colour = "black"))+facet_grid(.~ og.number_patches)+
+  geom_vline(xintercept=0, linetype="dashed", color = "black")+
+  geom_hline(yintercept=0, linetype="dashed", color = "black")+
+  ylab(expression(paste("Accuracy of ",italic("LR"))))+
+  xlab(NULL)+
+  theme_bw()+scale_color_continuous(name = expression(italic(A)))+ ggtitle(expression(italic("PlotDensity")["E"])) + scale_shape_discrete("N")+ylim(-1,1)+xlim(-1,1.3)+ 
+    theme(plot.title = element_text(size = 11))
+
+plot.sr.cor <- ggplot(allsims)+geom_point(aes(x=acc_est_hg, y=acc_est_lnr, col=og.quadrat_area))+ theme_bw() + theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),plot.title = element_text(hjust = 0.5))+facet_grid(.~ og.number_patches)+
+  geom_vline(xintercept=0, linetype="dashed", color = "black")+
+  geom_hline(yintercept=0, linetype="dashed", color = "black")+
+  ylab(expression(paste("Accuracy of ",italic("LR"))))+
+  xlab(expression(paste("Accuracy of ", italic("g"))))+
+  theme_bw()+scale_color_continuous(name = expression(italic(A)))+ ggtitle(expression(italic("PatchRich")["E"])) + scale_shape_discrete("N")+ylim(-1,1)+xlim(-1,1.3)+ 
+    theme(plot.title = element_text(size = 11))
+
+gridExtra::grid.arrange(plot.sd.cor, plot.sr.cor, ncol=1)
+
+```
+
+#Relationship of accuracy to precision at the study level
+
+Produce fig 3 in main text
+
+```{r}
+hedgesg1.density$method="a.PlotDensity"
+hedgesg2.true.rich$method="true"
+hedgesg3.patch.rich$method="b.PatchRichE"
+
+allmeth.hg <- rbind(hedgesg1.density, hedgesg3.patch.rich)
+htrues <- rbind(hedgesg2.true.rich,hedgesg2.true.rich)
+allmeth.hg$accuracy <- (allmeth.hg$yi-hg.pop.true$yi)/hg.pop.true$yi # accuracy
+hist(allmeth.hg$accuracy, breaks=100)
+allmeth.hg$A <- as.numeric(allmeth.hg$og.quadrat_area)
+
+lr1.density$method="aPlotDensity"
+lr2.true.rich$method="true"
+lr3.patch.rich$method="bPatchRichE"
+
+allmeth.lr <- rbind(lr1.density, lr3.patch.rich)
+ltrues <- rbind(lr2.true.rich,lr2.true.rich)
+allmeth.lr$A <- as.numeric(allmeth.lr$og.quadrat_area)
+hist(allmeth.lr$A)
+allmeth.lr$accuracy <- (allmeth.lr$yi-lr.pop.true$yi)/lr.pop.true$yi# ratio of true populaiton-level efefect size
+```
+```{r}
+supp.labels= c(expression(italic("PatchRich"["E"])),expression(italic("PlotDensity")))
+
+mt <- ggplot(allmeth.hg,aes(y=allmeth.hg$accuracy,x=1/allmeth.hg$vi, col=A, shape =as.factor(og.number_patches)))+geom_point()
+mt<-mt+facet_grid(.~method, labeller=labeller(method=supp.labels))+ theme_bw() + theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),strip.background = element_rect(colour="black", fill="white"))
+v1 <- mt+ylab("Accuracy of g")+xlab("Precision (1/V)") + geom_hline(yintercept = 0, colour="black", linetype="dashed")+ scale_shape_manual("N",values = c(0,1,2,3,5,6),guide=F) +ylim(-1,1.3)
+
+
+mt <- ggplot(allmeth.hg,aes(y=allmeth.hg$accuracy,x=1/allmeth.hg$vi_alt, col=A, shape =as.factor(og.number_patches)))+geom_point()
+mt<-mt+facet_grid(.~method, labeller=labeller(method=supp.labels))+ theme_bw() + theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),strip.background = element_rect(colour="black", fill="white"))
+v3 <- mt+ylab("Accuracy of g")+xlab("Precision (1/Vg_alt)") + geom_hline(yintercept = 0, colour="black", linetype="dashed")+ scale_shape_manual("N",values = c(0,1,2,3,5,6)) +ylim(-1,1.3)+scale_color_continuous(guide=F)
+
+mt <- ggplot(allmeth.lr,aes(y=accuracy,x=1/vi, col=A, shape =as.factor(og.number_patches)))+geom_point()
+mt<-mt+facet_grid(.~method,scales="free")+ theme_bw() + theme(panel.grid.major = element_blank(),
+panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),strip.background = element_rect(colour="black", fill="white"))
+v4 <- mt+ylab("Accuracy of LR")+xlab("Precision (1/VLR)")+ geom_hline(yintercept = 0, colour="black", linetype="dashed")+ scale_shape_discrete("N")+ scale_shape_manual("N",values = c(0,1,2,3,5,6))+ylim(-1,1.3)+xlim(0,3200)
+
+gridExtra::grid.arrange(v1,v3,v4, ncol=2)
+```
+
+#Meta-effects and covariation of study-level replication with plot size
+
+Here we want to generate study pools that vary according to their N by A correlaton coefficient.
+Then we want to meta-analyse them, estimating: i) overall mean effect, and ii) effect of plot size (meta-regression coefficient)
+
+```{r}
+#first make some functions for nice plotting
+mycor <- function(data, mapping, sgnf=3, size = 8, ...) {
+  
+  xCol <- as.character(mapping[[1]][[2]])
+  yCol <- as.character(mapping[[2]][[2]])
+
+  xVal <- data[[xCol]]
+  yVal <- data[[yCol]]
+  
+  rho <- Hmisc::rcorr(xVal, yVal, type = "spearman")$r[2,1]
+  loc <- data.table(x=.5, y=.5)
+  
+  p <-  ggplot(data = loc, aes(x = x, y = y)) + 
+    xlim(0:1) + 
+    ylim(0:1) + 
+    theme(panel.background = element_rect(fill = "grey95"),  
+          panel.grid = element_blank()) + 
+    labs(x = NULL, y = NULL) +
+    geom_text(size = size, color = "#8c8cc2",
+     label = 
+       paste("rank corr:\n", round(rho, sgnf), sep = "", collapse = ""))
+  p
+}
+
+my_lower <- function(data, mapping, ...){
+  
+  xCol <- as.character(mapping[[1]][[2]])
+  yCol <- as.character(mapping[[2]][[2]])
+  dx <- data.table(data)[ , c(xCol, yCol), with = FALSE]
+  ds <- dx[, .N, 
+    keyby = .(eval(parse(text=xCol)), eval(parse(text=yCol)))]
+  setnames(ds, c("parse", "parse.1"), c(xCol, yCol))
+
+  p <- ggplot(data = ds, mapping = mapping) + 
+    geom_point(aes(size = N), color = "#adadd4") +
+    scale_x_continuous(expand = c(.2, 0)) +
+    scale_y_continuous(expand = c(.2, 0)) +
+    theme(panel.grid = element_blank())
+  p
+}
+
+my_diag <- function(data, mapping, ...){
+  p <- ggplot(data = data, mapping = mapping) + 
+    geom_bar(aes(y = (..count..)/sum(..count..)), fill = "#8c8cc2") +
+    theme(panel.grid = element_blank())
+  p
+}
+
+```
+
+# code to generate a dataframe that will contain the values of N and A for each study
+
+```{r}
+length(unique(allsims$og.number_patches)) #5; 5,10,15,20,25
+length(unique(allsims$og.quadrat_area)) #11. Make this ten for ease of simulations (so miss out the smallest plot size, 0.05)
+
+#generate the data.. use 10 of the quadrat sizes.
+
+baseprobs <- matrix(c(0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, 0.10, # A
+                      0.20, 0.20, 0.20, 0.20, 0.20, 0.00, 0.00, 0.00, 0.00, 0.00), # N
+             nrow = 2, byrow = TRUE)
+
+
+#The above could be skewed to e.g. bigger plot sizes
+             
+#dT <- genData(nrow(allsims))
+dT <- genData(100) # 100 studies in each study pool
+
+head(dT)
+dX <- genCorOrdCat(dT, adjVar = NULL, baseprobs = baseprobs, 
+                   prefix = "q", rho = -0.5, corstr = "cs")# requires a correlation coefficient to simulate # package called ‘mvnfast’
+
+ggpairs(dX[, -"id"], lower = list(continuous = my_lower), # take a look at the distribution of A and N in one simulation
+        diag = list(continuous = my_diag))
+
+dX <- data.frame(dX)
+head(dX)
+colnames(dX)[2:3] <- c("A", "N")
+unique(dX$A)
+unique(dX$N)
+dX <- dX %>% mutate(N=recode(N, '1'="6",'2'="12",'3'= "18", '4'='24', "5"="30"))%>%
+  mutate(A=recode(A, '1'="0.1",'2'="0.2",'3'= "0.3", '4'='0.4', "5"="0.5", "6"="0.6","7"="0.7", "8"= "0.8", "9"="0.90", "10"="0.05")) # rename so they are consistent with A and N values
+
+```
+We want to do meta-analyses on pools of studies.
+There will always be 100 studies for each meta-analysis
+Each study will sample N patches with quadrats of size A and derive i) PatchRichE, ii) PlotDensityE. Averages and SDs will be taken across N replicates for each study
+The study pool will vary in the degree of collinearity between A and N
+
+#Meta-regressions of effect sizes on plot sizes
+
+Here we simulate studypools of 100 studies for each metaregression. Then we perform meta-regression with log(A) as a covariate. Both the response (effect size) and log(A) are scaled using scale() so that the regression coeficients are directly comparable among models.
+
+```{r}
+res <- list()
+
+corvals <- c(-0.01,-0.1, -0.2, -0.3, -0.4, -0.5, -0.6, -0.7, -0.8) # we will test these degrees of collinearity
+#make empty data.frame. each row will correspond to one study pool. for each study pool, meta-estimates are given for 100 studies. 
+studypool <- data.frame(corvals =corvals, "meta.g.plotdens"=0,"meta.g.est"=0, "meta.lr.est"=0,"meta.g.est"=0, "meta.g.plotdens.var"=0,"meta.g.est.var"=0 , "meta.lr.plotdensity.var"=0,"meta.lr.est.var"=0, "cor.actual"=0, "meta.g.plotdens.un"=0,"meta.g.est.un"=0, "meta.lr.est.un"=0,"meta.g.est.un"=0, "meta.g.plotdens.var.un"=0,"meta.g.est.var.un"=0 , "meta.lr.plotdensity.var.un"=0,"meta.lr.est.var.un"=0, "meta.g.plotdens.wt2"=0,"meta.g.est.wt2"=0, "meta.lr.est.wt2"=0,"meta.g.est.wt2"=0, "meta.g.plotdens.var.wt2"=0,"meta.g.est.var.wt2"=0 , "meta.lr.plotdensity.var.wt2"=0,"meta.lr.est.var.wt2"=0, "metaHEDGE.tau_EST"=0,"meta.lr.est.tau"=0,"meta.g.plotdensity.tau"=0,"meta.lr.plotdensity.tau"=0,"metaHEDGE.tau_EST.un"=0,"meta.lr.est.tau.un"=0,"meta.g.plotdensity.tau.un"=0,"meta.lr.plotdensity.tau.un"=0,"metaHEDGE.tau_EST.wt2"=0,"meta.lr.est.tau.wt2"=0,"meta.g.plotdensity.tau.wt2"=0,"meta.lr.plotdensity.tau.wt2"=0, "meta.g.est.ranwt.alt"=0,"meta.lr.est.tau.ranwt.alt"=0,"meta.g.plotdensity.tau.ranwt.alt"=0,"meta.lr.plotdensity.tau.ranwt.alt"=0, "meta.g.est.fix.alt"=0,"meta.lr.est.tau.fixwt.alt"=0,"meta.g.plotdensity.tau.fixwt.alt"=0,"meta.lr.plotdensity.tau.fixwt.alt"=0)
+
+#un = unweighted, wt2 = fixed, ranwt.alt = little rep altusted, random., fixwt.alt= little rep ajd, fixed
+
+studypool <- do.call("rbind", replicate(5,studypool, simplify = FALSE)) # replicates - how many times per A by N coeficient. is 50 in the manuscript. 5 here.
+nrow(studypool)
+
+for (c in 1:nrow(studypool)){
+  
+dX <- genCorOrdCat(dT, adjVar = NULL, baseprobs = baseprobs, 
+                   prefix = "q", rho = studypool$corvals[c], corstr = "cs")
+dX <- data.frame(dX)
+head(dX)
+colnames(dX)[2:3] <- c("A", "N") # replace with area and N
+dX <- dX %>% mutate(N=recode(N, '1'="6",'2'="12",'3'= "18", '4'='24', "5"="30"))%>%
+  mutate(A=recode(A, '1'="0.05",'2'="0.1",'3'= "0.2", '4'='0.3', "5"="0.4", "6"="0.5","7"="0.6", "8"= "0.7", "9"="0.80", "10"="0.9")) # convert the ordinal values to the actual A and N values they correspond to
+# create dummy columns that will get filled in
+# for old-growth
+dX$meanTRUE.og <- 0 #  true patch richness PatchRichT
+dX$meanDENS.og  <- 0 #  species density (PlotDensityE)
+dX$meanEST.og  <- 0 #  (PatchRichE)
+dX$sdTRUE.og  <- 0 # 
+dX$sdDENS.og  <- 0
+dX$sdEST.og  <- 0
+dX$meanTRUE.sec <- 0 # for secondary forest
+dX$meanDENS.sec  <- 0
+dX$meanEST.sec  <- 0
+dX$sdTRUE.sec  <- 0
+dX$sdDENS.sec  <- 0
+dX$sdEST.sec  <- 0
+cor.actual= cor(as.numeric(dX$A), as.numeric(dX$N), method="spearman") # these are the values we will test
+
+res[[c]] <- dX # put in a list
+
+#old-growth forests
+
+for(t in 1:nrow(dX)){ # for each row in our fake list of studies
+og_true_richnesses <- floor(rnorm(100,120,10)) #generate 100 patches with average 120 sp
+og_true_patchesN <- sample(og_true_richnesses, dX$N[t], replace = FALSE, prob = NULL) #randomly sample N patches from the 100 patches 
+patchstats <- list()    
+patchstatdata <- ldply(1:length(og_true_patchesN), function(j){ # for each true richness value
+  out <- sample_comms_richness(richness=og_true_patchesN[j],quadrat_area=as.numeric(dX$A[t]), sad_type = sad_type_og, n_quadrats = 1) # sample biodievrsity from each selected patch
+   out$quadrat_area <- dX$A[t]
+     out$true_rich <- og_true_patchesN[j]
+     out$stand.no <- j
+     patchstats[j] <- out
+ }) 
+#calculate summary stats based on the different measures of biodiversity
+dX$meanTRUE.og[t]=mean(patchstatdata$true_rich); dX$sdTRUE.og[t]=sd(patchstatdata$true_rich); dX$meanDENS.og[t]=mean(patchstatdata$species_density); dX$sdDENS.og[t]=sd(patchstatdata$species_density); dX$meanEST.og[t]=mean(patchstatdata$estimated_chao1); dX$sdEST.og[t]=sd(patchstatdata$estimated_chao1)
+
+
+#secondary forests
+sec_true_richnesses <- floor(rnorm(100,70,10)) #generate 100 patches with average 70 sp
+sec_true_patchesN <- sample(sec_true_richnesses, dX$N[t], replace = FALSE, prob = NULL) #randomly sample N patches from the 100 patches 
+patchstats <- list()    
+patchstatdata <- ldply(1:length(sec_true_patchesN), function(j){ # for each true richness value
+  out <- sample_comms_richness(richness=sec_true_patchesN[j],quadrat_area=as.numeric(dX$A[t]), sad_type = sad_type_og, n_quadrats = 1) # sample biodievrsity from each selected patch
+   out$quadrat_area <- dX$A[t]
+     out$true_rich <- sec_true_patchesN[j]
+     out$stand.no <- j
+     patchstats[j] <- out
+ }) 
+#calcculate summary stats based on the different measures of biodiversity
+dX$meanTRUE.sec[t]=mean(patchstatdata$true_rich); dX$sdTRUE.sec[t]=sd(patchstatdata$true_rich); dX$meanDENS.sec[t]=mean(patchstatdata$species_density); dX$sdDENS.sec[t]=sd(patchstatdata$species_density); dX$meanEST.sec[t]=mean(patchstatdata$estimated_chao1); dX$sdEST.sec[t]=sd(patchstatdata$estimated_chao1)
+}
+
+#calculate effect sizes
+# Hedges' g, PlotDensityE
+hedgeDENS <- metafor::escalc(measure="SMD",m1i=meanDENS.sec, m2i=meanDENS.og, sd1i=sdDENS.sec, sd2i=sdDENS.og, n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=dX)
+# LR, PlotDensityE
+lrDENS <- metafor::escalc(measure="ROM",m1i=meanDENS.sec, m2i=meanDENS.og, sd1i=sdDENS.sec, sd2i=sdDENS.og, n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=dX)
+# Hedges' g, PatchRichE
+hedgeEST <- metafor::escalc(measure="SMD",m1i=meanEST.sec, m2i=meanEST.og, sd1i=sdEST.sec, sd2i=sdEST.og,n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=dX)
+# LR, PatchRichE
+lrEST <- metafor::escalc(measure="ROM",m1i=meanEST.sec, m2i=meanEST.og, sd1i=sdEST.sec, sd2i=sdEST.og, n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=dX)
+
+
+##########################################################################################################
+#Do meta-regressions
+## the response and explanatory variable (logA) are both centred and scaled, so that the coeficients are directly comparable across models.
+#########################################################################################################
+#do meta-regression - random effects conventional weighted
+hg.ma.PLOTDENS <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeDENS, method="REML")
+hg.ma.EST <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeEST, method="REML")
+lr.ma.PLOTDENS <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=lrDENS, method="REML")
+lr.ma.EST <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=lrEST, method="REML")
+
+studypool$meta.g.plotdens[c] <- hg.ma.PLOTDENS$b[2] # extract plot size coeficient
+studypool$meta.g.plotdens.var[c] <- hg.ma.PLOTDENS$se[2] #se
+studypool$meta.g.plotdensity.tau[c] <- hg.ma.PLOTDENS$z[2]
+studypool$meta.lr.est[c] <- lr.ma.PLOTDENS$b[2]
+studypool$meta.lr.plotdensity.var[c] <- lr.ma.PLOTDENS$se[2]
+studypool$meta.lr.plotdensity.tau[c] <- lr.ma.PLOTDENS$z[2]
+studypool$meta.g.est[c] <- hg.ma.EST$b[2]
+studypool$meta.g.est.var[c] <- hg.ma.EST$se[2]
+studypool$metaHEDGE.tau_EST[c] <- hg.ma.EST$z
+studypool$meta.g.est[c] <- lr.ma.EST$b[2]
+studypool$meta.lr.est.var[c] <- lr.ma.EST$se[2]
+studypool$meta.lr.est.tau[c] <- lr.ma.EST$z[2]
+studypool$cor.actual[c] <- cor.actual
+
+#do meta-regression - Unweighted
+hg.ma.PLOTDENS.un <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeDENS, method="REML", weighted = F)
+hg.ma.EST.un <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeEST, method="REML", weighted = F)
+lr.ma.PLOTDENS.un <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=lrDENS, method="REML", weighted = F)
+lr.ma.EST.un <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=lrEST, method="REML", weighted = F)
+
+studypool$meta.g.plotdens.un[c] <- hg.ma.PLOTDENS.un$b[2] # extract plot size coeficient
+studypool$meta.g.plotdens.var.un[c] <- hg.ma.PLOTDENS.un$se[2]
+studypool$meta.g.plotdensity.tau.un[c] <- hg.ma.PLOTDENS.un$z[2]
+studypool$meta.lr.est.un[c] <- lr.ma.PLOTDENS.un$b[2]
+studypool$meta.lr.plotdensity.var.un[c] <- lr.ma.PLOTDENS.un$se[2]
+studypool$meta.lr.plotdensity.tau.un[c] <- lr.ma.PLOTDENS.un$z
+studypool$meta.g.est.un[c] <- hg.ma.EST.un$b[2]
+studypool$meta.g.est.var.un[c] <- hg.ma.EST.un$se[2]
+studypool$metaHEDGE.tau_EST.un[c] <- hg.ma.EST.un$z[2]
+studypool$meta.g.est.un[c] <- lr.ma.EST.un$b[2]
+studypool$meta.lr.est.var.un[c] <- lr.ma.EST.un$se[2]
+studypool$meta.lr.est.tau.un[c] <- lr.ma.EST.un$z[2]
+
+#do meta-regression - fixed effect, wt=1/v
+hg.ma.PLOTDENS.f <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeDENS, method="REML", weights = 1/vi)
+hg.ma.EST.f <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeEST, method="REML", weights = 1/vi)
+lr.ma.PLOTDENS.f <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=lrDENS, method="REML", weights = 1/vi)
+lr.ma.EST.f <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=lrEST, method="REML", weights = 1/vi)
+
+studypool$meta.g.plotdens.wt2[c] <- hg.ma.PLOTDENS.f$b[2] # extract plot size coeficient
+studypool$meta.g.plotdens.var.wt2[c] <- hg.ma.PLOTDENS.f$se[2]
+studypool$meta.g.plotdensity.tau.wt2[c] <- hg.ma.PLOTDENS.f$z[2]
+studypool$meta.lr.est.wt2[c] <- lr.ma.PLOTDENS.f$b[2]
+studypool$meta.lr.plotdensity.var.wt2[c] <- lr.ma.PLOTDENS.f$se[2]
+studypool$meta.lr.plotdensity.tau.wt2[c] <- lr.ma.PLOTDENS.f$z[2]
+studypool$meta.g.est.wt2[c] <- hg.ma.EST.f$b[2]
+studypool$meta.g.est.var.wt2[c] <- hg.ma.EST.f$se[2]
+studypool$metaHEDGE.tau_EST.wt2[c] <- hg.ma.EST.f$z[2]
+studypool$meta.g.est.wt2[c] <- lr.ma.EST.f$b[2]
+studypool$meta.lr.est.var.wt2[c] <- lr.ma.EST.f$se[2]
+studypool$meta.lr.est.tau.wt2[c] <- lr.ma.EST.f$z[2]
+studypool$cor.actual.wt2[c] <- cor.actual
+
+
+#alternative variance estimation - hedges' g https://esajournals.onlinelibrary.wiley.com/doi/full/10.1002/ecs2.2419
+
+#calculate effect sizes
+n1=as.numeric(hedgeDENS$N); n2=as.numeric(hedgeDENS$N)
+n_tilde=n2*n1/(n2+n1)
+var_d_n.PLOTDENS=((1-3/(4*(n2+n1-2)-1))^2)*(n2+n1-2)/(n_tilde*(n2+n1-4)) #Hedges variance that does not contain d 
+hedgeDENS.alt <- metafor::escalc(measure="SMD",m1i=meanDENS.sec, m2i=meanDENS.og, sd1i=sdDENS.sec, sd2i=sdDENS.og, n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=dX)
+#append the alternative variance estimate
+hedgeDENS.alt$vi <- var_d_n.PLOTDENS  # only contains info on plot size
+
+hedgeEST.alt <- metafor::escalc(measure="SMD",m1i=meanEST.sec, m2i=meanEST.og, sd1i=sdEST.sec, sd2i=sdEST.og,n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=dX, vtype="UB")
+#append the alternative variance estimate
+hedgeEST.alt$vi <- var_d_n.PLOTDENS # only contains info on N
+
+
+#do meta-regression - random effects conventional weighted, using the alternative vriance estimate 
+hg.ma.PLOTDENS.ranwt.alt <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeDENS.alt, method="REML")
+hg.ma.EST.ranwt.alt <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeEST.alt, method="REML")
+
+studypool$meta.g.plotdens.ranwt.alt[c] <- hg.ma.PLOTDENS.ranwt.alt$b[2] # extract plot size coeficient
+studypool$meta.g.plotdens.var.ranwt.alt[c] <- hg.ma.PLOTDENS.ranwt.alt$se[2]
+studypool$meta.g.plotdensity.tau.ranwt.alt[c] <- hg.ma.PLOTDENS.ranwt.alt$z[2]
+studypool$meta.g.est.ranwt.alt[c] <- hg.ma.EST.ranwt.alt$b[2]
+studypool$meta.g.est.var.ranwt.alt[c] <- hg.ma.EST.ranwt.alt$se[2]
+studypool$meta.g.est.ran.alt[c] <- hg.ma.EST.ranwt.alt$z[2]
+studypool$cor.actual[c] <- cor.actual
+
+
+#do meta-regression - fixed effects conventional weighted, using the alternative vriance estimate
+hg.ma.PLOTDENS.fixwt.alt <- rma(yi=scale(yi), vi=vi, mods=scale(log(as.numeric(A))),data=hedgeDENS.alt, method="REML", weights = 1/vi)
+hg.ma.EST.fixwt.alt <- rma(yi=scale(yi), vi=vi,mods=scale(log(as.numeric(A))), data=hedgeEST.alt, method="REML", weights = 1/vi)
+
+studypool$meta.g.plotdens.fixwt.alt[c] <- hg.ma.PLOTDENS.fixwt.alt$b[2] # extract plot size coeficient
+studypool$meta.g.plotdens.var.fixwt.alt[c] <- hg.ma.PLOTDENS.fixwt.alt$se[2]
+studypool$meta.g.plotdensity.tau.fixwt.alt[c] <- hg.ma.PLOTDENS.fixwt.alt$z[2]
+studypool$meta.g.est.fixwt.alt[c] <- hg.ma.EST.fixwt.alt$b[2]
+studypool$meta.g.est.var.fixwt.alt[c] <- hg.ma.EST.fixwt.alt$se[2]
+studypool$meta.g.est.fix.alt[c] <- hg.ma.EST.fixwt.alt$z[2]
+studypool$cor.actual[c] <- cor.actual
+
+save(res, file="###") # save the list, this will contain each study pool for each meta-analysis
+
+write.csv(studypool, "###") # write the .csv file out, this will contain the summary statistics for each meta-analysis
+}
+
+
+```
+
+Compare the standardised regression coeficients, make boxplots. Figure 6 in the main text.
+
+```{r}
+studdat <- gather(studypool[,c(2,3,4,5,11:14,19:22,48,50,52,54)])
+studdat$corval <- rep(studypool$cor.actual,16)
+
+
+studdat$weighted1 <- c(rep("weighted", nrow(studdat)/4),rep("unweighted", nrow(studdat)/4),rep("weighted1/v", nrow(studdat)/4),rep("weighted,valt", nrow(studdat)/8),rep("fixed,valt", nrow(studdat)/8))
+studdat$weighting <- c(rep("R", nrow(studdat)/4),rep("U", nrow(studdat)/4),rep("F", nrow(studdat)/4),rep("R", nrow(studdat)/8),rep("F", nrow(studdat)/8))
+studdat$metric <- c(rep(c(rep("g", nrow(studdat)/8),rep("LR", nrow(studdat)/8)),3),rep("g",nrow(studdat)/4))
+studdat$vtype <- c(rep(c(rep("Vg", nrow(studdat)/8),rep("VLR", nrow(studdat)/8)),3),rep("Vg_alt",nrow(studdat)/4))
+studdat$measure <- rep(c(rep("aPlotDensityE",nrow(studdat)/16 ), rep("PatchRichE", nrow(studdat)/16)),8)
+studdat$stud <- rep(1:nrow(studypool), 16)
+table(studdat$key, studdat$measure)
+table(studdat$weighted, studdat$metric)
+table(studdat$key, studdat$metric)
+
+unweightedvdalt <- studdat %>%
+  filter(metric=="g")%>%
+  filter(weighting=="U")
+
+
+unweightedvdalt$vtype <- "Vg_alt"
+
+studdat <- rbind(studdat, unweightedvdalt)
+
+table(studdat$weighting, studdat$vtype)
+
+
+studdat <- studdat %>%
+arrange(weighting) %>%    # First sort by val. This sort the dataframe but NOT the factor levels
+  mutate(weighting=factor(weighting, levels=
+                            c("R", "F", "U")))    # 
+
+studdat.p.a <-ggplot(studdat) + geom_boxplot(studdat,mapping=aes(x=weighting,y=value, fill=vtype))+facet_grid(.~measure)+scale_fill_manual(values=c("#66CCFF", "#000033","#FFCC33"))+
+  ylab("Effect of plot size (regression coefficient)")+xlab("Weighting")+ 
+  theme(plot.title = element_text(size=10),axis.title = element_text(size=10),axis.text = element_text(size=9) )
+(studdat.p.a <-studdat.p.a +theme(axis.text.x = element_text(angle=0,face = c(rep('plain',16), 'bold', 'bold')))+theme_bw()+geom_hline(yintercept = 0, linetype="dashed"))
+
+```
+Now plot for a single simulated study pool, so we can visualise the relationships. Figure 5 in the main text.
+
+```{r}
+#random-effects meta-analyses, conventionally weighted 
+hg.ma.DENS.r <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeDENS, method="REML")
+hg.ma.EST.r <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeEST, method="REML")
+lr.ma.DENS.r <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=lrDENS, method="REML")
+lr.ma.EST.r <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=lrEST, method="REML")
+
+newmods=data.frame(intercept=hg.ma.DENS.r$b[1], A=seq(min(dX$A), max(dX$A), 0.01) )
+newmods=as.matrix(newmods)
+head(newmods)
+hg.ma.DENS.r.preds=data.frame(predict(hg.ma.DENS.r,  addx=TRUE))
+hg.ma.EST.r.preds=data.frame(predict(hg.ma.EST.r,  addx=TRUE))
+lr.ma.DENS.r.preds=data.frame(predict(lr.ma.DENS.r,  addx=TRUE))
+lr.ma.EST.r.preds=data.frame(predict(lr.ma.EST.r,  addx=TRUE))
+
+
+hedgeDENS.r.p=ggplot()+geom_point(data=hedgeDENS,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.DENS.r))), alpha=0.3,colour="#66CCFF") +geom_line(aes(x=exp(hg.ma.DENS.r.preds$X.mods), y=hg.ma.DENS.r.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.DENS.r.preds$X.mods),ymin=hg.ma.DENS.r.preds$ci.lb, ymax=hg.ma.DENS.r.preds$ci.ub),alpha=0.2, fill="#66CCFF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+
+hedgeEST.r.p=ggplot()+geom_point(data=hedgeEST,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.EST.r))), alpha=0.3,colour="#66CCFF") +geom_line(aes(x=exp(hg.ma.EST.r.preds$X.mods), y=hg.ma.EST.r.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.EST.r.preds$X.mods),ymin=hg.ma.EST.r.preds$ci.lb, ymax=hg.ma.EST.r.preds$ci.ub),alpha=0.2,fill="#66CCFF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+
+lrDENS.r.p=ggplot()+geom_point(data=lrDENS,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(lr.ma.DENS.r))), alpha=0.3, colour="#FFCC33") +geom_line(aes(x=exp(lr.ma.DENS.r.preds$X.mods), y=lr.ma.DENS.r.preds$pred))+geom_ribbon(aes(x=exp(lr.ma.DENS.r.preds$X.mods),ymin=lr.ma.DENS.r.preds$ci.lb, ymax=lr.ma.DENS.r.preds$ci.ub),alpha=0.2,fill="#FFCC33")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(LR)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-0.7,-0.2)
+lrEST.r.p=ggplot()+geom_point(data=lrEST,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(lr.ma.EST.r))), alpha=0.3, colour="#FFCC33") +geom_line(aes(x=exp(lr.ma.EST.r.preds$X.mods), y=lr.ma.EST.r.preds$pred))+geom_ribbon(aes(x=exp(lr.ma.EST.r.preds$X.mods),ymin=lr.ma.EST.r.preds$ci.lb, ymax=lr.ma.EST.r.preds$ci.ub),alpha=0.2, fill="#FFCC33")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(LR)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-0.7,-0.2)
+
+gridExtra::grid.arrange(hedgeDENS.r.p,lrDENS.r.p,hedgeEST.r.p, lrEST.r.p, ncol=2)
+
+# fixed effect
+hg.ma.DENS.f <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeDENS, method="REML", weights = 1/vi)
+hg.ma.EST.f <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeEST, method="REML", weights = 1/vi)
+lr.ma.DENS.f <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=lrDENS, method="REML", weights = 1/vi)
+lr.ma.EST.f <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=lrEST, method="REML", weights = 1/vi)
+
+newmods=data.frame(intercept=hg.ma.DENS.f$b[1], A=seq(min(dX$A), max(dX$A), 0.01) )
+newmods=as.matrix(newmods)
+head(newmods)
+hg.ma.DENS.f.preds=data.frame(predict(hg.ma.DENS.f,  addx=TRUE))
+hg.ma.EST.f.preds=data.frame(predict(hg.ma.EST.f,  addx=TRUE))
+lr.ma.DENS.f.preds=data.frame(predict(lr.ma.DENS.f,  addx=TRUE))
+lr.ma.EST.f.preds=data.frame(predict(lr.ma.EST.f,  addx=TRUE))
+
+
+hedgeDENS.f.p=ggplot()+geom_point(data=hedgeDENS,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.DENS.f))), alpha=0.3,colour="#66CCFF") +geom_line(aes(x=exp(hg.ma.DENS.f.preds$X.mods), y=hg.ma.DENS.f.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.DENS.f.preds$X.mods),ymin=hg.ma.DENS.f.preds$ci.lb, ymax=hg.ma.DENS.f.preds$ci.ub),alpha=0.2,fill="#66CCFF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Fixed-effects, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+hedgeEST.f.p=ggplot()+geom_point(data=hedgeEST,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.EST.f))), alpha=0.3,colour="#66CCFF") +geom_line(aes(x=exp(hg.ma.EST.f.preds$X.mods), y=hg.ma.EST.f.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.EST.f.preds$X.mods),ymin=hg.ma.EST.f.preds$ci.lb, ymax=hg.ma.EST.f.preds$ci.ub),alpha=0.2,fill="#66CCFF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Fixed-effects, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+
+lrDENS.f.p=ggplot()+geom_point(data=lrDENS,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(lr.ma.DENS.f))), alpha=0.3, colour="#FFCC33") +geom_line(aes(x=exp(lr.ma.DENS.f.preds$X.mods), y=lr.ma.DENS.f.preds$pred))+geom_ribbon(aes(x=exp(lr.ma.DENS.f.preds$X.mods),ymin=lr.ma.DENS.f.preds$ci.lb, ymax=lr.ma.DENS.f.preds$ci.ub),alpha=0.2, fill="#FFCC33")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(LR)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Fixed-effects, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-0.7,-0.2)
+lrEST.f.p=ggplot()+geom_point(data=lrEST,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(lr.ma.EST.f))), alpha=0.3, colour="#FFCC33") +geom_line(aes(x=exp(lr.ma.EST.f.preds$X.mods), y=lr.ma.EST.f.preds$pred))+geom_ribbon(aes(x=exp(lr.ma.EST.f.preds$X.mods),ymin=lr.ma.EST.f.preds$ci.lb, ymax=lr.ma.EST.f.preds$ci.ub),alpha=0.2, fill="#FFCC33")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(LR)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Fixed-effects meta-analysis, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-0.7,-0.2)
+
+gridExtra::grid.arrange(hedgeDENS.f.p,lrDENS.f.p,hedgeEST.r.p, lrEST.r.p, ncol=2)
+
+#unwt
+
+hg.ma.DENS.u <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeDENS, method="REML", weights = 1)
+hg.ma.EST.u <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeEST, method="REML", weights = 1)
+lr.ma.DENS.u <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=lrDENS, method="REML", weights = 1)
+lr.ma.EST.u <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=lrEST, method="REML", weights = 1)
+
+
+
+
+newmods=data.frame(intercept=hg.ma.DENS.u$b[1], A=seq(min(dX$A), max(dX$A), 0.01) )
+newmods=as.matrix(newmods)
+head(newmods)
+hg.ma.DENS.u.preds=data.frame(predict(hg.ma.DENS.u,  addx=TRUE))
+hg.ma.EST.u.preds=data.frame(predict(hg.ma.EST.u,  addx=TRUE))
+lr.ma.DENS.u.preds=data.frame(predict(lr.ma.DENS.u,  addx=TRUE))
+lr.ma.EST.u.preds=data.frame(predict(lr.ma.EST.u,  addx=TRUE))
+
+hedgeDENS.u.p=ggplot()+geom_point(data=hedgeDENS,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.DENS.u))), alpha=0.3,colour="#66CCFF") +geom_line(aes(x=exp(hg.ma.DENS.u.preds$X.mods), y=hg.ma.DENS.u.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.DENS.u.preds$X.mods),ymin=hg.ma.DENS.u.preds$ci.lb, ymax=hg.ma.DENS.u.preds$ci.ub),alpha=0.2,fill="#66CCFF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Unweighted, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)+xlab(expression(italic(A)))
+hedgeEST.u.p=ggplot()+geom_point(data=hedgeEST,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.EST.u))), alpha=0.3,colour="#66CCFF") +geom_line(aes(x=exp(hg.ma.EST.u.preds$X.mods), y=hg.ma.EST.u.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.EST.u.preds$X.mods),ymin=hg.ma.EST.u.preds$ci.lb, ymax=hg.ma.EST.u.preds$ci.ub),alpha=0.2,fill="#66CCFF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Unweighted, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)+xlab(expression(italic(A)))
+
+
+hedgeDENS.u.p2=ggplot()+geom_point(data=hedgeDENS,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.DENS.u))), alpha=0.3,colour="#3333FF") +geom_line(aes(x=exp(hg.ma.DENS.u.preds$X.mods), y=hg.ma.DENS.u.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.DENS.u.preds$X.mods),ymin=hg.ma.DENS.u.preds$ci.lb, ymax=hg.ma.DENS.u.preds$ci.ub),alpha=0.2,fill="#3333FF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Unweighted, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)+xlab(expression(italic(A)))
+hedgeEST.u.p2=ggplot()+geom_point(data=hedgeEST,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.EST.u))), alpha=0.3,colour="#3333FF") +geom_line(aes(x=exp(hg.ma.EST.u.preds$X.mods), y=hg.ma.EST.u.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.EST.u.preds$X.mods),ymin=hg.ma.EST.u.preds$ci.lb, ymax=hg.ma.EST.u.preds$ci.ub),alpha=0.2,fill="#3333FF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Unweighted, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)+xlab(expression(italic(A)))
+
+
+
+
+
+
+lrDENS.u.p=ggplot()+geom_point(data=lrDENS,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(lr.ma.DENS.u))), alpha=0.3, colour="#FFCC33") +geom_line(aes(x=exp(lr.ma.DENS.u.preds$X.mods), y=lr.ma.DENS.u.preds$pred))+geom_ribbon(aes(x=exp(lr.ma.DENS.u.preds$X.mods),ymin=lr.ma.DENS.u.preds$ci.lb, ymax=lr.ma.DENS.u.preds$ci.ub),alpha=0.2, fill="#FFCC33")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(LR)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Unweighted, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-0.7,-0.2)+xlab(expression(italic(A)))
+lrEST.u.p=ggplot()+geom_point(data=lrEST,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(lr.ma.EST.u))), alpha=0.3, colour="#FFCC33") +geom_line(aes(x=exp(lr.ma.EST.u.preds$X.mods), y=lr.ma.EST.u.preds$pred))+geom_ribbon(aes(x=exp(lr.ma.EST.u.preds$X.mods),ymin=lr.ma.EST.u.preds$ci.lb, ymax=lr.ma.EST.u.preds$ci.ub),alpha=0.2, fill="#FFCC33")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(LR)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Unweighted, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-0.7,-0.2)+xlab(expression(italic(A)))
+
+gridExtra::grid.arrange(hedgeDENS.u.p,lrDENS.u.p,hedgeEST.u.p, lrEST.u.p, ncol=2)
+
+
+#random, Vd_alt
+n1=as.numeric(hedgeDENS$N); n2=as.numeric(hedgeDENS$N)
+n_tilde=n2*n1/(n2+n1)
+var_d_n.DENS=((1-3/(4*(n2+n1-2)-1))^2)*(n2+n1-2)/(n_tilde*(n2+n1-4)) #Hedges variance that does not contain d 
+
+hedgeDENS.adj <- metafor::escalc(measure="SMD",m1i=meanDENS.sec, m2i=meanDENS.og, sd1i=sdDENS.sec, sd2i=sdDENS.og, n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=hedgeDENS[,-c(17:18)])
+hedgeDENS.adj$vi <- var_d_n.DENS # Hamman, Hedges. no d in var calc
+
+hedgeEST.adj <- metafor::escalc(measure="SMD",m1i=meanEST.sec, m2i=meanEST.og, sd1i=sdEST.sec, sd2i=sdEST.og,n1i=as.numeric(N), n2i=as.numeric(N), append=T, data=hedgeDENS[,-c(17:18)], vtype="UB")
+hedgeEST.adj$vi <- var_d_n.DENS # Hamman, Hedges. no d in var calc
+
+
+hg.ma.DENS.r.adj <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeDENS.adj, method="REML")
+hg.ma.EST.r.adj <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeEST.adj, method="REML")
+
+newmods=data.frame(intercept=hg.ma.DENS.r.adj$b[1], A=seq(min(hedgeDENS.adj$A), max(hedgeDENS.adj$A), 0.01) )
+newmods=as.matrix(newmods)
+head(newmods)
+hg.ma.DENS.r.adj.preds=data.frame(predict(hg.ma.DENS.r.adj,  addx=TRUE))
+hg.ma.EST.r.adj.preds=data.frame(predict(hg.ma.EST.r.adj,  addx=TRUE))
+
+hedgeDENS.r.adj.p=ggplot()+geom_point(data=hedgeDENS.adj,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.DENS.r.adj))), alpha=0.3,colour="#3333FF") +geom_line(aes(x=exp(hg.ma.DENS.r.adj.preds$X.mods), y=hg.ma.DENS.r.adj.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.DENS.r.adj.preds$X.mods),ymin=hg.ma.DENS.r.adj.preds$ci.lb, ymax=hg.ma.DENS.r.adj.preds$ci.ub),alpha=0.2,fill="#3333FF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+
+hedgeEST.r.p.adj=ggplot()+geom_point(data=hedgeEST.adj,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.EST.r.adj))), alpha=0.3,colour="#3333FF") +geom_line(aes(x=exp(hg.ma.EST.r.adj.preds$X.mods), y=hg.ma.EST.r.adj.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.EST.r.adj.preds$X.mods),ymin=hg.ma.EST.r.adj.preds$ci.lb, ymax=hg.ma.EST.r.adj.preds$ci.ub),alpha=0.2,fill="#3333FF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+
+
+#fixed, v_alt
+
+hg.ma.DENS.fixwt.adj <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeDENS.adj, method="REML", weights=1/vi)
+hg.ma.EST.fixwt.adj <- rma(yi=yi, vi=vi,mods=log(as.numeric(A)), data=hedgeEST.adj, method="REML", weights=1/vi)
+
+
+
+newmods=data.frame(intercept=hg.ma.DENS.fixwt.adj$b[1], A=seq(min(as.numeric(hedgeDENS.adj$A)), max(as.numeric(hedgeDENS.adj$A)), 0.01) )
+newmods=as.matrix(newmods)
+head(newmods)
+hg.ma.DENS.fixwt.adj.preds=data.frame(predict(hg.ma.DENS.fixwt.adj,  addx=TRUE))
+hg.ma.EST.fixwt.adj.preds=data.frame(predict(hg.ma.EST.fixwt.adj,  addx=TRUE))
+
+hedgeDENS.fixwt.adj.p=ggplot()+geom_point(data=hedgeDENS.adj,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.DENS.fixwt.adj))), alpha=0.3,colour="#3333FF") +geom_line(aes(x=exp(hg.ma.DENS.fixwt.adj.preds$X.mods), y=hg.ma.DENS.fixwt.adj.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.DENS.fixwt.adj.preds$X.mods),ymin=hg.ma.DENS.fixwt.adj.preds$ci.lb, ymax=hg.ma.DENS.fixwt.adj.preds$ci.ub),alpha=0.2,fill="#3333FF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PlotDensity")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+
+hedgeEST.fixwt.p.adj=ggplot()+geom_point(data=hedgeEST.adj,aes(x=as.numeric(A), y=yi, size=as.numeric(weights(hg.ma.EST.fixwt.adj))), alpha=0.3,colour="#3333FF") +geom_line(aes(x=exp(hg.ma.EST.fixwt.adj.preds$X.mods), y=hg.ma.EST.fixwt.adj.preds$pred))+geom_ribbon(aes(x=exp(hg.ma.EST.fixwt.adj.preds$X.mods),ymin=hg.ma.EST.fixwt.adj.preds$ci.lb, ymax=hg.ma.EST.fixwt.adj.preds$ci.ub),alpha=0.2,fill="#3333FF")+scale_size_continuous(guide=FALSE)+theme_bw()+ylab(expression(italic(g)))+xlab(NULL)+geom_hline(yintercept = 0, linetype = "dashed") +ggtitle("Random-effects, PatchRich")+theme(plot.title = element_text(size = 8))+ylim(-7.5,-1)
+
+
+
+
+gridExtra::grid.arrange(hedgeDENS.r.p,hedgeEST.r.p,hedgeDENS.r.adj.p, hedgeEST.r.p.adj, lrDENS.r.p,lrEST.r.p,hedgeDENS.f.p,hedgeEST.f.p,hedgeDENS.fixwt.adj.p, hedgeEST.fixwt.p.adj,lrDENS.f.p, lrEST.r.p,hedgeDENS.u.p,hedgeEST.u.p,hedgeDENS.u.p,hedgeEST.u.p,lrDENS.u.p, lrEST.u.p, ncol=6, heights=c(2,2,2.2))
+
+gridExtra::grid.arrange(hedgeDENS.r.p,hedgeEST.r.p,hedgeDENS.r.adj.p, hedgeEST.r.p.adj, hedgeDENS.f.p,hedgeEST.f.p,hedgeDENS.fixwt.adj.p, hedgeEST.fixwt.p.adj,hedgeDENS.u.p,hedgeEST.u.p,hedgeDENS.u.p2,hedgeEST.u.p2, ncol=4, heights=c(2,2,2.2))
+
+gridExtra::grid.arrange(lrDENS.r.p,lrEST.r.p,lrDENS.f.p, lrEST.r.p,lrDENS.u.p, lrEST.u.p, ncol=2, heights=c(2,2,2.2))
+
+```
+
