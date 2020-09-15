@@ -7,7 +7,7 @@ Any comments or questions, please contact Yefeng Yang: yefengyang1[at]UNSW[dot]e
 
 ### Dataset
 The following files are provided in the database folder:
-all_traits.csv - meta-analysis data 
+all_traits.csv and data set for each trait
 
 ### Code
 To run the analysis in the paper, use the file in the 'code' folder: 
