@@ -1,7 +1,7 @@
-"Maximum lnRR","Neurobehavior","Brain development","Brain growth factors"
-"Neurobehavior",1,0.162,0.164
+"Maximum lnRR","Cognition","Brain structure","Brain growth factors"
+"Cognition",1,0.162,0.164
 "p value",NA,0.565,0.529
-"Brain development",0.162,1,0.617
+"Brain structure",0.162,1,0.617
 "p value",0.565,NA,0.025
 "Brain growth factors",0.164,0.617,1
 "p value",0.529,0.025,NA
