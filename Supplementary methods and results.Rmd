@@ -50,10 +50,7 @@ link-citations: yes
                  knitr, # present table
                  MuMIn, # model inference
                  lme4,
-                 rptR)
-  
-  
-  source('./functions/functions.R')
+                 rptR);source('./functions/functions.R')
 ```
 
 
@@ -991,7 +988,7 @@ model.selection.brain_development_RR <- modified.rma.mv(yi = RR,
 ## permutation_moderators <- dredge(model.selection.brain_development_RR, evaluate = F)
 
 # Testing dredge
-   candidates_brain_development_RR_int <- dredge(model.selection.brain_development_RR_int, trace = 2) 
+  candidates_brain_development_RR_int <- dredge(model.selection.brain_development_RR_int, trace = 2) 
   candidates_brain_development_RR <- dredge(model.selection.brain_development_RR, trace = 2) 
 
 # Retrieving AICc delta<2
@@ -1030,11 +1027,11 @@ model.selection.brain_development_RR <- modified.rma.mv(yi = RR,
   tibble(`Model (variable weight)` = c("Model1", "Model2","(Sum of weights)"), 
 `Exercise mode` = c(if_else(aic2_brain_development_RR$manipulation_mode == "+", "+", "NA"), round(ranking_brain_development_RR[1], 3)), `Exercised sex` = c(if_else(aic2_brain_development_RR$F0_sex_exercise == "+", "+", "NA"), round(ranking_brain_development_RR[2], 3)), `Exercise timing` = c(if_else(aic2_brain_development_RR$manipulation_window == "+", "+", "NA"), round(ranking_brain_development_RR[3], 3)), 
 `F1 ontogenetic stage` = c(if_else(aic2_brain_development_RR$response_age_life_phase == "+", "+", "NA"), round(ranking_brain_development_RR[4], 3)), 
-`F1 sex` = c(if_else(aic2_brain_development_RR$F1_sex_test == "+", "+", "NA"), round(ranking_brain_development_RR[5], 3)), delta_AICc = c(aic2_brain_development_RR$delta, NA), Weight = c(aic2_brain_development_RR$weight, NA)) -> table.top3.models_brain_development_RR
+`F1 sex` = c(if_else(aic2_brain_development_RR$F1_sex_test == "+", "+", "NA"), round(ranking_brain_development_RR[5], 3)), delta_AICc = c(aic2_brain_development_RR$delta, NA), Weight = c(aic2_brain_development_RR$weight, NA)) -> table.top2.models_brain_development_RR
 
 
 # Saving
-  write.csv(table.top3.models_brain_development_RR, file = './results/csv/table.top3.models_brain_development_RR.csv', row.names = FALSE, col.names = TRUE)
+  write.csv(table.top2.models_brain_development_RR, file = './results/csv/table.top2.models_brain_development_RR.csv', row.names = FALSE, col.names = TRUE)
 
  
   average_sigma2 <- "Variance"
@@ -1114,11 +1111,11 @@ model.selection.genes_RR <- modified.rma.mv(yi = RR,
   tibble(`Model (variable weight)` = c("Model1","(Sum of weights)"), 
 `Exercise mode` = c(if_else(aic2_genes_RR$manipulation_mode == "+", "+", "NA"), round(ranking_genes_RR[2], 3)), `Exercised sex` = c(if_else(aic2_genes_RR$F0_sex_exercise == "+", "+", "NA"), round(ranking_genes_RR[1], 3)), `Exercise timing` = c(if_else(aic2_genes_RR$manipulation_window == "+", "+", "NA"), round(ranking_genes_RR[3], 3)), 
 `F1 ontogenetic stage` = c(if_else(aic2_genes_RR$response_age_life_phase == "+", "+", "NA"), round(ranking_genes_RR[5], 3)), 
-`F1 sex` = c(if_else(aic2_genes_RR$F1_sex_test == "+", "+", "NA"), round(ranking_genes_RR[4], 3)), delta_AICc = c(aic2_genes_RR$delta, NA), Weight = c(aic2_genes_RR$weight, NA)) -> table.top3.models_genes_RR
+`F1 sex` = c(if_else(aic2_genes_RR$F1_sex_test == "+", "+", "NA"), round(ranking_genes_RR[4], 3)), delta_AICc = c(aic2_genes_RR$delta, NA), Weight = c(aic2_genes_RR$weight, NA)) -> table.top1.models_genes_RR
 
 
 # Saving
-  write.csv(table.top3.models_genes_RR, file = './results/csv/table.top3.models_genes_RR.csv', row.names = FALSE, col.names = TRUE)
+  write.csv(table.top1.models_genes_RR, file = './results/csv/table.top1.models_genes_RR.csv', row.names = FALSE, col.names = TRUE)
 
  
   average_sigma2 <- "Variance"
@@ -1467,7 +1464,7 @@ table.top4.models_behavior_CVR %>% kable(digits = 3)
 
 **Brain development (lnRR):**
 ```{r}
-table.top3.models_brain_development_RR %>% kable(digits = 3)
+table.top2.models_brain_development_RR %>% kable(digits = 3)
 ```
 
 **Brain development (lnCVR):**
@@ -1477,7 +1474,7 @@ table.top3.models_brain_development_CVR %>% kable(digits = 3)
 
 **Brain growth factors (lnRR):**
 ```{r}
-table.top3.models_genes_RR %>% kable(digits = 3)
+table.top1.models_genes_RR %>% kable(digits = 3)
 ```
 
 **Brain growth factors (lnCVR):**
@@ -1520,126 +1517,127 @@ table.model.averaging.genes_CVR %>% kable(digits = 3)
 
 
 
+### 4. Funnel plot 
 
-4. ### Publication bias 
-
-```{r publication bias}
-
-# contour-enhanced funnel plots
+```{r contour-enhanced funnel plots}
 
 #***************************************************************#
-#--------------------- improvement (lnRR) ----------------------#
+#--------------------- Improvement (lnRR) ----------------------#
 #***************************************************************#
 
 
-# behavior
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
 
-## residual funnel plot 1
+# Residual funnel plot 1
 
-funnel.behavior_RR.1 <- rma.mv(yi = RR,
-                                                        V = cov_VRR_behavior,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F0_sex_exercise + manipulation_mode,
-                                                        method = 'REML',
-                                                        data = behavior)
+  funnel.behavior_RR.1 <- rma.mv(yi = RR,
+                                 V = cov_VRR_behavior,
+                                 random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                 mods = ~manipulation_mode + F0_sex_exercise,
+                                 method = 'REML',
+                                 data = behavior)
 
-pdf(file = './results/Figures/funnel.behavior.RR.1.pdf', height = 6, width = 8)
-funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)  
-dev.off()
+#pdf(file = './results/Figures/funnel.behavior.RR.1.pdf', height = 6, width = 8)
+#funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)  
+#dev.off()
+
+  png(file = './results/Figures/funnel.behavior.RR.1.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)  
+  dev.off()
 
 
-par(mfrow=c(2,1))
-funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T) 
-funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T) 
+#par(mfrow=c(2,1))
+#funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T) 
+#funnel(funnel.behavior_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T) 
 
-## Residual funnel plot 2
-### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
+# Residual funnel plot 2
+
 funnel.behavior_RR.2 <- rma.mv(yi = RR,
-                                                        V = cov_VRR_behavior,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F0_sex_exercise + manipulation_mode + sqrt(VRR),
-                                                        method = 'REML',
-                                                        data = behavior)
+                               V = cov_VRR_behavior,
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mods = ~manipulation_mode + F0_sex_exercise + sqrt(VRR),
+                               method = 'REML',
+                               data = behavior)
 
 
-pdf(file = './results/Figures/funnel.behavior.RR.2.pdf', height = 6, width = 8)
-funnel(funnel.behavior_RR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'), pch = 21, refline = 0, legend = T)
-dev.off()
-
-
-
-
-# brain_development
-
-## residual funnel plot 1
-
-funnel.brain_development_RR.1 <- rma.mv(yi = RR,
-                                        V = cov_VRR_brain_development,
-                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                        mods = ~manipulation_mode + manipulation_window,
-                                        method = 'REML',
-                                        data = brain_development)
-
-pdf(file = './results/Figures/funnel.brain_development.RR.1.pdf', height = 6, width = 8)
-funnel(funnel.brain_development_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
+  png(file = './results/Figures/funnel.behavior.RR.2.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel(funnel.behavior_RR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'), pch = 21, refline = 0, legend = T)
+  dev.off()
 
 
 
-## Residual funnel plot 2
-### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
-funnel.brain_development_RR.2 <- rma.mv(yi = RR,
-                                        V = cov_VRR_brain_development,
-                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                        mods = ~manipulation_mode + manipulation_window + sqrt(VRR),
-                                        method = 'REML',
-                                        data = brain_development)
+
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+# Residual funnel plot 1
+
+  funnel.brain_development_RR.1 <- rma.mv(yi = RR,
+                                          V = cov_VRR_brain_development,
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mods = ~manipulation_mode,
+                                          method = 'REML',
+                                          data = brain_development)
+
+  
+  png(file = './results/Figures/funnel.brain_development.RR.1.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel(funnel.brain_development_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
 
 
-pdf(file = './results/Figures/funnel.brain_development.RR.2.pdf', height = 6, width = 8)
-funnel(funnel.brain_development_RR.2, yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21,  refline = 0, legend = T)
-dev.off()
+
+# Residual funnel plot 2
+  funnel.brain_development_RR.2 <- rma.mv(yi = RR,
+                                          V = cov_VRR_brain_development,
+                                          random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                          mods = ~manipulation_mode + sqrt(VRR),
+                                          method = 'REML',
+                                          data = brain_development)
 
 
-## without moderators
-pdf(file = './results/Figures/funnel.brain_development.RR.without.pdf', height = 6, width = 8)
-funnel(model1.brain_development_RR, yaxis = 'seinv', xlab = 'brain development', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch= 21, refline = 0, legend = T)
-dev.off()
+  png(file = './results/Figures/funnel.brain_development.RR.2.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel(funnel.brain_development_RR.2, yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21,  refline = 0, legend = T)
+  dev.off()
 
 
 
 
 
-# genes
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
 
-## residual funnel plot 1
+# Residual funnel plot 1
 
-funnel.genes_RR.1 <- rma.mv(yi = RR,
-                                                        V = cov_VRR_genes,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F0_sex_exercise,
-                                                        method = 'REML',
-                                                        data = genes)
+  funnel.genes_RR.1 <- rma.mv(yi = RR,
+                              V = cov_VRR_genes,
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mods = ~F0_sex_exercise,
+                              method = 'REML',
+                              data = genes)
 
-pdf(file = './results/Figures/funnel.genes.RR.1.pdf', height = 6, width = 8)
-funnel(funnel.genes_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
-
-
-
-## Residual funnel plot 2
-### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
-funnel.genes_RR.2 <- rma.mv(yi = RR,
-                            V = cov_VRR_genes,
-                            random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                            mods = ~F0_sex_exercise + sqrt(VRR),
-                            method = 'REML',
-                            data = genes)
+  
+  png(file = './results/Figures/funnel.genes_RR.1.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel(funnel.genes_RR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
 
 
-pdf(file = './results/Figures/funnel.genes.RR.2.pdf', height = 6, width = 8)
-funnel(funnel.genes_RR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
+
+# Residual funnel plot 2
+  funnel.genes_RR.2 <- rma.mv(yi = RR,
+                              V = cov_VRR_genes,
+                              random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                              mods = ~F0_sex_exercise + sqrt(VRR),
+                              method = 'REML',
+                              data = genes)
+
+
+  png(file = './results/Figures/funnel.genes_RR.2.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel(funnel.genes_RR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
 
 
 
@@ -1647,120 +1645,120 @@ dev.off()
 
 
 #***************************************************************#
-#------------------ inter-difference (lnCVR) -------------------#
+#------------------ Inter-difference (lnCVR) -------------------#
 #***************************************************************#
 
 
+#--------------------------------------------------------------#
+#                         Neurobehavior
+#--------------------------------------------------------------#
 
+# Residual funnel plot 1
 
-# behavior
+  funnel.behavior_CVR.1 <- rma.mv(yi = CVR,
+                                  V = cov_VCVR_behavior,
+                                  random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mods = ~F1_sex_test + F0_sex_exercise,
+                                  method = 'REML',
+                                  data = behavior)
 
-## residual funnel plot 1
-
-funnel.behavior_CVR.1 <- rma.mv(yi = CVR,
-                                                        V = cov_VCVR_behavior,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F1_sex_test + manipulation_mode + F0_sex_exercise,
-                                                        method = 'REML',
-                                                        data = behavior)
-
-pdf(file = './results/Figures/funnel.behavior.CVR.1.pdf', height = 6, width = 8)
-funnel.brain_size.CVR1 <- funnel(funnel.behavior_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
-
-
-
-## Residual funnel plot 2
-### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
-funnel.behavior_CVR.2 <- rma.mv(yi = CVR,
-                                                        V = cov_VCVR_behavior,
-                                                        random = list(~~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F1_sex_test + manipulation_mode + F0_sex_exercise + sqrt(VCVR),
-                                                        method = 'REML',
-                                                        data = behavior)
-
-
-pdf(file = './results/Figures/funnel.behavior.CVR.2.pdf', height = 6, width = 8)
-funnel.brain_size.CVR2 <- funnel(funnel.behavior_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
+  
+  png(file = './results/Figures/funnel.behavior_CVR.1.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel.brain_size.CVR1 <- funnel(funnel.behavior_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
 
 
 
+# Residual funnel plot 2
 
-# brain_development
-
-## residual funnel plot 1
-
-funnel.brain_development_CVR.1 <- rma.mv(yi = CVR,
-                                                        V = cov_VCVR_brain_development,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F1_sex_test + manipulation_mode,
-                                                        method = 'REML',
-                                                        data = brain_development)
-
-pdf(file = './results/Figures/funnel.brain_development.CVR.1.pdf', height = 6, width = 8)
-funnel.brain_size.CVR2 <- funnel(funnel.brain_development_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'), pch = 21, refline = 0, legend = T)
-dev.off()
+  funnel.behavior_CVR.2 <- rma.mv(yi = CVR,
+                                  V = cov_VCVR_behavior,
+                                  random = list(~~1|strain, ~1|study_ID, ~1|ES_ID),
+                                  mods = ~F1_sex_test + F0_sex_exercise + sqrt(VCVR),
+                                  method = 'REML',
+                                  data = behavior)
 
 
-
-## Residual funnel plot 2
-### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
-funnel.brain_development_CVR.2 <- rma.mv(yi = CVR,
-                                                        V = cov_VCVR_brain_development,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F1_sex_test + manipulation_mode + sqrt(VCVR),
-                                                        method = 'REML',
-                                                        data = brain_development)
-
-
-pdf(file = './results/Figures/funnel.brain_development.CVR.2.pdf', height = 6, width = 8)
-funnel.brain_size.CVR2 <- funnel(funnel.brain_development_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
-
-
-
-# genes
-
-## residual funnel plot 1
-
-funnel.genes_CVR.1 <- rma.mv(yi = CVR,
-                                                        V = cov_VCVR_genes,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F0_sex_exercise,
-                                                        method = 'REML',
-                                                        data = genes)
-
-pdf(file = './results/Figures/funnel.genes.CVR.1.pdf', height = 6, width = 8)
-funnel.brain_size.CVR1 <- funnel(funnel.genes_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
-
-
-
-## Residual funnel plot 2
-### exclude strain and study_ID from random effect, because optimizer (nlminb) did not achieve convergence (convergence = 1)
-funnel.genes_CVR.2 <- rma.mv(yi = CVR,
-                                                        V = cov_VCVR_genes,
-                                                        random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
-                                                        mods = ~F0_sex_exercise + sqrt(VCVR),
-                                                        method = 'REML',
-                                                        data = genes)
-
-
-pdf(file = './results/Figures/funnel.genes.CVR.2.pdf', height = 6, width = 8)
-funnel.brain_size.CVR2 <- funnel(funnel.genes_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
-dev.off()
+  png(file = './results/Figures/funnel.behavior_CVR.2.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel.brain_size.CVR2 <- funnel(funnel.behavior_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
 
 
 
 
+#--------------------------------------------------------------#
+#                     Brain development
+#--------------------------------------------------------------#
+
+# residual funnel plot 1
+  funnel.brain_development_CVR.1 <- rma.mv(yi = CVR,
+                                           V = cov_VCVR_brain_development,
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mods = ~F1_sex_test + manipulation_mode,
+                                           method = 'REML',
+                                           data = brain_development)
+
+  
+  png(file = './results/Figures/funnel.brain_development_CVR.1.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel.brain_size.CVR2 <- funnel(funnel.brain_development_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'), pch = 21, refline = 0, legend = T)
+  dev.off()
+
+
+
+# Residual funnel plot 2
+  funnel.brain_development_CVR.2 <- rma.mv(yi = CVR,
+                                           V = cov_VCVR_brain_development,
+                                           random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                                           mods = ~F1_sex_test + manipulation_mode + sqrt(VCVR),
+                                           method = 'REML',
+                                           data = brain_development)
+
+
+  png(file = './results/Figures/funnel.brain_development_CVR.2.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel.brain_size.CVR2 <- funnel(funnel.brain_development_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
+
+
+
+#--------------------------------------------------------------#
+#                     Brain growth factors
+#--------------------------------------------------------------#
+
+# Residual funnel plot 1
+
+  funnel.genes_CVR.1 <- rma.mv(yi = CVR,
+                               V = cov_VCVR_genes,
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mods = ~F0_sex_exercise + F1_sex_test,
+                               method = 'REML',
+                               data = genes)
+
+  
+  png(file = './results/Figures/funnel.genes_CVR.1.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel.brain_size.CVR1 <- funnel(funnel.genes_CVR.1 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
+
+
+
+# Residual funnel plot 2
+  funnel.genes_CVR.2 <- rma.mv(yi = CVR,
+                               V = cov_VCVR_genes,
+                               random = list(~1|strain, ~1|study_ID, ~1|ES_ID),
+                               mods = ~F0_sex_exercise + F1_sex_test + sqrt(VCVR),
+                               method = 'REML',
+                               data = genes)
+
+
+  png(file = './results/Figures/funnel.genes_CVR.2.png', height = 8, width = 8, bg = "white", units = "in", type = c("windows"), res = 400)
+  funnel.brain_size.CVR2 <- funnel(funnel.genes_CVR.2 , yaxis = 'seinv', level = c(90, 95, 99), shade = c('white', '#CC79A7', '#56B4E9'),pch = 21, refline = 0, legend = T)
+  dev.off()
 ```
 
 
 
-### 4. Egger regression
+### 5. Egger regression
 
-#### 4.1 Methods
+#### 5.1 Methods
 
 ```{r Publication bias}
 
@@ -1861,7 +1859,7 @@ Egger_genes_CVR <- rma.mv(yi = CVR,
 
 
 
-#### 4.2 Results
+#### 5.2 Results
 
 ```{r visualization}
 #***************************************************************#
@@ -1886,7 +1884,7 @@ behavior %>% mutate(ymin = pred.Egger_behavior_RR$ci.lb,
   geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
-  labs(x = "sqrt(Sampling variance)", y = 'Neurobehavior (lnRR)',  size = expression(paste('Precision (1/SE)'))) +    
+  labs(x = "sqrt(Sampling variance)", y = 'Cognition (lnRR)',  size = expression(paste('Precision (1/SE)'))) +    
   guides(fill = "none", colour = "none") + 
   theme_bw() + 
   theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
@@ -1901,7 +1899,7 @@ behavior %>% mutate(ymin = pred.Egger_behavior_RR$ci.lb,
 
 
 print(Egger_behavior_RR.p)
-png(filename = './results/Figures/Egger_neurobehavior_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+png(filename = './results/Figures/Egger_cognition_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
 Egger_behavior_RR.p
 dev.off()
 
@@ -1923,7 +1921,7 @@ brain_development %>% mutate(ymin = pred.Egger_brain_development_RR$ci.lb,
   geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
-  labs(x = "sqrt(Sampling variance)", y = 'Brain development (lnRR)',  size = expression(paste('Precision (1/SE)'))) + 
+  labs(x = "sqrt(Sampling variance)", y = 'Brain structure (lnRR)',  size = expression(paste('Precision (1/SE)'))) + 
   guides(fill = "none", colour = "none") + 
   theme_bw() + 
   theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
@@ -1937,7 +1935,7 @@ brain_development %>% mutate(ymin = pred.Egger_brain_development_RR$ci.lb,
 
 
 print(Egger_brain_development_RR.p)
-png(filename = './results/Figures/Egger_brain_development_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+png(filename = './results/Figures/Egger_brain_structure_RR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
 Egger_brain_development_RR.p
 dev.off()
 
@@ -2002,7 +2000,7 @@ behavior %>% mutate(ymin = pred.Egger_behavior_CVR$ci.lb,
   geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") +
-  labs(x = "sqrt(Sampling variance)", y = 'Neurobehavior (lnCVR)',  size = expression(paste('Precision (1/SE)'))) +    
+  labs(x = "sqrt(Sampling variance)", y = 'Cognition (lnCVR)',  size = expression(paste('Precision (1/SE)'))) +    
   guides(fill = "none", colour = "none") + 
   theme_bw() + 
   theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
@@ -2015,7 +2013,7 @@ behavior %>% mutate(ymin = pred.Egger_behavior_CVR$ci.lb,
 
 
 print(Egger_behavior_CVR.p)
-png(filename = './results/Figures/Egger_neurobehavior_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+png(filename = './results/Figures/Egger_cognition_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
 Egger_behavior_CVR.p
 dev.off()
 
@@ -2040,7 +2038,7 @@ brain_development %>% mutate(ymin = pred.Egger_brain_development_CVR$ci.lb,
   geom_smooth(aes(y = ymax2), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#0072B2") + geom_smooth(aes(y = ymin), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = ymax), method = "loess", se = FALSE, lty = "dotted", lwd = 0.6, colour = "#D55E00") + 
   geom_smooth(aes(y = pred), method = "loess", se = FALSE, lty = 2, lwd = 0.6, colour = "black") + 
-  labs(x = "sqrt(Sampling variance)", y = 'Brain development (lnCVR)',  size = expression(paste('Precision (1/SE)'))) + 
+  labs(x = "sqrt(Sampling variance)", y = 'Brain structure (lnCVR)',  size = expression(paste('Precision (1/SE)'))) + 
   guides(fill = "none", colour = "none") + 
   theme_bw() + 
   theme(legend.position = c(0, 1), legend.justification = c(0, 1)) + 
@@ -2055,7 +2053,7 @@ brain_development %>% mutate(ymin = pred.Egger_brain_development_CVR$ci.lb,
 
 
 print(Egger_brain_development_CVR.p)
-png(filename = './results/Figures/Egger_brain_development_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
+png(filename = './results/Figures/Egger_brain_structure_CVR.png', height = 4, width = 6, units = "in", type = "windows", res = 400)
 Egger_brain_development_CVR.p
 dev.off()
 
@@ -2100,9 +2098,9 @@ dev.off()
 
 
 
-### 5. Time-lag bias
+### 6. Time-lag bias
 
-#### 5.1 Methods
+#### 6.1 Methods
 
 ```{r Publications bias}
 
@@ -2191,7 +2189,7 @@ Time.lag_genes_CVR <- rma.mv(yi = CVR,
 
 
 
-#### 5.2 Results
+#### 6.2 Results
 
 ```{r Visualization}
 #***************************************************************#
@@ -2433,9 +2431,9 @@ dev.off()
 
 
 
-### 6. Extractions validation
+### 7. Extractions validation
 
-#### 6.1 Methods   
+#### 7.1 Methods   
 
 Data were extracted from figures, tables and main text. We used metaDigitise package to extract descriptive statistics (mean, se) from figures. All data were extracted by one author (YY). But we verify these extractions by checking 10 papers by other two authors (ML and YF) independently. 
 
@@ -2539,7 +2537,7 @@ To verify the extracted data, we evaluated the inter-class correlations (Pearson
 ```
 
 
-#### 6.2 Results
+#### 7.2 Results
 
 ###### (i) Summary of extractions
 
@@ -2626,7 +2624,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Losia_mean <- ggplot(Yefeng_VS_Losia, 
                             mapping = aes(x = mean_Yefeng, y = mean_Yefeng)) 
   plot_Losia_mean <- plot_Losia_mean + 
-                    labs(y = 'mean_Losia') +
+                    labs(y = 'mean_ML') + labs(x = "mean_YFY") +
                     geom_segment(aes(xend = mean_Yefeng, yend = mean_Losia), alpha = 1) +
                     geom_point(aes(color = study_ID)) +          
                     geom_point(aes(y = mean_Losia), shape = 1) + 
@@ -2637,7 +2635,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Yong_mean <- ggplot(Yefeng_VS_Yong, 
                            mapping = aes(x = mean_Yefeng, y = mean_Yefeng)) 
   plot_Yong_mean <- plot_Yong_mean + 
-                    labs(y = 'mean_Yong') +
+                    labs(y = 'mean_ZFY') + labs(x = "mean_YFY") +
                     geom_segment(aes(xend = mean_Yefeng, yend = mean_Yong), alpha = 1) +
                     geom_point(aes(color = study_ID)) +          
                     geom_point(aes(y = mean_Yong), shape = 1) + 
@@ -2653,7 +2651,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Losia_se <- ggplot(Yefeng_VS_Losia, 
                           mapping = aes(x = se_Yefeng, y = se_Yefeng)) 
   plot_Losia_se <- plot_Losia_se + 
-                    labs(y = 'se_Losia') +
+                    labs(y = 'se_ML') + labs(x = "se_YFY") +
                     geom_segment(aes(xend = se_Yefeng, yend = se_Losia), alpha = 1) +
                     geom_point(aes(color = study_ID)) +          
                     geom_point(aes(y = se_Losia), shape = 1) + 
@@ -2664,7 +2662,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Yong_se <- ggplot(Yefeng_VS_Yong, 
                          mapping = aes(x = se_Yefeng, y = se_Yefeng), size = 0.01) 
   plot_Yong_se <- plot_Yong_se + 
-                  labs(y = 'se_Yong') +
+                  labs(y = 'se_ZFY') + labs(x = "se_YFY") +
                   geom_segment(aes(xend = se_Yefeng, yend = se_Yong), alpha = 1) +
                   geom_point(aes(color = study_ID)) +          
                   geom_point(aes(y = se_Yong), shape = 1) + 
@@ -2683,7 +2681,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Losia_logmean <- ggplot(Yefeng_VS_Losia, 
                                mapping = aes(x = log(mean_Yefeng), y = log(mean_Yefeng))) 
   plot_Losia_logmean <- plot_Losia_logmean + 
-                         labs(y = 'log(mean_Losia)') +
+                         labs(y = 'log(mean_ML)') + labs(x = 'log(mean_YFY)') +
                          geom_segment(aes(xend = log(mean_Yefeng), yend = log(mean_Losia)), alpha = 1) +
                          geom_point(aes(color = study_ID)) +          
                          geom_point(aes(y = log(mean_Losia)), shape = 1) + 
@@ -2694,7 +2692,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Yong_logmean <- ggplot(Yefeng_VS_Yong, 
                               mapping = aes(x = log(mean_Yefeng), y = log(mean_Yefeng))) 
   plot_Yong_logmean <- plot_Yong_logmean + 
-                       labs(y = 'log(mean_Losia)') +
+                       labs(y = 'log(mean_ZFY)') + labs(x = 'log(mean_YFY)') +
                        geom_segment(aes(xend = log(mean_Yefeng), yend = log(mean_Yong)), alpha = 1) +
                        geom_point(aes(color = study_ID)) +          
                        geom_point(aes(y = log(mean_Yong)), shape = 1) + 
@@ -2711,7 +2709,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Losia_logse <- ggplot(Yefeng_VS_Losia, 
                              mapping = aes(x = log(se_Yefeng), y = log(se_Yefeng))) 
   plot_Losia_logse <- plot_Losia_logse + 
-                       labs(y = 'log(se_Losia)') +
+                       labs(y = 'log(se_ML)') + labs(x = 'log(se_YFY)') +
                        geom_segment(aes(xend = log(se_Yefeng), yend = log(se_Losia)), alpha = 1) +
                        geom_point(aes(color = study_ID)) +          
                        geom_point(aes(y = log(se_Losia)), shape = 1) + 
@@ -2722,7 +2720,7 @@ se: 0.9970836  CI: 0.9954449 to 0.9981333, p-value < 0.0001
   plot_Yong_logse <- ggplot(Yefeng_VS_Yong, 
                             mapping = aes(x = log(se_Yefeng), y = log(se_Yefeng))) 
   plot_Yong_logse <- plot_Yong_logse + 
-                     labs(y = 'log(se_Yong)') +
+                     labs(y = 'log(se_ZFY)') + labs(x = 'log(se_YFY)') +
                      geom_segment(aes(xend = log(se_Yefeng), yend = log(se_Yong)), alpha = 1) +
                      geom_point(aes(color = study_ID)) +          
                      geom_point(aes(y = log(se_Yong)), shape = 1) + 
