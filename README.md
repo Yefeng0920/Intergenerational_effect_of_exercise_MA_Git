@@ -1,5 +1,5 @@
 # Intergenerational_effect_of_exercise_MA_Git
-This is the information file for the code and dataset used in the paper "intergenerational effect of exercise on cognition and brain: a multilevel meta-analysis of mean and variance" and its corresponding results (figures and tables). 
+This is the information file for the code and dataset used in the paper titled "Benefitial intergenerational effect of exercise on cognition and brain: a multilevel meta-analysis of mean and variance" and its corresponding results (figures and tables). 
 
 Any comments or questions, please contact Yefeng Yang: yefeng.yang1[at]UNSW[dot]edu.au
 
