@@ -20,11 +20,7 @@ output: word_document
                  tidyverse,
                  knitr,
                  Hmisc, # correlation matrix with significance levels (p-value)
-                 readxl)
-  
-
-  source('./functions/functions.R')
-  
+                 readxl);source('./functions/functions.R')
 ```
 
 
@@ -998,7 +994,7 @@ table_F0_sex$...7[FE_position_RR] <- round(c(model2.behavior_RR$ci.lb[1],       
         model2.genes_RR$ci.lb[1],                                         model2.genes_RR$ci.lb[2]),3)
 
 
- # ci.ub
+ # ci.lb
   table_F0_sex$...8[FE_position_RR] <- round(c(model2.behavior_RR$ci.ub[1],                                      model2.behavior_RR$ci.ub[2],											                 model2.brain_development_RR$ci.ub[1],                             model2.brain_development_RR$ci.ub[2],
         model2.genes_RR$ci.ub[1],                                         model2.genes_RR$ci.ub[2]),3)
 
@@ -1034,7 +1030,7 @@ table_F0_sex$`Fixed effect`[FE_position_CVR] <- round(c(model2.behavior_CVR$b[1]
         model2.genes_CVR$ci.lb[1],                                        model2.genes_CVR$ci.lb[2]),3)
 
 
-  # ci.ub
+  # ci.lb
   table_F0_sex$...8[FE_position_CVR] <- round(c(model2.behavior_CVR$ci.ub[1],                                     model2.behavior_CVR$ci.ub[2],											                model2.brain_development_CVR$ci.ub[1],                            model2.brain_development_CVR$ci.ub[2],
         model2.genes_CVR$ci.ub[1],                                        model2.genes_CVR$ci.ub[2]),3)
 
@@ -1084,7 +1080,7 @@ table_F0_sex$`Fixed effect`[FE_position_CVR] <- round(c(model2.behavior_CVR$b[1]
         model.contrast2.genes_RR$ci.lb[1],                                model.contrast2.genes_RR$ci.lb[2]),3)
 
 
- # ci.ub
+ # ci.lb
   table_F0_sex_contrast$...8[FE_position_RR] <- round(c(model.contrast2.behavior_RR$ci.ub[1],                             model.contrast2.behavior_RR$ci.ub[2],											        model.contrast2.brain_development_RR$ci.ub[1],                    model.contrast2.brain_development_RR$ci.ub[2],
         model.contrast2.genes_RR$ci.ub[1],                                model.contrast2.genes_RR$ci.ub[2]),3)
 
@@ -1120,7 +1116,7 @@ table_F0_sex_contrast$`Fixed effect`[FE_position_CVR] <- round(c(model.contrast2
         model.contrast2.genes_CVR$ci.lb[1],                               model.contrast2.genes_CVR$ci.lb[2]),3)
 
 
-  # ci.ub
+  # ci.lb
   table_F0_sex_contrast$...8[FE_position_CVR] <- round(c(model.contrast2.behavior_CVR$ci.ub[1],                            model.contrast2.behavior_CVR$ci.ub[2],											        model.contrast2.brain_development_CVR$ci.ub[1],                  model.contrast2.brain_development_CVR$ci.ub[2],
         model.contrast2.genes_CVR$ci.ub[1],                               model.contrast2.genes_CVR$ci.ub[2]),3)
 
@@ -1186,7 +1182,7 @@ table_F0_sex_contrast$`Fixed effect`[FE_position_CVR] <- round(c(model.contrast2
         model3.genes_RR$ci.lb[3]),3)
 
 
-## ci.ub
+## ci.lb
   table_F1_sex$...8[FE_position_RR] <- round(c(model3.behavior_RR$ci.ub[1],                                      model3.behavior_RR$ci.ub[2],
         model3.behavior_RR$ci.ub[3],
         model3.brain_development_RR$ci.ub[1],
@@ -1203,6 +1199,8 @@ table_F0_sex_contrast$`Fixed effect`[FE_position_CVR] <- round(c(model.contrast2
 
 ## n
 table_F1_sex$...10[FE_position_RR] <- c((sum(behavior[behavior$F1_sex_test=='male',]$exp_n)+ sum(behavior[behavior$F1_sex_test=='male',][!duplicated(behavior[behavior$F1_sex_test=='male',][,"shared_ID"]) ,"con_n"])), (sum(behavior[behavior$F1_sex_test=='female',]$exp_n)+ sum(behavior[behavior$F1_sex_test=='female',][!duplicated(behavior[behavior$F1_sex_test=='female',][,"shared_ID"]) ,"con_n"])), (sum(behavior[behavior$F1_sex_test=='mixed',]$exp_n)+ sum(behavior[behavior$F1_sex_test=='mixed',][!duplicated(behavior[behavior$F1_sex_test=='mixed',][,"shared_ID"]) ,"con_n"])), (sum(brain_development[brain_development$F1_sex_test=='male',]$exp_n)+ sum(brain_development[brain_development$F1_sex_test=='male',][!duplicated(brain_development[brain_development$F1_sex_test=='male',][,"shared_ID"]) ,"con_n"])), (sum(brain_development[brain_development$F1_sex_test=='female',]$exp_n)+ sum(brain_development[brain_development$F1_sex_test=='female',][!duplicated(brain_development[brain_development$F1_sex_test=='female',][,"shared_ID"]) ,"con_n"])), (sum(brain_development[brain_development$F1_sex_test=='mixed',]$exp_n)+ sum(brain_development[brain_development$F1_sex_test=='mixed',][!duplicated(brain_development[brain_development$F1_sex_test=='mixed',][,"shared_ID"]) ,"con_n"])), (sum(genes[genes$F1_sex_test=='male',]$exp_n)+ sum(genes[genes$F1_sex_test=='male',][!duplicated(genes[genes$F1_sex_test=='male',][,"shared_ID"]) ,"con_n"])), (sum(genes[genes$F1_sex_test=='female',]$exp_n)+ sum(genes[genes$F1_sex_test=='female',][!duplicated(genes[genes$F1_sex_test=='female',][,"shared_ID"]) ,"con_n"])), (sum(genes[genes$F1_sex_test=='mixed',]$exp_n)+ sum(genes[genes$F1_sex_test=='mixed',][!duplicated(genes[genes$F1_sex_test=='mixed',][,"shared_ID"]) ,"con_n"])))
+
+
 
 
 
@@ -1238,7 +1236,7 @@ table_F1_sex$...10[FE_position_RR] <- c((sum(behavior[behavior$F1_sex_test=='mal
         model3.genes_CVR$ci.lb[3]),3)
 
 
- # ci.ub
+ # ci.lb
   table_F1_sex$...8[FE_position_CVR] <- round(c(model3.behavior_CVR$ci.ub[1],                                     model3.behavior_CVR$ci.ub[2],
         model3.behavior_CVR$ci.ub[3],
         model3.brain_development_CVR$ci.ub[1],
@@ -1746,7 +1744,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   write.csv(table_exercise_winidow, file = './results/csv/table_exercise_winidow.csv', row.names = FALSE, na = '')
   
   
-### Again, lots of repeat code. Try to generalise what you're doing above into a single function that does this and then you don't need to repeat huge code chunks all the time. See Step 1 example of a type of function that can do this. Try to understand that and then this problem will be easy to tackle
+
   
   
     
@@ -2251,7 +2249,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
     
 
   # Exercise mode
-  table_moderator_R_square_behavior$df[R2_position_behavior_RR1] <- c(model4.behavior_RR$p-1, model4.learning_MWM_RR$p-1, model4.memory_MWM_RR$p-1, model4.memory_NOR_RR$p-1, model4.anxiety_EPM_RR$p-1, model4.anxiety_OFT_RR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_RR1] <- c(model4.behavior_RR$p, model4.learning_MWM_RR$p, model4.memory_MWM_RR$p, model4.memory_NOR_RR$p, model4.anxiety_EPM_RR$p, model4.anxiety_OFT_RR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_RR1] <- c(model4.behavior_RR$QM, model4.learning_MWM_RR$QM, model4.memory_MWM_RR$QM, model4.memory_NOR_RR$QM, model4.anxiety_EPM_RR$QM, model4.anxiety_OFT_RR$QM)
   
@@ -2265,7 +2263,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Exercise timing
-  table_moderator_R_square_behavior$df[R2_position_behavior_RR2] <- c(model5.behavior_RR$p-1, model5.learning_MWM_RR$p-1, model5.memory_MWM_RR$p-1, model5.memory_NOR_RR$p-1, model5.anxiety_EPM_RR$p-1, model5.anxiety_OFT_RR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_RR2] <- c(model5.behavior_RR$p, model5.learning_MWM_RR$p, model5.memory_MWM_RR$p, model5.memory_NOR_RR$p, model5.anxiety_EPM_RR$p, model5.anxiety_OFT_RR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_RR2] <- c(model5.behavior_RR$QM, model5.learning_MWM_RR$QM, model5.memory_MWM_RR$QM, model5.memory_NOR_RR$QM, model5.anxiety_EPM_RR$QM, model5.anxiety_OFT_RR$QM)
   
@@ -2278,7 +2276,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Exercised sex
-  table_moderator_R_square_behavior$df[R2_position_behavior_RR3] <- c(model2.behavior_RR$p-1, model2.learning_MWM_RR$p-1, model2.memory_MWM_RR$p-1, model2.memory_NOR_RR$p-1, model2.anxiety_EPM_RR$p-1, model2.anxiety_OFT_RR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_RR3] <- c(model2.behavior_RR$p, model2.learning_MWM_RR$p, model2.memory_MWM_RR$p, model2.memory_NOR_RR$p, model2.anxiety_EPM_RR$p, model2.anxiety_OFT_RR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_RR3] <- c(model2.behavior_RR$QM, model2.learning_MWM_RR$QM, model2.memory_MWM_RR$QM, model2.memory_NOR_RR$QM, model2.anxiety_EPM_RR$QM, model2.anxiety_OFT_RR$QM)
   
@@ -2291,7 +2289,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
 
 # Offspring sex
-  table_moderator_R_square_behavior$df[R2_position_behavior_RR4] <- c(model3.behavior_RR$p-1, model3.learning_MWM_RR$p-1, model3.memory_MWM_RR$p-1, model3.memory_NOR_RR$p-1, model3.anxiety_EPM_RR$p-1, model3.anxiety_OFT_RR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_RR4] <- c(model3.behavior_RR$p, model3.learning_MWM_RR$p, model3.memory_MWM_RR$p, model3.memory_NOR_RR$p, model3.anxiety_EPM_RR$p, model3.anxiety_OFT_RR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_RR4] <- c(model3.behavior_RR$QM, model3.learning_MWM_RR$QM, model3.memory_MWM_RR$QM, model3.memory_NOR_RR$QM, model3.anxiety_EPM_RR$QM, model3.anxiety_OFT_RR$QM)
   
@@ -2303,7 +2301,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Offspring ontogenetic stage
-  table_moderator_R_square_behavior$df[R2_position_behavior_RR5] <- c(model6.behavior_RR$p-1, model6.learning_MWM_RR$p-1, model6.memory_MWM_RR$p-1, model6.memory_NOR_RR$p-1, model6.anxiety_EPM_RR$p-1, model6.anxiety_OFT_RR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_RR5] <- c(model6.behavior_RR$p, model6.learning_MWM_RR$p, model6.memory_MWM_RR$p, model6.memory_NOR_RR$p, model6.anxiety_EPM_RR$p, model6.anxiety_OFT_RR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_RR5] <- c(model6.behavior_RR$QM, model6.learning_MWM_RR$QM, model6.memory_MWM_RR$QM, model6.memory_NOR_RR$QM, model6.anxiety_EPM_RR$QM, model6.anxiety_OFT_RR$QM)
   
@@ -2335,7 +2333,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise mode
-  table_moderator_R_square_brain_development$df[R2_position_brain_RR1] <- c(model4.brain_development_RR$p-1, model4.brain_size_RR$p-1, model4.neuron_count_RR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_RR1] <- c(model4.brain_development_RR$p, model4.brain_size_RR$p, model4.neuron_count_RR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_RR1] <- c(model4.brain_development_RR$QM, model4.brain_size_RR$QM, model4.neuron_count_RR$QM)  
 
@@ -2347,7 +2345,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise timing
-  table_moderator_R_square_brain_development$df[R2_position_brain_RR2] <- c(model5.brain_development_RR$p-1, model5.brain_size_RR$p-1, model5.neuron_count_RR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_RR2] <- c(model5.brain_development_RR$p, model5.brain_size_RR$p, model5.neuron_count_RR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_RR2] <- c(model5.brain_development_RR$QM, model5.brain_size_RR$QM, model5.neuron_count_RR$QM)  
 
@@ -2358,7 +2356,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
  
   
 # Exercised sex
-  table_moderator_R_square_brain_development$df[R2_position_brain_RR3] <- c(model2.brain_development_RR$p-1, model2.brain_size_RR$p-1, model2.neuron_count_RR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_RR3] <- c(model2.brain_development_RR$p, model2.brain_size_RR$p, model2.neuron_count_RR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_RR3] <- c(model2.brain_development_RR$QM, model2.brain_size_RR$QM, model2.neuron_count_RR$QM)  
 
@@ -2371,7 +2369,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
 
 # Offspring sex
-  table_moderator_R_square_brain_development$df[R2_position_brain_RR4] <- c(model3.brain_development_RR$p-1, model3.brain_size_RR$p-1, model3.neuron_count_RR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_RR4] <- c(model3.brain_development_RR$p, model3.brain_size_RR$p, model3.neuron_count_RR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_RR4] <- c(model3.brain_development_RR$QM, model3.brain_size_RR$QM, model3.neuron_count_RR$QM)  
 
@@ -2383,7 +2381,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Offspring ontogenetic stage
-  table_moderator_R_square_brain_development$df[R2_position_brain_RR5] <- c(model6.brain_development_RR$p-1, model6.brain_size_RR$p-1, model6.neuron_count_RR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_RR5] <- c(model6.brain_development_RR$p, model6.brain_size_RR$p, model6.neuron_count_RR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_RR5] <- c(model6.brain_development_RR$QM, model6.brain_size_RR$QM, model6.neuron_count_RR$QM)  
 
@@ -2417,7 +2415,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise mode
-  table_moderator_R_square_genes$df[R2_position_genes_RR1] <- c(model4.genes_RR$p-1, model4.BDNF_RR$p-1, model4.TrkB_RR$p-1, model4.VEGF_RR$p-1, model4.reelin_RR$p-1, model5.GFAP_RR$p-1, model4.syptophysin_RR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_RR1] <- c(model4.genes_RR$p, model4.BDNF_RR$p, model4.TrkB_RR$p, model4.VEGF_RR$p, model4.reelin_RR$p, model5.GFAP_RR$p, model4.syptophysin_RR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_RR1] <- c(model4.genes_RR$QM, model4.BDNF_RR$QM, model4.TrkB_RR$QM, model4.VEGF_RR$QM, model4.reelin_RR$QM, model5.GFAP_RR$QM, model4.syptophysin_RR$QM)
   
@@ -2429,7 +2427,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise timing
-  table_moderator_R_square_genes$df[R2_position_genes_RR2] <- c(model5.genes_RR$p-1, model5.BDNF_RR$p-1, model5.TrkB_RR$p-1, model5.VEGF_RR$p-1, model5.reelin_RR$p-1, model5.GFAP_RR$p-1, model5.syptophysin_RR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_RR2] <- c(model5.genes_RR$p, model5.BDNF_RR$p, model5.TrkB_RR$p, model5.VEGF_RR$p, model5.reelin_RR$p, model5.GFAP_RR$p, model5.syptophysin_RR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_RR2] <- c(model5.genes_RR$QM, model5.BDNF_RR$QM, model5.TrkB_RR$QM, model5.VEGF_RR$QM, model5.reelin_RR$QM, model5.GFAP_RR$QM, model5.syptophysin_RR$QM)
   
@@ -2442,7 +2440,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Exercised sex
-  table_moderator_R_square_genes$df[R2_position_genes_RR3] <- c(model2.genes_RR$p-1, model2.BDNF_RR$p-1, model2.TrkB_RR$p-1, model2.VEGF_RR$p-1, model2.reelin_RR$p-1, model2.GFAP_RR$p-1, model2.syptophysin_RR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_RR3] <- c(model2.genes_RR$p, model2.BDNF_RR$p, model2.TrkB_RR$p, model2.VEGF_RR$p, model2.reelin_RR$p, model2.GFAP_RR$p, model2.syptophysin_RR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_RR3] <- c(model2.genes_RR$QM, model2.BDNF_RR$QM, model2.TrkB_RR$QM, model2.VEGF_RR$QM, model2.reelin_RR$QM, model2.GFAP_RR$QM, model2.syptophysin_RR$QM)
   
@@ -2455,7 +2453,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
 
 # Offspring sex
-  table_moderator_R_square_genes$df[R2_position_genes_RR4] <- c(model3.genes_RR$p-1, model3.BDNF_RR$p-1, model3.TrkB_RR$p-1, model3.VEGF_RR$p-1, model3.reelin_RR$p-1, model3.GFAP_RR$p-1, model3.syptophysin_RR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_RR4] <- c(model3.genes_RR$p, model3.BDNF_RR$p, model3.TrkB_RR$p, model3.VEGF_RR$p, model3.reelin_RR$p, model3.GFAP_RR$p, model3.syptophysin_RR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_RR4] <- c(model3.genes_RR$QM, model3.BDNF_RR$QM, model3.TrkB_RR$QM, model3.VEGF_RR$QM, model3.reelin_RR$QM, model3.GFAP_RR$QM, model3.syptophysin_RR$QM)
   
@@ -2467,7 +2465,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Offspring ontogenetic stage
-  table_moderator_R_square_genes$df[R2_position_genes_RR5] <- c(model6.genes_RR$p-1, model6.BDNF_RR$p-1, model6.TrkB_RR$p-1, model6.VEGF_RR$p-1, model6.reelin_RR$p-1, model6.GFAP_RR$p-1, model6.syptophysin_RR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_RR5] <- c(model6.genes_RR$p, model6.BDNF_RR$p, model6.TrkB_RR$p, model6.VEGF_RR$p, model6.reelin_RR$p, model6.GFAP_RR$p, model6.syptophysin_RR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_RR5] <- c(model6.genes_RR$QM, model6.BDNF_RR$QM, model6.TrkB_RR$QM, model6.VEGF_RR$QM, model6.reelin_RR$QM, model6.GFAP_RR$QM, model6.syptophysin_RR$QM)
   
@@ -2514,7 +2512,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
     
 
   # Exercise mode
-  table_moderator_R_square_behavior$df[R2_position_behavior_CVR1] <- c(model4.behavior_CVR$p-1, model4.learning_MWM_CVR$p-1, model4.memory_MWM_CVR$p-1, model4.memory_NOR_CVR$p-1, model4.anxiety_EPM_CVR$p-1, model4.anxiety_OFT_CVR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_CVR1] <- c(model4.behavior_CVR$p, model4.learning_MWM_CVR$p, model4.memory_MWM_CVR$p, model4.memory_NOR_CVR$p, model4.anxiety_EPM_CVR$p, model4.anxiety_OFT_CVR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_CVR1] <- c(model4.behavior_CVR$QM, model4.learning_MWM_CVR$QM, model4.memory_MWM_CVR$QM, model4.memory_NOR_CVR$QM, model4.anxiety_EPM_CVR$QM, model4.anxiety_OFT_CVR$QM)
   
@@ -2528,7 +2526,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Exercise timing
-  table_moderator_R_square_behavior$df[R2_position_behavior_CVR2] <- c(model5.behavior_CVR$p-1, model5.learning_MWM_CVR$p-1, model5.memory_MWM_CVR$p-1, model5.memory_NOR_CVR$p-1, model5.anxiety_EPM_CVR$p-1, model5.anxiety_OFT_CVR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_CVR2] <- c(model5.behavior_CVR$p, model5.learning_MWM_CVR$p, model5.memory_MWM_CVR$p, model5.memory_NOR_CVR$p, model5.anxiety_EPM_CVR$p, model5.anxiety_OFT_CVR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_CVR2] <- c(model5.behavior_CVR$QM, model5.learning_MWM_CVR$QM, model5.memory_MWM_CVR$QM, model5.memory_NOR_CVR$QM, model5.anxiety_EPM_CVR$QM, model5.anxiety_OFT_CVR$QM)
   
@@ -2541,7 +2539,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Exercised sex
-  table_moderator_R_square_behavior$df[R2_position_behavior_CVR3] <- c(model2.behavior_CVR$p-1, model2.learning_MWM_CVR$p-1, model2.memory_MWM_CVR$p-1, model2.memory_NOR_CVR$p-1, model2.anxiety_EPM_CVR$p-1, model2.anxiety_OFT_CVR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_CVR3] <- c(model2.behavior_CVR$p, model2.learning_MWM_CVR$p, model2.memory_MWM_CVR$p, model2.memory_NOR_CVR$p, model2.anxiety_EPM_CVR$p, model2.anxiety_OFT_CVR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_CVR3] <- c(model2.behavior_CVR$QM, model2.learning_MWM_CVR$QM, model2.memory_MWM_CVR$QM, model2.memory_NOR_CVR$QM, model2.anxiety_EPM_CVR$QM, model2.anxiety_OFT_CVR$QM)
   
@@ -2554,7 +2552,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
 
 # Offspring sex
-  table_moderator_R_square_behavior$df[R2_position_behavior_CVR4] <- c(model3.behavior_CVR$p-1, model3.learning_MWM_CVR$p-1, model3.memory_MWM_CVR$p-1, model3.memory_NOR_CVR$p-1, model3.anxiety_EPM_CVR$p-1, model3.anxiety_OFT_CVR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_CVR4] <- c(model3.behavior_CVR$p, model3.learning_MWM_CVR$p, model3.memory_MWM_CVR$p, model3.memory_NOR_CVR$p, model3.anxiety_EPM_CVR$p, model3.anxiety_OFT_CVR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_CVR4] <- c(model3.behavior_CVR$QM, model3.learning_MWM_CVR$QM, model3.memory_MWM_CVR$QM, model3.memory_NOR_CVR$QM, model3.anxiety_EPM_CVR$QM, model3.anxiety_OFT_CVR$QM)
   
@@ -2566,7 +2564,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Offspring ontogenetic stage
-  table_moderator_R_square_behavior$df[R2_position_behavior_CVR5] <- c(model6.behavior_CVR$p-1, model6.learning_MWM_CVR$p-1, model6.memory_MWM_CVR$p-1, model6.memory_NOR_CVR$p-1, model6.anxiety_EPM_CVR$p-1, model6.anxiety_OFT_CVR$p-1)
+  table_moderator_R_square_behavior$df[R2_position_behavior_CVR5] <- c(model6.behavior_CVR$p, model6.learning_MWM_CVR$p, model6.memory_MWM_CVR$p, model6.memory_NOR_CVR$p, model6.anxiety_EPM_CVR$p, model6.anxiety_OFT_CVR$p)
   
   table_moderator_R_square_behavior$`QM statistic`[R2_position_behavior_CVR5] <- c(model6.behavior_CVR$QM, model6.learning_MWM_CVR$QM, model6.memory_MWM_CVR$QM, model6.memory_NOR_CVR$QM, model6.anxiety_EPM_CVR$QM, model6.anxiety_OFT_CVR$QM)
   
@@ -2598,7 +2596,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise mode
-  table_moderator_R_square_brain_development$df[R2_position_brain_CVR1] <- c(model4.brain_development_CVR$p-1, model4.brain_size_CVR$p-1, model4.neuron_count_CVR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_CVR1] <- c(model4.brain_development_CVR$p, model4.brain_size_CVR$p, model4.neuron_count_CVR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_CVR1] <- c(model4.brain_development_CVR$QM, model4.brain_size_CVR$QM, model4.neuron_count_CVR$QM)  
 
@@ -2610,7 +2608,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise timing
-  table_moderator_R_square_brain_development$df[R2_position_brain_CVR2] <- c(model5.brain_development_CVR$p-1, model5.brain_size_CVR$p-1, model5.neuron_count_CVR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_CVR2] <- c(model5.brain_development_CVR$p, model5.brain_size_CVR$p, model5.neuron_count_CVR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_CVR2] <- c(model5.brain_development_CVR$QM, model5.brain_size_CVR$QM, model5.neuron_count_CVR$QM)  
 
@@ -2621,7 +2619,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
  
   
 # Exercised sex
-  table_moderator_R_square_brain_development$df[R2_position_brain_CVR3] <- c(model2.brain_development_CVR$p-1, model2.brain_size_CVR$p-1, model2.neuron_count_CVR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_CVR3] <- c(model2.brain_development_CVR$p, model2.brain_size_CVR$p, model2.neuron_count_CVR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_CVR3] <- c(model2.brain_development_CVR$QM, model2.brain_size_CVR$QM, model2.neuron_count_CVR$QM)  
 
@@ -2634,7 +2632,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
 
 # Offspring sex
-  table_moderator_R_square_brain_development$df[R2_position_brain_CVR4] <- c(model3.brain_development_CVR$p-1, model3.brain_size_CVR$p-1, model3.neuron_count_CVR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_CVR4] <- c(model3.brain_development_CVR$p, model3.brain_size_CVR$p, model3.neuron_count_CVR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_CVR4] <- c(model3.brain_development_CVR$QM, model3.brain_size_CVR$QM, model3.neuron_count_CVR$QM)  
 
@@ -2646,7 +2644,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Offspring ontogenetic stage
-  table_moderator_R_square_brain_development$df[R2_position_brain_CVR5] <- c(model6.brain_development_CVR$p-1, model6.brain_size_CVR$p-1, model6.neuron_count_CVR$p-1)
+  table_moderator_R_square_brain_development$df[R2_position_brain_CVR5] <- c(model6.brain_development_CVR$p, model6.brain_size_CVR$p, model6.neuron_count_CVR$p)
 
   table_moderator_R_square_brain_development$`QM statistic`[R2_position_brain_CVR5] <- c(model6.brain_development_CVR$QM, model6.brain_size_CVR$QM, model6.neuron_count_CVR$QM)  
 
@@ -2680,7 +2678,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise mode
-  table_moderator_R_square_genes$df[R2_position_genes_CVR1] <- c(model4.genes_CVR$p-1, model4.BDNF_CVR$p-1, model4.TrkB_CVR$p-1, model4.VEGF_CVR$p-1, model4.reelin_CVR$p-1, model5.GFAP_CVR$p-1, model4.syptophysin_CVR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_CVR1] <- c(model4.genes_CVR$p, model4.BDNF_CVR$p, model4.TrkB_CVR$p, model4.VEGF_CVR$p, model4.reelin_CVR$p, model5.GFAP_CVR$p, model4.syptophysin_CVR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_CVR1] <- c(model4.genes_CVR$QM, model4.BDNF_CVR$QM, model4.TrkB_CVR$QM, model4.VEGF_CVR$QM, model4.reelin_CVR$QM, model5.GFAP_CVR$QM, model4.syptophysin_CVR$QM)
   
@@ -2692,7 +2690,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
   
 # Exercise timing
-  table_moderator_R_square_genes$df[R2_position_genes_CVR2] <- c(model5.genes_CVR$p-1, model5.BDNF_CVR$p-1, model5.TrkB_CVR$p-1, model5.VEGF_CVR$p-1, model5.reelin_CVR$p-1, model5.GFAP_CVR$p-1, model5.syptophysin_CVR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_CVR2] <- c(model5.genes_CVR$p, model5.BDNF_CVR$p, model5.TrkB_CVR$p, model5.VEGF_CVR$p, model5.reelin_CVR$p, model5.GFAP_CVR$p, model5.syptophysin_CVR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_CVR2] <- c(model5.genes_CVR$QM, model5.BDNF_CVR$QM, model5.TrkB_CVR$QM, model5.VEGF_CVR$QM, model5.reelin_CVR$QM, model5.GFAP_CVR$QM, model5.syptophysin_CVR$QM)
   
@@ -2705,7 +2703,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Exercised sex
-  table_moderator_R_square_genes$df[R2_position_genes_CVR3] <- c(model2.genes_CVR$p-1, model2.BDNF_CVR$p-1, model2.TrkB_CVR$p-1, model2.VEGF_CVR$p-1, model2.reelin_CVR$p-1, model2.GFAP_CVR$p-1, model2.syptophysin_CVR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_CVR3] <- c(model2.genes_CVR$p, model2.BDNF_CVR$p, model2.TrkB_CVR$p, model2.VEGF_CVR$p, model2.reelin_CVR$p, model2.GFAP_CVR$p, model2.syptophysin_CVR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_CVR3] <- c(model2.genes_CVR$QM, model2.BDNF_CVR$QM, model2.TrkB_CVR$QM, model2.VEGF_CVR$QM, model2.reelin_CVR$QM, model2.GFAP_CVR$QM, model2.syptophysin_CVR$QM)
   
@@ -2718,7 +2716,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
 
 
 # Offspring sex
-  table_moderator_R_square_genes$df[R2_position_genes_CVR4] <- c(model3.genes_CVR$p-1, model3.BDNF_CVR$p-1, model3.TrkB_CVR$p-1, model3.VEGF_CVR$p-1, model3.reelin_CVR$p-1, model3.GFAP_CVR$p-1, model3.syptophysin_CVR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_CVR4] <- c(model3.genes_CVR$p, model3.BDNF_CVR$p, model3.TrkB_CVR$p, model3.VEGF_CVR$p, model3.reelin_CVR$p, model3.GFAP_CVR$p, model3.syptophysin_CVR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_CVR4] <- c(model3.genes_CVR$QM, model3.BDNF_CVR$QM, model3.TrkB_CVR$QM, model3.VEGF_CVR$QM, model3.reelin_CVR$QM, model3.GFAP_CVR$QM, model3.syptophysin_CVR$QM)
   
@@ -2730,7 +2728,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   
   
 # Offspring ontogenetic stage
-  table_moderator_R_square_genes$df[R2_position_genes_CVR5] <- c(model6.genes_CVR$p-1, model6.BDNF_CVR$p-1, model6.TrkB_CVR$p-1, model6.VEGF_CVR$p-1, model6.reelin_CVR$p-1, model6.GFAP_CVR$p-1, model6.syptophysin_CVR$p-1)
+  table_moderator_R_square_genes$df[R2_position_genes_CVR5] <- c(model6.genes_CVR$p, model6.BDNF_CVR$p, model6.TrkB_CVR$p, model6.VEGF_CVR$p, model6.reelin_CVR$p, model6.GFAP_CVR$p, model6.syptophysin_CVR$p)
   
   table_moderator_R_square_genes$`QM statistic`[R2_position_genes_CVR5] <- c(model6.genes_CVR$QM, model6.BDNF_CVR$QM, model6.TrkB_CVR$QM, model6.VEGF_CVR$QM, model6.reelin_CVR$QM, model6.GFAP_CVR$QM, model6.syptophysin_CVR$QM)
   
@@ -2774,7 +2772,7 @@ FE_position_CVR <- c(2, 5, 8, 11, 14, 17) + 1
   colnames(overlap.CVR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
   colnames(overlap.CVR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
 
-### NOTE: Yefeng. OK, here below you're doing the correlation between effects within studies? This isn't quite clear. Maybe a bit more annotation is needed here.
+
 
 #***************************************************************#
 #--------------------- Improvement (lnRR) ----------------------#
