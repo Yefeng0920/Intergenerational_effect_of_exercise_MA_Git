@@ -26,9 +26,7 @@ output: word_document
                  gridExtra,
                  patchwork, 
                  orchardRd # orchard plot - extended forest plot devtools::install_github("itchyshin/orchard_plot", subdir = "orchaRd", force = TRUE)
-               )
-
-  source('./functions/functions.R')
+               );source('./functions/functions.R')
 ```
 
 
@@ -327,9 +325,9 @@ set.seed(20200817)
 
 
 
-### 5. Neurobehavior
+### 5. Cognition (original category: Neurobehavior)
 
-```{r Neurobehavior improvement and variability}
+```{r Cognition improvement and variability}
 #***************************************************************#
 #--------------------- Improvement (lnRR) ----------------------#
 #***************************************************************#
@@ -351,7 +349,7 @@ set.seed(20200817)
   scale_x_continuous(limits = c(-2, 3),
                      breaks = c(-2, -1, 0, 1, 2, 3), 
                      labels = c('-2', '-1', '0', '1', '2','3') ) +
-  scale_y_discrete(labels = c('Neurobehavior')) +
+  scale_y_discrete(labels = c('Cognition')) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
         axis.ticks = element_line(size = 0.9, color = 'black'),
@@ -364,7 +362,7 @@ set.seed(20200817)
         plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
         legend.text = element_text(size = 20),
         legend.title = element_text(size = 20),
-        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+        legend.position = c(0, 1), legend.justification = c(0, 1)) +
     ggtitle('(A)  Overall trait mean') -> orchard.overall.behavior.RR
 
 
@@ -427,7 +425,7 @@ set.seed(20200817)
     annotate('text', x = 5, y = 2.7, label= paste("italic(k)==", nrow(learning_MWM %>% distinct(ES_ID))), parse=TRUE, size=7)-> fig.specific.behavior.RR
 
 
-### NOTE YEFENG: IN the main ms I suggested adding together all lnRR and lnCVR figures into a 3 panel figure. YOu can do thsi quite easily with the package ggarrange(); in essence save your ggplot figures to objects (e.g., p1 <- ggplot(...), p2 <- ggplot(..)+..), then add each individual plot in ggarrange as follows: ggarrange(p1 + p2, labels= c("A)", "B)"))
+
 
 
 
@@ -447,7 +445,7 @@ set.seed(20200817)
 
   
 # Plotting
-  p1 <- ggplot() +  # Note yefeng you can save all this to a single object and then call that object for plotting p1 at end
+  ggplot() +
     geom_hline(yintercept = 0, lty = 2, lwd = 1, colour = 'grey40', alpha = 1) +
     geom_pointrange(data = model.table.RR, aes(x = traits, y = coeffi, ymin = lower, ymax = upper, shape = traits, size = traits, colour = traits), lwd = 0.7, show.legend = F, fatten = 7) +
     scale_shape_manual(values = c(16, 16)) +
@@ -471,7 +469,7 @@ set.seed(20200817)
     annotate('text', x = 1, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='voluntary') %>% distinct(ES_ID))), parse=TRUE, size=7) +
     annotate('text', x = 2, y = 2.7, label= paste("italic(k)==", nrow(behavior %>% filter(manipulation_mode=='forced') %>% distinct(ES_ID))), parse=TRUE, size=7)->  fig.mode.behavior.RR
 
-p1
+
 
     
 #--------------------------------------------------------------#
@@ -713,7 +711,7 @@ dev.off()
   orchard.plot.behavior_CVR(table.behavior.CVR, mod = "Int", xlab = "Inter-individual difference (lnCVR)", transfm = "none", angle = 0) +
   scale_colour_manual(values = c('grey40')) +
   scale_x_continuous(limits = c(-2, 2),breaks = c(-2, -1, 0, 1, 2)) +
-  scale_y_discrete(labels = c('Neurobehavior')) +
+  scale_y_discrete(labels = c('Cognition')) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
         axis.ticks = element_line(size = 0.9, color = 'black'),
@@ -727,7 +725,7 @@ dev.off()
         plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
         legend.text = element_text(size = 20),
         legend.title = element_text(size = 20),
-        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+        legend.position = c(0, 1), legend.justification = c(0, 1)) +
     ggtitle('(A)  Overall trait variation') -> orchard.overall.behavior.CVR
 
 
@@ -1040,9 +1038,9 @@ dev.off()
 
 
 
-### 6. Brain development
+### 6. Brain structure (original category: Brain development)
 
-```{r Brain development improvement and variability}
+```{r Brain structure improvement and variability}
 #***************************************************************#
 #--------------------- Improvement (lnRR) ----------------------#
 #***************************************************************#
@@ -1062,7 +1060,7 @@ dev.off()
   orchard.plot.brain_RR(table.brain_development.RR, mod = "Int", xlab = "Improvement (lnRR)", transfm = "none", angle = 0) +
   scale_colour_manual(values = c('grey40')) +
   scale_x_continuous(limits = c(-1, 2), breaks = c(-1, 0, 1, 2)) +
-  scale_y_discrete(labels = c('Brain development')) +
+  scale_y_discrete(labels = c('Brain structure')) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
         axis.ticks = element_line(size = 0.9, color = 'black'),
@@ -1075,7 +1073,7 @@ dev.off()
         plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
         legend.text = element_text(size = 20),
         legend.title = element_text(size = 20),
-        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+        legend.position = c(0, 1), legend.justification = c(0, 1)) +
     ggtitle('(A)  Overall trait mean') -> orchard.overall.brain_development.RR
 
 
@@ -1348,18 +1346,18 @@ dev.off()
 
 
 # Saving
-fig.brain_development.RR <- ggarrange(orchard.overall.brain_development.RR, fig.specific.brain_development.RR, fig.mode.brain_development.RR,fig.timing.brain_development.RR, fig.F0.sex.brain_development.RR, fig.F1.sex.brain_development.RR,fig.F1.age.brain_development.RR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
+fig.brain_structure.RR <- ggarrange(orchard.overall.brain_development.RR, fig.specific.brain_development.RR, fig.mode.brain_development.RR,fig.timing.brain_development.RR, fig.F0.sex.brain_development.RR, fig.F1.sex.brain_development.RR,fig.F1.age.brain_development.RR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
 
 
-fig.brain_development.RR
+fig.brain_structure.RR
 png(filename = "./results/Figures/fig.brain.RR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
-fig.brain_development.RR
+fig.brain_structure.RR
 dev.off()
 
 
 
 pdf(file = "./results/Figures/fig.brain.RR.pdf", width = 16, height = 22)
-fig.brain_development.RR
+fig.brain_structure.RR
 dev.off()
 
 
@@ -1383,7 +1381,7 @@ dev.off()
   orchard.plot.brain_CVR(table.brain_development.CVR, mod = "Int", xlab = "Inter-individual difference (lnCVR)", transfm = "none", angle = 0) +
   scale_colour_manual(values = c('grey40')) +
   scale_x_continuous(limits = c(-2, 2), breaks = c(-2, -1, 0, 1, 2)) +
-  scale_y_discrete(labels = c('Brain development')) +
+  scale_y_discrete(labels = c('Brain structure')) +
   theme(panel.grid = element_blank(),
         panel.border = element_rect(size = 1.2, colour = "black", fill = NA),
         axis.ticks = element_line(size = 0.9, color = 'black'),
@@ -1396,7 +1394,7 @@ dev.off()
         plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
         legend.text = element_text(size = 20),
         legend.title = element_text(size = 20),
-        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+        legend.position = c(0, 1), legend.justification = c(0, 1)) +
     ggtitle('(A)  Overall trait variation') -> orchard.overall.brain_development.CVR
 
 
@@ -1670,19 +1668,19 @@ dev.off()
 
 
 # Saving
-fig.brain_development.CVR <- ggarrange(orchard.overall.brain_development.CVR, fig.specific.brain_development.CVR, fig.mode.brain_development.CVR,fig.timing.brain_development.CVR, fig.F0.sex.brain_development.CVR, fig.F1.sex.brain_development.CVR,fig.F1.age.brain_development.CVR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
+fig.brain_structure.CVR <- ggarrange(orchard.overall.brain_development.CVR, fig.specific.brain_development.CVR, fig.mode.brain_development.CVR,fig.timing.brain_development.CVR, fig.F0.sex.brain_development.CVR, fig.F1.sex.brain_development.CVR,fig.F1.age.brain_development.CVR, heights = c(5,5,3,4.5,3,3.5,4.5), widths = c(12,12,12,12,12,12,15), nrow = 7, ncol = 1, align = "v")
 
 
-fig.brain_development.CVR
+fig.brain_structure.CVR
 png(filename = "./results/Figures/fig.brain.CVR.png", width = 16, height = 22, units = "in", type = "windows", res = 400)
-fig.brain_development.CVR
+fig.brain_structure.CVR
 dev.off()
 
 
 
 
 pdf(file = "./results/Figures/fig.brain.CVR.pdf", width = 16, height = 22)
-fig.brain_development.CVR
+fig.brain_structure.CVR
 dev.off()
 
 
@@ -1727,7 +1725,7 @@ dev.off()
         plot.title = element_text(colour = 'black', size = 25, face = 'bold', hjust = -0.03),
         legend.text = element_text(size = 20),
         legend.title = element_text(size = 20),
-        legend.position = c(1, 1), legend.justification = c(1, 1)) +
+        legend.position = c(0, 1), legend.justification = c(0, 1)) +
     ggtitle('(A)  Overall trait mean') -> orchard.overall.genes.RR
 
 
@@ -2036,7 +2034,6 @@ pdf(file =  "./results/Figures/fig.genes.RR.pdf", width = 16, height = 22)
 fig.genes.RR
 dev.off()
 
-
 ```
 
 
@@ -2051,17 +2048,17 @@ dev.off()
   overlap.max %>% subset(select = c(2:4)) -> overlap.RR.max
   overlap.ave %>% subset(select = c(2:4)) -> overlap.RR.ave
   overlap.min %>% subset(select = c(2:4)) -> overlap.RR.min
-  colnames(overlap.RR.max) <- c("Neurobehavior", "Brain development", "Brain growth factors")
-  colnames(overlap.RR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
-  colnames(overlap.RR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.RR.max) <- c("Cognition", "Brain structure", "Brain growth factors")
+  colnames(overlap.RR.ave) <- c("Cognition", "Brain structure", "Brain growth factors")
+  colnames(overlap.RR.min) <- c("Cognition", "Brain structure", "Brain growth factors")
 
  # CVR
   overlap.max %>% subset(select = c(6:8)) -> overlap.CVR.max
   overlap.ave %>% subset(select = c(6:8)) -> overlap.CVR.ave
   overlap.min %>% subset(select = c(6:8)) -> overlap.CVR.min
-  colnames(overlap.CVR.max) <- c("Neurobehavior", "Brain development", "Brain growth factors")
-  colnames(overlap.CVR.ave) <- c("Neurobehavior", "Brain development", "Brain growth factors")
-  colnames(overlap.CVR.min) <- c("Neurobehavior", "Brain development", "Brain growth factors")
+  colnames(overlap.CVR.max) <- c("Cognition", "Brain structure", "Brain growth factors")
+  colnames(overlap.CVR.ave) <- c("Cognition", "Brain structure", "Brain growth factors")
+  colnames(overlap.CVR.min) <- c("Cognition", "Brain structure", "Brain growth factors")
 
 # Visualization
  # RR
