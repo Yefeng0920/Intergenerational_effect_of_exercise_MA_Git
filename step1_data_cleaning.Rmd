@@ -26,10 +26,7 @@ output:
                   matrixcalc, # positive-definite matrix check; first time to install from devtools::install_github('cran/matrixcalc')
                   purrr, # functional programming tools
                   janitor # tabulating overlaps
-                 )
-
-   
-  source('./functions/functions.R')
+                 );source('./functions/functions.R')
 ```
 
 
@@ -149,21 +146,23 @@ all_traits <- cbind(all_traits, effect_size)
 
 # Quick visual check 
   hist(all_traits$RR, breaks = 100)
-  plot(all_traits$RR, 1/sqrt(all_traits$VRR) ) # NOTE: Use precision instead, which is 1/se, so need to sqrt. There are some very high precision values here, did you just check these data are correct?
+  plot(all_traits$RR, 1/all_traits$VRR)
   hist(all_traits$CVR, breaks = 50)
-  plot(all_traits$CVR, 1/sqrt(all_traits$VCVR))
+  plot(all_traits$CVR, 1/all_traits$VCVR)
 
-# Visualizing mean-variance relationship
- # Correlation of control group
+# Visulizing mean-variance relationship
+ # Corretion of control group
    plot(log(all_traits$con_mean), log(all_traits$con_sd))
    cor.test(all_traits$con_mean, all_traits$con_sd) # 0.951138 
- # Correlation of experiment group
+ # Corretion of experiment group
    plot(log(all_traits$exp_mean), log(all_traits$exp_sd))
    cor.test(all_traits$exp_mean, all_traits$exp_sd) # 9964369 
 ```
 
-### 5. Splitting dataset
-Preparing specific trait categories
+
+
+### 5. Spliting dataset
+Preparing specific trait catefories
 
 ```{r Subsets}
 # Check trait types
@@ -184,7 +183,7 @@ Preparing specific trait categories
                   all_traits$response_type == 'memory(NOR)'|
                   all_traits$response_type == 'anxiety(EPM)'|
                   all_traits$response_type == 'anxiety(OFT)'] <- c('behavior') 
-
+   
  # Genes: BDNF, TrkB, VEGF, reelin,  GFAP, syptophysin
    grouped_traits[all_traits$response_type == 'BDNF'|
                   all_traits$response_type == 'TrkB'|
@@ -197,6 +196,8 @@ Preparing specific trait categories
    grouped_traits[all_traits$response_type == 'neuron count'|
                  all_traits$response_type == 'brain size'] <- c('brain development')
 
+
+
  # Others: mitochondrial biogenesis, DNA methylation
    grouped_traits[all_traits$response_type == 'mitochondrial biogenesis'|
                  all_traits$response_type == 'DNA methylation'] <- c('others')
@@ -204,51 +205,36 @@ Preparing specific trait categories
 
 all_traits$grouped_traits <- as.factor(grouped_traits)
 
-##################### Note all above code from "Define Trait Categories" can be condensed as follows:
-           type_behav <- c("learning(MWM)", "memory(MWM)", "memory(NOR)", "anxiety(EPM)", "anxiety(OFT)")
-           type_genes <- c("BDNF", "TrkB", "VEGF", "reelin", "GFAP", "syptophysin")
-          type_neuron <- c("neuron count", "brain size")
-           type_other <- c("mitochondrial biogenesis", "DNA methylation")
-    
-  all_traits <- all_traits %>%
-            mutate(grouped_traits = ifelse(response_type %in% type_behav, "behavior", 
-                                           ifelse(response_type %in% type_genes, "genes",
-                                                 ifelse(response_type %in% type_neuron, "brain development", 
-                                                       ifelse(response_type %in% type_other, "others", response_type)))))
-
-######################          
-
-
- # Split into specific trait categories;  # also can use filter() to split: all_traits %>% filter(response_type == 'trait')
-             neuron_count <- all_traits[all_traits$response_type == 'neuron count',]
-               brain_size <- all_traits[all_traits$response_type == 'brain size',]
-                     BDNF <- all_traits[all_traits$response_type == 'BDNF',]
-                     TrkB <- all_traits[all_traits$response_type == 'TrkB',]
-                     VEGF <- all_traits[all_traits$response_type == 'VEGF',]
-                   reelin <- all_traits[all_traits$response_type == 'reelin',]
-                     GFAP <- all_traits[all_traits$response_type == 'GFAP',]
-              syptophysin <- all_traits[all_traits$response_type == 'syptophysin',]
- mitochondrial_biogenesis <- all_traits[all_traits$response_type == 'mitochondrial biogenesis',]
-          DNA_methylation <- all_traits[all_traits$response_type == 'DNA methylation',]
-             learning_MWM <- all_traits[all_traits$response_type == 'learning(MWM)',]
-               memory_MWM <- all_traits[all_traits$response_type == 'memory(MWM)',] 
-               memory_NOR <- all_traits[all_traits$response_type == 'memory(NOR)',]
-              anxiety_OFT <- all_traits[all_traits$response_type == 'anxiety(OFT)',]
-              anxiety_EPM <- all_traits[all_traits$response_type == 'anxiety(EPM)',]
+ # Split into specific trait categories 
+   neuron_count <- all_traits[all_traits$response_type == 'neuron count',] # also can use filter() to split: all_traits %>% filter(response_type == 'trait')
+   brain_size <- all_traits[all_traits$response_type == 'brain size',]
+   BDNF <- all_traits[all_traits$response_type == 'BDNF',]
+   TrkB <- all_traits[all_traits$response_type == 'TrkB',]
+   VEGF <- all_traits[all_traits$response_type == 'VEGF',]
+   reelin <- all_traits[all_traits$response_type == 'reelin',]
+   GFAP <- all_traits[all_traits$response_type == 'GFAP',]
+   syptophysin <- all_traits[all_traits$response_type == 'syptophysin',]
+   mitochondrial_biogenesis <- all_traits[all_traits$response_type == 'mitochondrial biogenesis',]
+   DNA_methylation <- all_traits[all_traits$response_type == 'DNA methylation',]
+   learning_MWM <- all_traits[all_traits$response_type == 'learning(MWM)',]
+   memory_MWM <- all_traits[all_traits$response_type == 'memory(MWM)',] 
+   memory_NOR <- all_traits[all_traits$response_type == 'memory(NOR)',]
+   anxiety_OFT <- all_traits[all_traits$response_type == 'anxiety(OFT)',]
+   anxiety_EPM <- all_traits[all_traits$response_type == 'anxiety(EPM)',]
 
  # Split into board trait categories
-            behavior <- all_traits %>% filter(grouped_traits == 'behavior') 
-               genes <- all_traits %>% filter(grouped_traits == 'genes') 
+   behavior <- all_traits %>% filter(grouped_traits == 'behavior') 
+   genes <- all_traits %>% filter(grouped_traits == 'genes') 
    brain_development <- all_traits %>% filter(grouped_traits == 'brain development') 
 
 
- # we are also interested in the component of behavior, so we divided behavior into cognition and anxiety
+ # we are also inverested in the component of behavior, so we divided behavior into cognition and anxiety
   # cognition <- rbind(learning_MWM, memory_MWM, memory_NOR)
   # anxiety <- rbind(anxiety_OFT, anxiety_EPM)
 
 
 
-# Pre-processed subsets for study-level correlations among traits; NOTE: NOte entirely clear what is happening here and why this is done. Can you annote some more to explain. Is this for measuring correlations between effects within studies?
+# Pre-processed subsets for study-level correlations among traits
  # The maximum effect size within each study
    group_by(all_traits, study_ID, grouped_traits) %>% summarise(max.RR = max(RR), max.CVR = max(CVR)) -> overlap.max
    overlap.max <- pivot_wider(overlap.max, names_from = grouped_traits, values_from = c('max.RR', 'max.CVR'))
@@ -259,10 +245,12 @@ all_traits$grouped_traits <- as.factor(grouped_traits)
    overlap.ave <- pivot_wider(overlap.ave, names_from = grouped_traits, values_from = c('ave.RR', 'ave.CVR'))
 
 
- # The minimum effect size within each study
+ # The minmum effect size within each study
    group_by(all_traits,study_ID, grouped_traits) %>% summarise(min.RR = min(RR), min.CVR = min(CVR)) -> overlap.min
    overlap.min <- pivot_wider(overlap.min, names_from = grouped_traits, values_from = c('min.RR', 'min.CVR'))
 ```
+
+
 
          
 ### 6. Construct variance-covariance matrices
@@ -271,7 +259,7 @@ Effect sizes belong to same cohort (shared cluster) are assumed to be nonindepen
 
 ```{r Variance-covariance matrices}
 # Variance-covariance matrices for lnRR
- # Specific categories
+ # Specific catefories
    cov_VRR_neuron_count <- make_VCV_matrix(data = neuron_count, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
    cov_VRR_brain_size <- make_VCV_matrix(data = brain_size, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
    cov_VRR_BDNF <- make_VCV_matrix(data = BDNF, V = 'VRR', cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
@@ -354,33 +342,7 @@ Effect sizes belong to same cohort (shared cluster) are assumed to be nonindepen
    is.positive.definite(cov_VCVR_brain_development) #TRUE
 ```
 
-NOTE: Above you have a lot of repeated code. I don't want to break anything, but whenever you have this try to wrap it into a function. For example, You can do all the steps above and the saving below (step 7) as follows:
 
-# Just an example here with two of the datasets you used
-data_list <- list(neuron_count=neuron_count, 
-                    brain_size=brain_size)
-names <- names(data_names)
-
-# Here is the function that does it all. You just apply once in mapply function. This can even go directly to your function.R script so you don't need it here. Note that you can change the path to whatever directory you want. It will test and print whether a matrix is positive definite and then save it all after building matrix. This can be improved quite a bit yet still, but this is a first pass that can really reduce the amount of code you have 
-  create_vcv_matrix <- function(data, name, path = "."){
-    # Using data, create matrices for CVR and RR. Note that much of the code stays the same except the Rr and CVR and data frame
-     tmp_matrix_RR <- make_VCV_matrix(data = data,  V = "VRR",  cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
-    tmp_matrix_CVR <- make_VCV_matrix(data = data, V = "VCVR", cluster = 'cohort_ID', type = 'vcv', obs = 'ES_ID', rho = 0.5)
-
-    # Check that matrices are positive definite
-    print(is.positive.definite(tmp_matrix_RR))
-    print(is.positive.definite(tmp_matrix_CVR))
-
-    # Save matrix
-     namesRR <- paste0(path, "/cov_VRR_", name)
-    namesCVR <- paste0(path,"/cov_VCVR_", name)
-
-     saveRDS(tmp_matrix_RR, file = namesRR)
-     saveRDS(tmp_matrix_CVR, file = namesCVR)  
-  }
-
-# Ok, now use the function once and apply to the list of dataframes
-mapply(function(x,y) create_vcv_matrix(x,y, path = "."), x = data_list, y = names)
 
 ### 7. Saving processed data
 
@@ -405,7 +367,7 @@ mapply(function(x,y) create_vcv_matrix(x,y, path = "."), x = data_list, y = name
   write.csv(behavior, file = './database/behavior.csv', row.names = F) 
   write.csv(brain_development, file = './database/brain_development.csv', row.names = F)
 
-# Variance-covariance matrices NOTE: Again everything from 410-448 can go and be replaced with the function above
+# Variance-covariance matrices
  # RR
    save(cov_VRR_neuron_count, file = './database/cov_VRR_neuron_count.Rdata')
    save(cov_VRR_brain_size, file = './database/cov_VRR_brain_size.Rdata')
